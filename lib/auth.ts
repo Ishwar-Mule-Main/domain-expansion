@@ -37,7 +37,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         prisma.adminUser.update({
           where: { id: user.id },
           data: { lastLogin: new Date() },
-        }).catch((err) => console.error("Failed to update last login:", err));
+        }).catch((err: any) => console.error("Failed to update last login:", err));
 
         return {
           id: user.id,
