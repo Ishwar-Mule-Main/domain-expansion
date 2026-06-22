@@ -1,0 +1,95 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  IN_PROGRESS
+  PROPOSAL_SENT
+  CONVERTED
+  LOST
+  SPAM
+}
+
+model Lead {
+  id           String     @id @default(uuid())
+  name         String
+  email        String
+  phone        String?
+  company      String?
+  service      String
+  budget       String?
+  message      String     @db.Text
+  status       LeadStatus @default(NEW)
+  ipAddress    String?
+  userAgent    String?
+  referrer     String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+enum WaitlistRole {
+  AGENCY
+  CLIENT
+}
+
+model TechGuildWaitlist {
+  id        String       @id @default(uuid())
+  email     String       @unique
+  role      WaitlistRole @default(CLIENT)
+  company   String?
+  phone     String?
+  position  Int          @default(autoincrement())
+  createdAt DateTime     @default(now())
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+}
+
+model AdminUser {
+  id        String         @id @default(uuid())
+  email     String         @unique
+  password  String
+  role      AdminRole      @default(ADMIN)
+  lastLogin DateTime?
+  sessions  AdminSession[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model AdminSession {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+}
+
+model PortfolioItem {
+  id             String   @id @default(uuid())
+  title          String
+  clientName     String
+  slug           String   @unique
+  categories     String[]
+  description    String   @db.Text
+  image          String
+  thumbnail      String
+  metricHeadline String
+  published      Boolean  @default(true)
+  featured       Boolean  @default(false)
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

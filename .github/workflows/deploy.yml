@@ -1,0 +1,58 @@
+name: Build and Deploy Next.js Standalone to cPanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build Next.js Application
+        run: npm run build
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: 'https://domainexpansion.in'
+
+      # Next.js standalone builds require 'public' and '.next/static' to be manually
+      # copied into the standalone structure to serve static assets correctly.
+      - name: Prepare Standalone Build Package
+        run: |
+          mkdir -p deploy_package
+          cp -r .next/standalone/* deploy_package/
+          cp -r public deploy_package/
+          mkdir -p deploy_package/.next
+          cp -r .next/static deploy_package/.next/
+          
+          # Create a dynamic restart file to trigger Phusion Passenger reload on cPanel
+          mkdir -p deploy_package/tmp
+          touch deploy_package/tmp/restart.txt
+
+      - name: Upload Standalone Build to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy_package/
+          # This should point to your cPanel Node.js application root directory
+          server-dir: ${{ secrets.FTP_DESTINATION_PATH }}
+          dangerous-clean-slate: false
