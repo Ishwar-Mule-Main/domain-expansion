@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local audit & heavy files
+/claude-seo/
+/localhost-audit/
+/SM Domain Expansion PPT.pdf
+
