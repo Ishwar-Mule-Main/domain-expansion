@@ -13,6 +13,16 @@ Awaiting user's next set of instructions.
 
 ## SESSION LOG
 
+### 2026-06-22 — Session 19 (Service Blogs & Vercel Standalone Deployment Configs)
+- Removed 10 demo posts and created 4 long-form articles (~5,000 words each) exploring industry challenges and AI/automation solutions for all 4 service pillars in [blog.ts](file:///d:/demo%202/lib/data/blog.ts).
+- Generated 4 premium featured images using Gemini image engine and saved them to `/public/blog/`.
+- Modified [page.tsx](file:///d:/demo%202/app/blog/page.tsx) and [[slug]/page.tsx](file:///d:/demo%202/app/blog/[slug]/page.tsx) to support rendering `featuredImage` values.
+- Updated the "Connect on LinkedIn ↗" author card link to point directly to Ishwar Mule's LinkedIn profile: `https://www.linkedin.com/in/ishwarmule/`.
+- Configured Vercel deployment variables, enabled `output: "standalone"` in [next.config.ts](file:///d:/demo%202/next.config.ts), and resolved NPM ERESOLVE peer conflicts on React 19 by introducing [.npmrc](file:///d:/demo%202/.npmrc) with `legacy-peer-deps=true`.
+- Added a proprietary copyright [LICENSE](file:///d:/demo%202/LICENSE) file owned by Domain Expansion and Ishwar Mule.
+- Updated [AGENTS.md](file:///d:/demo%202/AGENTS.md) to document the dynamic routing sync rules for `sitemap.ts` and `robots.ts` so future sessions preserve SEO crawlers.
+- Pushed changes to GitHub repository: `https://github.com/Ishwar-Mule-Main/domain-expansion.git`.
+
 ### 2026-06-21 — Session 18 (TechGuild Countdown Timer & Brand Asset Refresh)
 - Integrated a premium, responsive 30-day pre-launch countdown timer inside the Hero section of the TechGuild landing page ([page.tsx](file:///d:/demo%202/app/techguild/page.tsx)) using hydration-safe mount checks.
 - Copied the new `public/favicon.ico` asset into the `app/` directory and renamed the default `app/icon.svg` to prevent Next.js from overriding the new icon configuration.
