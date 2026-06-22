@@ -7,7 +7,7 @@
 
 ## 📍 NEXT UP (current pointer)
 
-Awaiting user's next set of instructions.
+Collaborate with the user to refine and update the 21 portfolio case studies tomorrow (e.g., updating details, SEO metrics, links, and content maps).
 
 ---
 
