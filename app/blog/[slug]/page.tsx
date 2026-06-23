@@ -191,7 +191,7 @@ export default async function BlogPostDetailPage({ params }: PageProps) {
             {/* Main Long-form Article Body */}
             <div className="lg:col-span-8 text-left">
               {/* Article cover visual frame */}
-              <div className={`aspect-video rounded-xl bg-gradient-to-br ${post.coverGradient} p-10 flex flex-col justify-end text-white relative overflow-hidden mb-12 shadow-sm`}>
+              <div className={`aspect-video rounded-xl bg-gradient-to-br ${post.coverGradient} p-6 sm:p-10 flex flex-col justify-end text-white relative overflow-hidden mb-12 shadow-sm`}>
                 {post.featuredImage && (
                   <img
                     src={post.featuredImage}
@@ -210,7 +210,7 @@ export default async function BlogPostDetailPage({ params }: PageProps) {
 
               {/* Parsed Blog Body HTML styling */}
               <div 
-                className="prose prose-lg max-w-none"
+                className="prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: post.bodyHTML }}
               />
 
