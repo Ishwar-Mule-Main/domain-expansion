@@ -161,7 +161,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                 {project.challengeHeadline}
               </h2>
             </div>
-            <div className="lg:col-span-7 text-left text-xs sm:text-sm text-[#ACACB8] leading-relaxed flex flex-col gap-6">
+            <div className="lg:col-span-7 text-left text-sm md:text-base text-[#ACACB8] leading-relaxed flex flex-col gap-6">
               <p>{project.challengeDescription}</p>
               <div className="p-5 rounded-xl bg-[#141414] border border-[#2E2E2E] border-l-4 border-l-[#FF6200]">
                 <span className="text-[9px] font-mono text-[#888898] uppercase block mb-1">Context Outline</span>
@@ -184,7 +184,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                 Engineered Strategy & Execution
               </h2>
             </div>
-            <div className="lg:col-span-7 text-left text-xs sm:text-sm text-[#ACACB8] leading-relaxed flex flex-col gap-6">
+            <div className="lg:col-span-7 text-left text-sm md:text-base text-[#ACACB8] leading-relaxed flex flex-col gap-6">
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-white mb-2">Our Methodical Approach</h4>
                 <p>{project.approachDescription}</p>

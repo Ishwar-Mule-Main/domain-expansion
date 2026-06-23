@@ -180,7 +180,7 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
                 {project.challengeHeadline}
               </h2>
             </div>
-            <div className="lg:col-span-7 text-left text-xs sm:text-sm text-[#ACACB8] leading-relaxed">
+            <div className="lg:col-span-7 text-left text-sm md:text-base text-[#ACACB8] leading-relaxed">
               <p className="mb-6">{project.challengeDescription}</p>
               <div className="p-5 rounded-xl bg-red-950/10 border border-red-900/30 text-red-400">
                 <span className="text-[9px] font-mono uppercase block mb-1 font-bold">Identified Failure Loop</span>
@@ -203,7 +203,7 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
                 Engineered Solutions Architecture
               </h2>
             </div>
-            <div className="lg:col-span-7 text-left text-xs sm:text-sm text-[#ACACB8] leading-relaxed">
+            <div className="lg:col-span-7 text-left text-sm md:text-base text-[#ACACB8] leading-relaxed">
               <p>{project.approachDescription}</p>
             </div>
           </div>
@@ -222,7 +222,7 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
                 Technical Execution Lifecycle
               </h2>
             </div>
-            <div className="lg:col-span-7 text-left text-xs sm:text-sm text-[#ACACB8] leading-relaxed">
+            <div className="lg:col-span-7 text-left text-sm md:text-base text-[#ACACB8] leading-relaxed">
               <p>{project.executionDescription}</p>
             </div>
           </div>
@@ -242,7 +242,7 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
                 Blended ROI and Performance Lift
               </h2>
             </div>
-            <div className="lg:col-span-7 text-left text-xs sm:text-sm text-[#ACACB8] leading-relaxed flex flex-col gap-8">
+            <div className="lg:col-span-7 text-left text-sm md:text-base text-[#ACACB8] leading-relaxed flex flex-col gap-8">
               <p>{project.resultsDescription}</p>
               
               {/* Highlight metrics cards */}
@@ -297,7 +297,7 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FF6200]/10 text-brand-orange text-xs font-bold font-mono shrink-0">
                     {idx + 1}
                   </span>
-                  <p className="text-xs sm:text-sm text-[#ACACB8] leading-relaxed pt-0.5">
+                  <p className="text-sm md:text-base text-[#ACACB8] leading-relaxed pt-0.5">
                     {lesson}
                   </p>
                 </div>
@@ -353,7 +353,7 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
           <div className="flex flex-col gap-2">
             <span className="text-[10px] font-mono tracking-widest text-[#FF8C42] uppercase font-bold">Actionable Strategy</span>
             <h2 className="font-display text-3xl sm:text-4xl font-bold">Scale Your Acquisitions Safely</h2>
-            <p className="text-xs sm:text-sm text-[#ACACB8] max-w-lg mx-auto leading-relaxed">
+            <p className="text-sm md:text-base text-[#ACACB8] max-w-lg mx-auto leading-relaxed">
               Contact us to discuss how to run high-volume outreach, design responsive corporate portals, or configure automated data frameworks.
             </p>
           </div>
