@@ -84,12 +84,13 @@ export default function Navbar() {
   ];
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || mobileMenuOpen
-        ? "border-b border-[#2E2E2E] bg-[#0D0D0D]/95 backdrop-blur-md py-4"
-        : "bg-transparent py-6"
-        }`}
-    >
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || mobileMenuOpen
+          ? "border-b border-[#2E2E2E] bg-near-black/95 backdrop-blur-md py-4"
+          : "bg-transparent py-6"
+          }`}
+      >
       <div className="mx-auto max-w-7xl px-6 md:px-8">
         <nav className="flex items-center justify-between">
           {/* Logo */}
@@ -227,81 +228,83 @@ export default function Navbar() {
           </button>
         </nav>
       </div>
+    </header>
 
-      {/* Mobile Drawer Overlay */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-[#0D0D0D] flex flex-col justify-between p-8 pt-28 lg:hidden"
-          >
-            {/* Nav list */}
-            <div className="flex flex-col gap-6">
-              {/* Services Header */}
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#888898]">
-                  Services
-                </span>
-                <div className="grid grid-cols-2 gap-4 mt-1">
-                  {pillars.map((pillar, i) => (
-                    <Link
-                      key={i}
-                      href={pillar.path}
-                      className="group flex flex-col p-2.5 rounded-lg border border-[#2E2E2E]/40 bg-[#1A1A1A]/30 hover:border-brand-orange/30 transition-all"
-                    >
-                      <span className="font-display text-xs font-bold text-white group-hover:text-brand-orange transition-colors">
-                        {pillar.title.split(" ")[0]}
-                      </span>
-                      <span className="text-[9px] text-[#888898] mt-0.5">Explore</span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <hr className="border-[#2E2E2E]/40" />
-
-              {/* Standard Links */}
-              <div className="flex flex-col gap-4">
-                {navLinks.map((link, idx) => (
+    {/* Mobile Drawer Overlay */}
+    <AnimatePresence>
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-40 bg-near-black flex flex-col justify-between p-8 pt-28 lg:hidden"
+          style={{ backgroundColor: "#0D0D0D" }}
+        >
+          {/* Nav list */}
+          <div className="flex flex-col gap-6">
+            {/* Services Header */}
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#888898]">
+                Services
+              </span>
+              <div className="grid grid-cols-2 gap-4 mt-1">
+                {pillars.map((pillar, i) => (
                   <Link
-                    key={idx}
-                    href={link.path}
-                    className="font-display text-2xl font-bold text-white hover:text-brand-orange transition-colors"
+                    key={i}
+                    href={pillar.path}
+                    className="group flex flex-col p-2.5 rounded-lg border border-[#2E2E2E]/40 bg-[#1A1A1A]/30 hover:border-brand-orange/30 transition-all"
                   >
-                    {link.name}
+                    <span className="font-display text-xs font-bold text-white group-hover:text-brand-orange transition-colors">
+                      {pillar.title.split(" ")[0]}
+                    </span>
+                    <span className="text-[9px] text-[#888898] mt-0.5">Explore</span>
                   </Link>
                 ))}
-
-                <Link
-                  href="/techguild"
-                  className="font-display text-2xl font-bold text-white hover:text-brand-orange transition-colors flex items-center gap-2"
-                >
-                  TechGuild
-                  <span className="rounded-full bg-brand-orange/15 px-2 py-0.5 text-[10px] font-bold text-brand-orange border border-brand-orange/30">
-                    NEW
-                  </span>
-                </Link>
               </div>
             </div>
 
-            {/* Bottom Actions */}
-            <div className="flex flex-col gap-4 border-t border-[#2E2E2E]/40 pt-6">
-              <p className="text-xs text-[#888898]">
-                Think Outside The Box — info@domainexpansion.in
-              </p>
+            <hr className="border-[#2E2E2E]/40" />
+
+            {/* Standard Links */}
+            <div className="flex flex-col gap-4">
+              {navLinks.map((link, idx) => (
+                <Link
+                  key={idx}
+                  href={link.path}
+                  className="font-display text-2xl font-bold text-white hover:text-brand-orange transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
+
               <Link
-                href="/contact"
-                className="w-full text-center rounded-full bg-brand-orange py-3 text-sm font-bold text-white transition-all hover:bg-brand-orange-hover"
+                href="/techguild"
+                className="font-display text-2xl font-bold text-white hover:text-brand-orange transition-colors flex items-center gap-2"
               >
-                Get Free Consultation
+                TechGuild
+                <span className="rounded-full bg-brand-orange/15 px-2 py-0.5 text-[10px] font-bold text-brand-orange border border-brand-orange/30">
+                  NEW
+                </span>
               </Link>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
-  );
+          </div>
+
+          {/* Bottom Actions */}
+          <div className="flex flex-col gap-4 border-t border-[#2E2E2E]/40 pt-6">
+            <p className="text-xs text-[#888898]">
+              Think Outside The Box — info@domainexpansion.in
+            </p>
+            <Link
+              href="/contact"
+              className="w-full text-center rounded-full bg-brand-orange py-3 text-sm font-bold text-white transition-all hover:bg-brand-orange-hover"
+            >
+              Get Free Consultation
+            </Link>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </>
+);
 }
