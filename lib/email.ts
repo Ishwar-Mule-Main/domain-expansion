@@ -22,10 +22,11 @@ HTML Body Snippet: ${html.substring(0, 180)}...
   }
 
   try {
+    const isSandbox = (process.env.FROM_EMAIL || "onboarding@resend.dev").includes("resend.dev");
     const data = await resend.emails.send({
-      from: process.env.FROM_EMAIL || "Domain Expansion <connect.domainexpansion@gmail.com>",
+      from: process.env.FROM_EMAIL || "onboarding@resend.dev",
       to,
-      cc,
+      cc: isSandbox ? undefined : cc,
       subject,
       html,
     });
