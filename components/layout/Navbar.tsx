@@ -88,7 +88,7 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled || mobileMenuOpen
           ? "border-b border-[#2E2E2E] bg-near-black/95 backdrop-blur-md py-4"
-          : "bg-transparent py-6"
+          : "bg-transparent py-4"
           }`}
       >
       <div className="mx-auto max-w-7xl px-6 md:px-8">
@@ -293,7 +293,7 @@ export default function Navbar() {
           {/* Bottom Actions */}
           <div className="flex flex-col gap-4 border-t border-[#2E2E2E]/40 pt-6">
             <p className="text-xs text-[#888898]">
-              Think Outside The Box — info@domainexpansion.in
+              Think Outside The Box — connect.domainexpansion@gmail.com
             </p>
             <Link
               href="/contact"

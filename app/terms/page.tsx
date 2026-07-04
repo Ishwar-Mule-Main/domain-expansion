@@ -173,7 +173,7 @@ export default function TermsPage() {
               <div className="p-5 rounded-xl border border-[#E5E5E5] bg-[#F8F8F8] text-xs text-[#5A5A6A] leading-relaxed flex flex-col gap-1.5">
                 <span className="font-bold text-[#0D0D0D]">Domain Expansion Legal Team</span>
                 <span>Address: Remote only</span>
-                <span>Email: <a href="mailto:info@domainexpansion.in" className="text-brand-orange hover:underline font-semibold font-mono">info@domainexpansion.in</a></span>
+                <span>Email: <a href="mailto:connect.domainexpansion@gmail.com" className="text-brand-orange hover:underline font-semibold font-mono">connect.domainexpansion@gmail.com</a></span>
               </div>
             </section>
 

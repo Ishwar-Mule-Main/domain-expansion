@@ -8,7 +8,7 @@ const adapter = new PrismaNeon({ connectionString });
 const prisma = new PrismaClient({ adapter } as any);
 
 async function main() {
-  const superAdminEmail = "info@domainexpansion.in";
+  const superAdminEmail = "connect.domainexpansion@gmail.com";
 
   // Check if admin already exists
   const existingAdmin = await (prisma as any).adminUser.findUnique({

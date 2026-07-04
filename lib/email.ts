@@ -7,12 +7,14 @@ interface SendMailParams {
   to: string;
   subject: string;
   html: string;
+  cc?: string | string[];
 }
 
-export async function sendEmail({ to, subject, html }: SendMailParams) {
+export async function sendEmail({ to, subject, html, cc }: SendMailParams) {
   if (!resend) {
     console.log(`[Email Mock Output]
 To: ${to}
+CC: ${cc}
 Subject: ${subject}
 HTML Body Snippet: ${html.substring(0, 180)}...
 ---------------------------------------`);
@@ -21,8 +23,9 @@ HTML Body Snippet: ${html.substring(0, 180)}...
 
   try {
     const data = await resend.emails.send({
-      from: process.env.FROM_EMAIL || "Domain Expansion <info@domainexpansion.in>",
+      from: process.env.FROM_EMAIL || "Domain Expansion <connect.domainexpansion@gmail.com>",
       to,
+      cc,
       subject,
       html,
     });
@@ -43,7 +46,7 @@ export async function sendAdminLeadNotification(leadData: {
   budget?: string;
   message: string;
 }) {
-  const adminEmail = process.env.ADMIN_EMAIL || "info@domainexpansion.in";
+  const adminEmail = process.env.ADMIN_EMAIL || "connect.domainexpansion@gmail.com";
   const subject = `🔥 New Lead Received: ${leadData.name} (${leadData.service})`;
   const html = `
     <div style="font-family: sans-serif; color: #111827; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px;">
@@ -58,7 +61,12 @@ export async function sendAdminLeadNotification(leadData: {
       <p style="background-color: #f9fafb; padding: 12px; border-left: 4px solid #ff6200; border-radius: 4px; font-style: italic; white-space: pre-wrap; margin: 0;">${leadData.message}</p>
     </div>
   `;
-  return sendEmail({ to: adminEmail, subject, html });
+  return sendEmail({ 
+    to: adminEmail, 
+    cc: process.env.ADMIN_CC || "ishwar.mule007@gmail.com",
+    subject, 
+    html 
+  });
 }
 
 // User submission confirmation template

@@ -23,7 +23,7 @@ export default function Home() {
       "name": "Ishwar B. Mule",
       "jobTitle": "Founder & CEO"
     },
-    "email": "Info@domainexpansion.in",
+    "email": "connect.domainexpansion@gmail.com",
     "address": {
       "@type": "PostalAddress",
       "addressRegion": "Remote",

@@ -10,34 +10,11 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import * as ga from "@/lib/analytics";
+import { blogPosts } from "@/lib/data/blog";
 
+// Display the 3 most recent articles dynamically
+const articles = blogPosts.slice(0, 3);
 
-const articles = [
-  {
-    category: "Search Engineering",
-    title: "GEO vs SEO vs AIO: What's Different in 2026 Search?",
-    excerpt: "Why traditional keyword optimization is dying and how to optimize your brand so LLMs (Gemini, Claude, ChatGPT) cite you as the source.",
-    date: "June 12, 2026",
-    readTime: "6 min read",
-    slug: "geo-vs-seo-vs-aio",
-  },
-  {
-    category: "AI & Automation",
-    title: "How AI Automation Cut Our Client's Lead Acquisition Cost by 40%",
-    excerpt: "A deep dive into n8n and Make workflow designs that qualify leads and automate instant SMS/WhatsApp scheduling alerts.",
-    date: "June 08, 2026",
-    readTime: "8 min read",
-    slug: "ai-automation-cut-cac",
-  },
-  {
-    category: "Growth Marketing",
-    title: "How We Delivered 2.08 Million Emails and Kept Inbox Rates High",
-    excerpt: "Lifecycle segmentation strategies and domain warming mechanics that protect your reputation on high-volume professional campaigns.",
-    date: "May 29, 2026",
-    readTime: "5 min read",
-    slug: "email-deliverability-deep-dive",
-  },
-];
 
 export function BlogPreview() {
   const [emailInput, setEmailInput] = useState("");
@@ -152,13 +129,26 @@ export function BlogPreview() {
           {articles.map((article, idx) => (
             <div
               key={idx}
-              className="flex flex-col justify-between p-6 rounded-2xl border border-[#2E2E2E] bg-[#141414]/30 hover:bg-[#141414] transition-all duration-300 group relative min-h-[320px]"
+              className="flex flex-col justify-between p-6 rounded-2xl border border-[#2E2E2E] bg-[#141414]/30 hover:bg-[#141414] hover:border-brand-orange/40 hover:shadow-[0_0_40px_rgba(255,98,0,0.06)] transition-all duration-300 group relative min-h-[440px]"
             >
               <div>
+                {/* Horizontal Frame Image */}
+                <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden mb-6 border border-[#2E2E2E]/60 bg-[#1A1A1A]">
+                  {article.featuredImage ? (
+                    <img
+                      src={article.featuredImage}
+                      alt={article.title}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className={`absolute inset-0 bg-gradient-to-br ${article.coverGradient || "from-[#FF6200]/20 to-[#6D28D9]/20"}`} />
+                  )}
+                </div>
+
                 {/* Meta details */}
-                <div className="flex items-center justify-between text-[#888898] text-[10px] font-mono mb-6">
+                <div className="flex items-center justify-between text-[#888898] text-[10px] font-mono mb-4">
                   <span className="rounded-full bg-[#1A1A1A] border border-[#2E2E2E] px-2.5 py-0.5 font-bold uppercase text-[#FF8C42]">
-                    {article.category}
+                    {article.categoryLabel}
                   </span>
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1">
@@ -173,13 +163,13 @@ export function BlogPreview() {
                 </div>
 
                 {/* Article Title */}
-                <h3 className="font-display text-lg font-bold text-white leading-snug group-hover:text-brand-orange transition-colors duration-200">
-                  {article.title}
+                <h3 className="font-display text-base font-bold text-white leading-snug group-hover:text-brand-orange transition-colors duration-200">
+                  {article.title.length > 100 ? `${article.title.substring(0, 100)}...` : article.title}
                 </h3>
 
                 {/* Article Excerpt */}
-                <p className="text-xs text-[#888898] leading-relaxed mt-3 line-clamp-3">
-                  {article.excerpt}
+                <p className="text-xs text-[#888898] leading-relaxed mt-3">
+                  {article.excerpt.length > 160 ? `${article.excerpt.substring(0, 160)}...` : article.excerpt}
                 </p>
               </div>
 

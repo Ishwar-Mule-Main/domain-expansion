@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, Inter, JetBrains_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 
 import Navbar from "@/components/layout/Navbar";
@@ -31,11 +32,15 @@ export const metadata: Metadata = {
   description: "Domain Expansion is a remote, results-driven digital agency delivering Marketing, Development, Design, and AI services. 10M+ touchpoints, 2,700+ leads generated.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const isAdminPage = pathname.startsWith("/admin") || pathname.startsWith("/studio");
+
   return (
     <html
       lang="en"
@@ -47,10 +52,10 @@ export default function RootLayout({
         <SmoothScroll>
           <ScrollProgress />
           <Cursor />
-          <Navbar />
-          <main className="flex-grow pt-24">{children}</main>
-          <Footer />
-          <WhatsAppButton />
+          {!isAdminPage && <Navbar />}
+          <main className={`flex-grow ${isAdminPage ? "" : "pt-24"}`}>{children}</main>
+          {!isAdminPage && <Footer />}
+          {!isAdminPage && <WhatsAppButton />}
         </SmoothScroll>
       </body>
     </html>

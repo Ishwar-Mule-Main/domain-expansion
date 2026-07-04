@@ -313,10 +313,10 @@ export default function ContactPage() {
               <div className="p-6 rounded-xl border border-[#2E2E2E] bg-[#141414] flex justify-between items-center group">
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-mono text-[#888898] uppercase">Inquiries & Briefs</span>
-                  <span className="font-display text-sm sm:text-base font-bold text-white">info@domainexpansion.in</span>
+                  <span className="font-display text-sm sm:text-base font-bold text-white">connect.domainexpansion@gmail.com</span>
                 </div>
                 <button
-                  onClick={() => handleCopy("info@domainexpansion.in", "email")}
+                  onClick={() => handleCopy("connect.domainexpansion@gmail.com", "email")}
                   className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1A1A1A] border border-[#2E2E2E] hover:border-brand-orange text-[#888898] hover:text-white transition-all"
                   aria-label="Copy Email"
                 >
