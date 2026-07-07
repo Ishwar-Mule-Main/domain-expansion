@@ -34,31 +34,33 @@ export const projects: Project[] = [
     slug: "polymint-prca",
     clientName: "PolyMint / PRCA",
     industry: "Events & Professional Network",
-    title: "Multi-Market Professional Event Campaign",
-    tagline: "2.08 Million Emails Bypassing Spam Filters Safely",
-    categories: ["marketing", "ai", "design"],
-    challengeHeadline: "Low Attendance & Deliverability Collapse",
-    challengeDescription: "PolyMint in partnership with PRCA ran a multi-market professional event series across Asian markets and needed to fill seats. Previous email outreach attempts hit spam filters, leading to low open rates, zero attribution metrics, and flat registration counts.",
-    approachDescription: "Domain Expansion engineered a reputation-safe sending lifecycle. We authenticated domain settings (SPF/DKIM/DMARC), warmed up IP paths, segmented the subscriber list by professional personas, and built a custom AI prompt matrix to draft personal subject lines.",
-    executionDescription: "We dispatched 2.08 million emails in micro-batches to bypass spam traps. Concurrently, we wired n8n automation flows to scrape response forms and log details directly to our database, pushing registrants into automated SMS and WhatsApp confirmation streams.",
-    resultsDescription: "Registrations jumped to 200+ across target markets. We protected email domain health throughout the high-volume outreach campaign, maintaining a high 38% average open rate and ensuring full campaign attribution.",
+    title: "7th Polymer Recycling Conference Asia (PRCA)",
+    tagline: "670+ paid delegate tickets sold, 46,000+ marketing leads, and 10M+ touchpoints generated across a 4-month AI-powered campaign.",
+    categories: ["marketing", "development", "design", "ai"],
+    challengeHeadline: "High-Value Ticket Sales & Worldwide Branding Barriers",
+    challengeDescription: "PolyMint, a plastic industry-related event organizer, needed to drive premium delegate ticket sales (priced at ₹20,000 per person) for their 7th Polymer Recycling Conference Asia (PRCA) in Delhi, India. The core challenges lay in reaching, engaging, and selling event passes to 500+ C-suite executives and managers, securing 30+ award nominations, and attracting leading corporate sponsors in a highly competitive market.",
+    approachDescription: "Domain Expansion constructed a 4-month multi-channel marketing campaign integrating advanced AI tools. We defined a targeted audience of industry decision-makers in recycling and environmental sectors, structured the media budget to ₹5 Lakhs per month (₹20 Lakhs total), and developed a cohesive visual branding blueprint to establish the summit's authority globally.",
+    executionDescription: "We deployed targeted campaigns across all social networks with customized high-impact creatives. Additionally, we implemented AI automation for calling leads, launched targeted WhatsApp business marketing, and carried out cold email outreach campaigns, which collectively generated 3 Million+ digital touchpoints and 2,700 genuine leads.",
+    resultsDescription: "The campaign exceeded all expectations, yielding over 46,000+ total marketing leads and 3 Million+ touchpoints from automated channels. This resulted in 2,700 genuine, highly-interested leads, converting into 670 delegate registrations. Furthermore, the conference secured 40+ award nominations and attracted 20+ corporate sponsors from Indian and international regions.",
     metrics: [
-      { value: "200+", label: "Registrations Generated" },
-      { value: "2.08M", label: "Emails Delivered" },
-      { value: "38%", label: "Average Open Rate" }
+      { value: "670+", label: "Delegate Tickets Sold" },
+      { value: "46k+", label: "Marketing Leads" },
+      { value: "20+", label: "Sponsors Secured" },
+      { value: "2,700+", label: "Genuine Leads" },
+      { value: "3M+", label: "Digital Touchpoints" }
     ],
     testimonial: {
-      quote: "Domain Expansion turned our event marketing around. The email deliverability strategy saved our domain reputation and filled the venue.",
-      author: "PRCA Lead Organizer",
-      role: "Director of Outreach"
+      quote: "Domain Expansion turned our event marketing around. Selling high-value tickets at scale and attracting major sponsors was made possible by their multi-channel strategy.",
+      author: "PolyMint Organizing Committee",
+      role: "Event Director"
     },
-    duration: "3 Months",
-    year: "2025",
+    duration: "4 Months",
+    year: "2026",
     region: "International",
     lessons: [
-      "IP warm-ups and authenticated records are mandatory for high-volume email campaigns.",
-      "Segmented messaging beats general broadcasts every time.",
-      "n8n form connectors remove registration delays completely."
+      "Targeting high-value tickets (₹20,000+) requires strict audience filtering and C-suite persona messaging.",
+      "Omnichannel campaigns across India and Asia build high-trust branding that drives corporate sponsorships.",
+      "Cohesive ad creatives and automated pipelines prevent lead decay and increase ticket sales velocity."
     ]
   },
   {

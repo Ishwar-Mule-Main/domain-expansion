@@ -118,16 +118,20 @@ export default function CaseStudiesPage() {
                   
                   <div className="flex flex-col gap-4 bg-black/40 p-6 rounded-xl border border-[#2E2E2E]">
                     <div className="flex justify-between items-center border-b border-[#2E2E2E]/60 pb-3">
-                      <span className="text-xs font-mono text-[#888898]">Emails Dispatched</span>
-                      <span className="text-xs font-bold text-white">2.08 Million</span>
+                      <span className="text-xs font-mono text-[#888898]">Marketing Leads</span>
+                      <span className="text-xs font-bold text-white">46,000+</span>
                     </div>
                     <div className="flex justify-between items-center border-b border-[#2E2E2E]/60 pb-3">
-                      <span className="text-xs font-mono text-[#888898]">Spam Trap Bypass</span>
-                      <span className="text-xs font-bold text-emerald-500">100% Secure</span>
+                      <span className="text-xs font-mono text-[#888898]">Outreach Touchpoints</span>
+                      <span className="text-xs font-bold text-white">3M+</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-[#2E2E2E]/60 pb-3">
+                      <span className="text-xs font-mono text-[#888898]">Campaign Budget</span>
+                      <span className="text-xs font-bold text-emerald-500">₹20 Lakhs</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-mono text-[#888898]">Registrations Generated</span>
-                      <span className="text-xs font-bold text-[#FF6200]">200+ Seats</span>
+                      <span className="text-xs font-mono text-[#888898]">Delegates Registered</span>
+                      <span className="text-xs font-bold text-[#FF6200]">670+ Seats</span>
                     </div>
                   </div>
                 </div>

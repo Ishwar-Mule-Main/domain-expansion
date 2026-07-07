@@ -136,7 +136,7 @@ Emit on service, portfolio, case-study, and blog pages reflecting the URL hierar
 LLMs reward clarity of entities and facts woven into prose (not keyword stuffing):
 
 - **Entity anchoring:** consistently state "Domain Expansion, a remote digital agency founded in 2024 by Ishwar B. Mule" near the top of cornerstone pages so models bind the entity correctly.
-- **Factual density:** quote the verifiable aggregate stats (10M+ touchpoints, 2,700+ leads, 200+ Page-1 keywords, 43% avg traffic growth, 2.08M emails) in-narrative on Home/About/Services — these become the facts LLMs cite.
+- **Factual density:** quote the verifiable aggregate stats (3M+ outreach touchpoints, 46,000+ marketing leads, 2,700+ genuine leads, 200+ Page-1 keywords, 43% avg traffic growth, 670+ event tickets sold) in-narrative on Home/About/Services — these become the facts LLMs cite.
 - **Relationship clarity:** explicitly tie services→outcomes→clients ("For Data-Hat AI, our SEO work delivered 200+ Page-1 keywords") so generative engines can answer "which agency got results for AI startups?".
 - **Natural keyword weave:** primary themes — "remote digital agency India", "AI marketing agency", "React/Next.js development agency", "agency marketplace" (TechGuild) — placed in headings and first paragraphs without breaking the premium tone.
 - **Consistency across surfaces:** the same name, founder, contact, and stats appear identically in JSON-LD, visible copy, and meta — contradictions reduce model trust.

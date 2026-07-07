@@ -212,7 +212,7 @@ Applies to all four pillar pages; sub-service pages reuse at reduced depth. Each
 8. **CTA** — pre-selects this service in the Contact form dropdown.
 
 ### B5.1 Marketing Expansion (`/services/marketing-expansion`)
-Overview covers SEO/GEO/AIO/GSO, performance, social, email (2.08M emails), WhatsApp, content, influencer, events (200+ regs). Process: Discover → Audit → Strategy → Execution → Optimization → Reporting. Mini case studies: Data-Hat AI (SEO), Meat Me Foods (social), PolyMint (event). Tools: GA4, Meta Business, HubSpot, Ahrefs, SEMrush, Mailchimp, Klaviyo. Headline proof: 7.4M+ impressions, 2,700+ leads, 43% traffic growth.
+Overview covers SEO/GEO/AIO/GSO, performance, social, email (lifecycle campaigns), WhatsApp, content, influencer, events (670+ registrations). Process: Discover → Audit → Strategy → Execution → Optimization → Reporting. Mini case studies: Data-Hat AI (SEO), Meat Me Foods (social), PolyMint (event). Tools: GA4, Meta Business, HubSpot, Ahrefs, SEMrush, Mailchimp, Klaviyo. Headline proof: 10M+ impressions, 2,700+ leads, 43% traffic growth.
 
 ### B5.2 Development Expansion (`/services/development-expansion`)
 Overview covers WordPress/Framer/custom, Shopify/WooCommerce, React/Next.js web apps, React Native/Flutter, custom software, APIs, CRM/ERP, SaaS. Process: Discover → Architecture → Design → Development → Testing → Launch. Mini case studies: SNAG Parking (web+app), Find Me Eats (web/app), CropWings (website+SEO). Tools: React, Next.js, Node, PostgreSQL, Tailwind, Vercel, AWS, Shopify, WordPress.
@@ -288,7 +288,7 @@ Each is a 1,500-3,000 word deep-dive with ten sections: (1) Hero + three key met
 
 **Section 6 — Load More / Pagination.** 9 per page.
 
-Launch posts (10): SEO 200+ keywords case study; WhatsApp Marketing guide; AI automation cut CAC 40%; 2026 social design trends; GEO vs SEO vs AIO; event marketing 200+ regs; remote-first agencies; 2.08M emails deep-dive; e-commerce that converts; What is TechGuild.
+Launch posts (10): SEO 200+ keywords case study; WhatsApp Marketing guide; AI automation cut CAC 40%; 2026 social design trends; GEO vs SEO vs AIO; event marketing 670+ delegates; remote-first agencies; email deliverability deep-dive; e-commerce that converts; What is TechGuild.
 
 ## B11. Blog Post Template (`/blog/[slug]`)
 
@@ -331,14 +331,14 @@ Same clean light layout/TOC. Twelve sections: Agreement; Use of Website; Intelle
 
 > One detailed case study per documented project. Each follows the B9 ten-section template. Metrics are best-effort representative figures consistent with DE's aggregate stats and are to be replaced with verified client data before publication.
 
-### C1. PolyMint / PRCA — Marketing, AI Automation & Event (`/case-studies/polymint-prca`)
-**Metric tiles:** 200+ event registrations · 2.08M emails delivered · 38% open rate.
-**Context:** PolyMint, in partnership with PRCA, ran a multi-market professional event series across Asian markets and needed to fill seats while protecting sender reputation across a very large outreach footprint.
-**Problem:** Previous broadcast attempts hurt deliverability; registrations were flat and attribution was guesswork. The list was large but unsegmented, and manual follow-up did not scale.
-**Strategy:** DE built a segmented lifecycle: warm-up sequencing to rebuild domain reputation, persona-based registration tracks, and an AI-assisted personalization layer that tailored subject lines and send-times per cohort. Event-marketing funnels were mapped end-to-end from invite to attendance.
-**Execution:** 2.08M emails dispatched in controlled, reputation-safe batches with authenticated sending (SPF/DKIM/DMARC), automated registration pages, and n8n workflows pushing registrants into reminder cadences and CRM. Real-time dashboards tracked opens, clicks, and registrations by market.
-**Results & Analysis:** 200+ registrations generated across Asian markets at a high 38% average open rate, with inbox placement protected throughout. Automation removed manual follow-up entirely, and attribution clarified which markets and subject lines drove sign-ups.
-**Takeaways:** Reputation-first sending plus AI personalization at scale beats blast volume — a transferable playbook for any high-volume event funnel.
+### C1. PolyMint / PRCA — Omnichannel Event & AI Automation (`/case-studies/polymint-prca`)
+**Metric tiles:** 670+ delegate tickets sold · 2,700+ genuine leads · 3M+ touchpoints.
+**Context:** PolyMint, a plastic industry-related event organizer, ran the 7th yearly Polymer Recycling Conference Asia (PRCA) in Delhi, India, and needed to drive high-value registrations and sponsorships.
+**Problem:** High ticket pricing (₹20,000 per person) and targeting C-suite and manager-level professionals required a highly qualified pipeline. They needed to secure 500+ ticket sales, 30+ award nominations, and corporate sponsorships.
+**Strategy:** DE constructed a 4-month multi-channel marketing campaign with a ₹5 Lakhs per month budget (₹20L total). We targeted C-suite executives, built worldwide brand awareness, and established an AI-driven lead qualification system.
+**Execution:** Deployed ₹20L marketing budget across all social channels, running high-impact creatives. We implemented AI automation for calling leads, launched targeted WhatsApp business marketing, and carried out cold email outreach, generating 3M+ touchpoints and feeding 2,700 genuine leads to the sales team while driving global sponsor acquisitions.
+**Results & Analysis:** Achieved 3M+ digital touchpoints, 46,000+ total marketing leads, and 670 paid registrations (exceeding the 500 target) with 2,700 genuine leads. Secured 40+ award nominations and 20+ sponsors across India and Asia.
+**Takeaways:** High-value ticket acquisition requires precise C-suite targeting, AI outreach automations (email/WhatsApp/voice), and cohesive multi-channel branding.
 
 ### C2. Data-Hat AI — SEO, Web Dev & Growth Marketing (`/case-studies/data-hat-ai`)
 **Metric tiles:** 200+ keywords on Page 1 · +320% organic traffic in 90 days · 6-mo payback.

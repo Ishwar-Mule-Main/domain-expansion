@@ -246,7 +246,7 @@ const smBrands = [
     name: "PolyMint / PRCA",
     tagline: "Corporate Event Campaigns",
     description: "Visual content layouts, email templates, and registration invitations for multi-market professional seminars.",
-    metrics: "200+ event registrations · 38% open rate",
+    metrics: "670+ delegate tickets sold · 2,700+ genuine leads · 3M+ touchpoints",
     items: [
       ...generateItems(
         "/Creative Designs/polymint social media creatives", 

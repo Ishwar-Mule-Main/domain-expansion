@@ -44,15 +44,15 @@ const serviceDetails: Record<string, ServiceData> = {
         label: "Average ROAS"
       },
       {
-        title: "Email & WhatsApp Lifecycles",
-        desc: "Authenticated domain warm-up sequencing, spam filter bypass checks, and automated WhatsApp onboarding pipelines.",
-        metric: "2.08M",
-        label: "Emails Safe-Sent"
+        title: "Outreach & WhatsApp Automation",
+        desc: "Automated cold email outreach, WhatsApp business marketing campaigns, and AI lead qualification setups.",
+        metric: "3M+",
+        label: "Outreach Touchpoints"
       },
       {
         title: "Event Lead Funnels",
         desc: "Targeted localized outreach and automatic scheduling workflows to fill virtual or physical professional events.",
-        metric: "200+",
+        metric: "670+",
         label: "Registrations Generated"
       }
     ],
@@ -66,7 +66,7 @@ const serviceDetails: Record<string, ServiceData> = {
     ],
     results: [
       { client: "Data-Hat AI", metric: "+320%", label: "Organic Traffic Growth", slug: "data-hat-ai" },
-      { client: "PolyMint / PRCA", metric: "200+", label: "Registrations Generated", slug: "polymint-prca" }
+      { client: "PolyMint / PRCA", metric: "670+", label: "Delegates Registered", slug: "polymint-prca" }
     ],
     tools: ["Google Analytics 4", "Meta Business Manager", "Ahrefs & SEMrush", "Klaviyo", "Mailchimp", "HubSpot"],
     faqs: [
@@ -234,7 +234,7 @@ const serviceDetails: Record<string, ServiceData> = {
     ],
     results: [
       { client: "Data-Hat AI", metric: "40%", label: "CAC Cost Reduction", slug: "data-hat-ai" },
-      { client: "PolyMint / PRCA", metric: "2.08M", label: "Automated Batch Invites", slug: "polymint-prca" }
+      { client: "PolyMint / PRCA", metric: "2,700+", label: "Genuine Leads Generated", slug: "polymint-prca" }
     ],
     tools: ["n8n & Make", "Claude API (Anthropic)", "Gemini API (Google)", "LangChain & Vector DBs", "Upstash Redis", "Zod Validators"],
     faqs: [

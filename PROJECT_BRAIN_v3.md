@@ -24,7 +24,7 @@ You are an **Elite Creative Technologist & Senior Frontend Architect** (15+ year
 
 **Four service pillars:** Marketing Expansion, Development Expansion, Design Expansion, AI Expansion (each with sub-services — see `FSD_v3.md` §5/B5).
 
-**Proof stats (cite these, they anchor SEO/GEO):** 10M+ digital touchpoints, 2,700+ leads generated, 200+ keywords on Page 1, 43% avg traffic growth, 2.08M emails sent, 200+ event registrations, 21 client projects, 6+ years expertise.
+**Proof stats (cite these, they anchor SEO/GEO):** 3M+ outreach touchpoints, 46,000+ marketing leads, 2,700+ genuine leads, 200+ keywords on Page 1, 43% avg traffic growth, 670+ event tickets sold, 21 client projects, 6+ years expertise.
 
 **21 clients/case studies:** PolyMint/PRCA, Data-Hat AI, AKC Foods, RocoMamas, Lucid Colloids, Sai Proviso Emporis, CropWings, Kubera, Kubera Communications, Nahl, AgriStox, Organoindia, Meat Me Foods, Sahchi United, Periship, Find Me Eats, Reyleaf, House Escort, Whats The Buz, SNAG Parking, Teegolf.
 

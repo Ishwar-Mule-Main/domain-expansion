@@ -22,9 +22,9 @@ const projects: Project[] = [
     client: "PolyMint / PRCA",
     category: "marketing",
     categoryLabel: "Marketing Expansion",
-    metric: "2.08M",
-    metricLabel: "Emails Delivered",
-    desc: "Hyper-targeted event marketing sequencing across Asian markets.",
+    metric: "670+",
+    metricLabel: "Tickets Sold",
+    desc: "Multi-channel marketing campaign targeting C-suite delegate tickets.",
     bgGradient: "from-orange-600/30 to-[#0D0D0D]",
   },
   {

@@ -5,7 +5,127 @@ import { projects, Project } from "@/lib/data/projects";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { JsonLd } from "@/components/ui/JsonLd";
+import { PortfolioMediaGrid, MediaItem } from "@/components/sections/portfolio/PortfolioMediaGrid";
 
+const projectGalleries: Record<
+  string,
+  {
+    paid: MediaItem[];
+    website: MediaItem[];
+    social: MediaItem[];
+  }
+> = {
+  "polymint-prca": {
+    paid: [
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (1).jpeg",
+        alt: "PolyMint Paid Campaign Creative #1 (JPEG)",
+        title: "PolyMint Paid Ad #1 (JPEG)",
+        description: "Targeted digital advertisement creative utilized on social channels to acquire high-value registrations."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (1).png",
+        alt: "PolyMint Paid Campaign Creative #1 (PNG)",
+        title: "PolyMint Paid Ad #1 (PNG)",
+        description: "High-resolution graphic layout for promotional email campaigns and paid sponsorships."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (2).png",
+        alt: "PolyMint Paid Campaign Creative #2",
+        title: "PolyMint Paid Ad #2",
+        description: "Custom target audience ad graphics highlighting event schedules and speakers."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (3).png",
+        alt: "PolyMint Paid Campaign Creative #3",
+        title: "PolyMint Paid Ad #3",
+        description: "B2B paid advertisement asset driving C-suite delegate conversions."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (4).png",
+        alt: "PolyMint Paid Campaign Creative #4",
+        title: "PolyMint Paid Ad #4",
+        description: "Social media advertisement targeting plastics recycling industry managers."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (5).png",
+        alt: "PolyMint Paid Campaign Creative #5",
+        title: "PolyMint Paid Ad #5",
+        description: "Promotional banner design for strategic event marketing campaigns."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (6).png",
+        alt: "PolyMint Paid Campaign Creative #6",
+        title: "PolyMint Paid Ad #6",
+        description: "High-impact visual creative driving visitor attendance and registrations."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (7).png",
+        alt: "PolyMint Paid Campaign Creative #7",
+        title: "PolyMint Paid Ad #7",
+        description: "B2B marketing ad layout focused on regional delegate tickets."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (8).png",
+        alt: "PolyMint Paid Campaign Creative #8",
+        title: "PolyMint Paid Ad #8",
+        description: "Custom sponsor promotion visual asset showcasing corporate partners."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (9).png",
+        alt: "PolyMint Paid Campaign Creative #9",
+        title: "PolyMint Paid Ad #9",
+        description: "Multi-market event announcement creative for global outreach."
+      },
+      {
+        src: "/Creative Designs/polymint paid campaign creatives (10).png",
+        alt: "PolyMint Paid Campaign Creative #10",
+        title: "PolyMint Paid Ad #10",
+        description: "Comprehensive event highlight graphic showing previous summit success."
+      }
+    ],
+    website: [
+      {
+        src: "/website design/PRCApolymint.png",
+        alt: "PRCA Website Design Mockup",
+        title: "PRCA Event Landing Page Design",
+        description: "Custom corporate responsive registration hub designed on a premium dark grid layout."
+      }
+    ],
+    social: [
+      {
+        src: "/Creative Designs/polymint social media creatives (1).jpeg",
+        alt: "PolyMint Social Media Creative #1 (JPEG)",
+        title: "PolyMint Social Graphic #1 (JPEG)",
+        description: "Email campaign header graphic for digital newsletter outreach."
+      },
+      {
+        src: "/Creative Designs/polymint social media creatives (1).png",
+        alt: "PolyMint Social Media Creative #1 (PNG)",
+        title: "PolyMint Social Graphic #1 (PNG)",
+        description: "Cohesive social media graphic templates matching the signature PRCA brand identity."
+      },
+      {
+        src: "/Creative Designs/polymint social media creatives (2).jpeg",
+        alt: "PolyMint Social Media Creative #2 (JPEG)",
+        title: "PolyMint Social Graphic #2 (JPEG)",
+        description: "Speaker introduction social layout template utilized for LinkedIn."
+      },
+      {
+        src: "/Creative Designs/polymint social media creatives (2).png",
+        alt: "PolyMint Social Media Creative #2 (PNG)",
+        title: "PolyMint Social Graphic #2 (PNG)",
+        description: "Key speaker announcement and attendee target templates."
+      },
+      {
+        src: "/Creative Designs/polymint social media creatives (3).png",
+        alt: "PolyMint Social Media Creative #3",
+        title: "PolyMint Social Graphic #3",
+        description: "Hyper-targeted visual banner tracking the closing delegate registration window."
+      }
+    ]
+  }
+};
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -24,6 +144,8 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
   if (!project) {
     notFound();
   }
+
+  const gallery = projectGalleries[slug];
 
   // Find 3 related projects
   const relatedProjects = projects
@@ -154,7 +276,7 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-mono text-[#888898] uppercase">Release Year</span>
-              <span className="text-xs sm:text-sm font-bold text-white">{project.year}</span>
+              <span className="text-xs sm:text-sm font-bold text-white">2026</span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-[10px] font-mono text-[#888898] uppercase">Category Pillars</span>
@@ -244,7 +366,7 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
             </div>
             <div className="lg:col-span-7 text-left text-sm md:text-base text-[#ACACB8] leading-relaxed flex flex-col gap-8">
               <p>{project.resultsDescription}</p>
-              
+
               {/* Highlight metrics cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {project.metrics.map((metric, i) => (
@@ -258,6 +380,51 @@ export default async function CaseStudyDetailPage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      {/* SECTION 6.5 — Visual Showcase (Dynamic Gallery) */}
+      {gallery && (
+        <section className="py-24 border-b border-[#2E2E2E] bg-[#141414]/10 relative z-10">
+          <div className="mx-auto max-w-7xl px-6 md:px-8 text-center">
+            <span className="text-[10px] font-mono text-[#FF8C42] uppercase tracking-wider font-bold">Campaign Showcase</span>
+            <h2 className="font-display text-2xl sm:text-4xl font-bold mt-2 mb-16">Visual Assets & Deliverables</h2>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left">
+              {/* Column 1: Paid Campaigns */}
+              <div className="flex flex-col gap-6 p-6 rounded-xl border border-[#2E2E2E] bg-black/40">
+                <div className="flex items-center gap-2 pb-3 border-b border-[#2E2E2E]">
+                  <span className="h-2 w-2 rounded-full bg-[#FF6200]" />
+                  <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">Paid Campaigns</h3>
+                </div>
+                <div className="w-full">
+                  <PortfolioMediaGrid items={gallery.paid} columns={1} />
+                </div>
+              </div>
+
+              {/* Column 2: Landing Page / Website */}
+              <div className="flex flex-col gap-6 p-6 rounded-xl border border-[#2E2E2E] bg-black/40">
+                <div className="flex items-center gap-2 pb-3 border-b border-[#2E2E2E]">
+                  <span className="h-2 w-2 rounded-full bg-[#8B5CF6]" />
+                  <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">Landing Page / Website</h3>
+                </div>
+                <div className="w-full">
+                  <PortfolioMediaGrid items={gallery.website} columns={1} />
+                </div>
+              </div>
+
+              {/* Column 3: Social Media */}
+              <div className="flex flex-col gap-6 p-6 rounded-xl border border-[#2E2E2E] bg-black/40">
+                <div className="flex items-center gap-2 pb-3 border-b border-[#2E2E2E]">
+                  <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
+                  <h3 className="font-display text-sm font-bold text-white uppercase tracking-wider">Social Media</h3>
+                </div>
+                <div className="w-full">
+                  <PortfolioMediaGrid items={gallery.social} columns={1} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* SECTION 7 — Testimonial (Optional) */}
       {project.testimonial && (

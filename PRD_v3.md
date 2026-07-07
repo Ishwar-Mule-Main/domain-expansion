@@ -142,11 +142,11 @@ Sub-services:
 - Search Engine Optimization (SEO) — including GEO (Generative Engine Optimization), AIO (AI Optimization), and GSO (Google SGE Optimization). Full-service keyword research, on-page optimization, technical SEO audits, link building, and performance reporting.
 - Performance Marketing — Google Ads (Search, Display, Shopping, YouTube), Meta Ads (Facebook + Instagram), LinkedIn Ads, and programmatic advertising. ROI-focused campaign management with weekly reporting.
 - Social Media Marketing & Management — Content strategy, daily/weekly post creation, community management, growth campaigns, and influencer coordination across Instagram, LinkedIn, Facebook, Twitter/X, and YouTube.
-- Email Marketing — Campaign strategy, list segmentation, email design and copywriting, automation workflows (welcome sequences, nurture sequences, re-engagement), and deliverability management. Demonstrated ability: 2.08M emails sent with high inbox rates.
+- Email Marketing — Campaign strategy, list segmentation, email design and copywriting, automation workflows (welcome sequences, nurture sequences, re-engagement), and deliverability management. Demonstrated ability: lifecycle campaign marketing with high inbox rates.
 - WhatsApp Marketing — WhatsApp Business API setup, broadcast campaigns, chatbot flows, and customer journey automation.
 - Content Marketing & Strategy — Blog strategy, SEO-optimized article writing, content calendar management, pillar page creation, and long-form content production.
 - Influencer & Affiliate Marketing — Influencer identification and outreach, campaign management, performance tracking, and affiliate program setup.
-- Event Marketing & Webinar Promotion — Pre-event marketing, registration page design, email sequences for event attendance, post-event follow-up. Demonstrated: 200+ registrations generated across Asian markets.
+- Event Marketing & Webinar Promotion — Pre-event marketing, registration page design, email sequences for event attendance, post-event follow-up. Demonstrated: 670+ registrations generated for a premium regional event.
 - Brand Strategy & Identity — Brand positioning, messaging framework, tone of voice development, and competitive differentiation strategy.
 
 **Pillar 2: Development Expansion**
@@ -481,9 +481,9 @@ Popular Posts list (5 articles), Category list with counts, Newsletter signup fo
 3. "How AI Automation Cut Our Client's Lead Acquisition Cost by 40%" — AI services case study
 4. "Social Media Design Trends Indian Brands Should Follow in 2026" — design insights
 5. "GEO vs SEO vs AIO: What's Different in 2026 Search?" — thought leadership
-6. "Event Marketing That Generated 200+ Registrations Across Asia" — campaign breakdown
+6. "Event Marketing That Generated 670+ Registrations: A Case Study" — campaign breakdown
 7. "Why Remote-First Agencies Are the Future of Digital Marketing" — opinion piece
-8. "How We Delivered 2.08 Million Emails and Kept Inbox Rates High" — email marketing deep-dive
+8. "Delivering High-Volume Marketing Campaigns and Keeping Inbox Rates High" — email marketing deep-dive
 9. "Building an E-Commerce Website That Actually Converts" — development guide
 10. "What Is TechGuild and How It Will Change How Agencies Get Clients" — product announcement
 

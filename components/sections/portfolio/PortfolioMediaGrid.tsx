@@ -15,7 +15,7 @@ export interface MediaItem {
 
 interface PortfolioMediaGridProps {
   items: MediaItem[];
-  columns?: 2 | 3 | 4;
+  columns?: 1 | 2 | 3 | 4;
 }
 
 export function PortfolioMediaGrid({ items, columns = 3 }: PortfolioMediaGridProps) {
@@ -75,6 +75,7 @@ export function PortfolioMediaGrid({ items, columns = 3 }: PortfolioMediaGridPro
   };
 
   const masonryCols = {
+    1: "columns-1",
     2: "columns-1 md:columns-2",
     3: "columns-1 sm:columns-2 lg:columns-3",
     4: "columns-1 sm:columns-2 md:columns-3 lg:columns-4",

@@ -16,9 +16,9 @@ const studies = [
   {
     client: "PolyMint / PRCA",
     industry: "Events & Professional Network",
-    challenge: "High-volume email outreach failing to reach target market inboxes.",
-    metric: "2.08M",
-    metricLabel: "Reputation-Safe Emails Sent",
+    challenge: "High-ticket pricing and C-suite targeting hurdles for a premium regional event.",
+    metric: "670+",
+    metricLabel: "Delegate Tickets Sold",
     slug: "polymint-prca",
   },
   {
