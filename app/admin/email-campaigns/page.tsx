@@ -131,22 +131,24 @@ export default function EmailCampaignsPage() {
   const fetchModels = async () => {
     setLoadingModels(true);
     try {
-      const res = await fetch("https://openrouter.ai/api/v1/models");
+      const res = await fetch("/api/admin/email/models");
       const data = await res.json();
-      if (data && Array.isArray(data.data)) {
+      if (data && data.success && Array.isArray(data.data)) {
         const mapped = data.data.map((m: any) => ({
           id: m.id,
           name: m.name || m.id
         })).sort((a: any, b: any) => a.name.localeCompare(b.name));
         setOpenRouterModels(mapped);
+      } else {
+        throw new Error("Failed to load models list from server");
       }
     } catch (err) {
       console.error("Failed to fetch OpenRouter models:", err);
       setOpenRouterModels([
-        { id: "google/gemini-2.0-flash", name: "Google: Gemini 2.0 Flash" },
-        { id: "google/gemini-2.0-flash-lite:free", name: "Google: Gemini 2.0 Flash Lite (Free)" },
-        { id: "google/gemini-1.5-flash", name: "Google: Gemini 1.5 Flash" },
-        { id: "google/gemini-1.5-pro", name: "Google: Gemini 1.5 Pro" },
+        { id: "google/gemini-2.5-flash", name: "Google: Gemini 2.5 Flash" },
+        { id: "google/gemini-2.5-pro", name: "Google: Gemini 2.5 Pro" },
+        { id: "google/gemini-2.5-flash-lite", name: "Google: Gemini 2.5 Flash Lite" },
+        { id: "google/gemini-3.5-flash", name: "Google: Gemini 3.5 Flash" },
         { id: "meta-llama/llama-3-8b-instruct:free", name: "Meta: Llama 3 8B Instruct (Free)" },
         { id: "deepseek/deepseek-chat", name: "DeepSeek: Chat" }
       ]);
