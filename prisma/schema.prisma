@@ -137,6 +137,10 @@ model EmailSettings {
   gmailUser          String   @default("connect.domainexpansion@gmail.com")
   gmailAppPassword   String   @default("")
   geminiApiKey       String   @default("")
+  openRouterApiKey   String   @default("")
+  openRouterModel    String   @default("google/gemini-2.0-flash")
+  preferredProvider  String   @default("GOOGLE") // "GOOGLE" | "OPENROUTER"
+  fallbackEnabled    Boolean  @default(true)
   pitchPrompt        String   @default("Write a cold email to the prospect pitching our digital services at Domain Expansion. Highlight how we are a startup B2B digital agency and can help them grow by sharing our case studies. Keep it short, professional, and personalized to their company and industry. Ask if we can jump on a quick call.") @db.Text
   replyPrompt        String   @default("You are an AI assistant at Domain Expansion. The prospect replied to our pitch email. Draft a friendly, professional response handling their questions, showing enthusiasm, and trying to book a meeting.") @db.Text
   dailyLimit         Int      @default(150)
@@ -144,3 +148,18 @@ model EmailSettings {
   isActive           Boolean  @default(false)
   updatedAt          DateTime @updatedAt
 }
+
+model MasterBrainLog {
+  id            String   @id @default(uuid())
+  prospectId    String?
+  prospectEmail String?
+  provider      String   // "GOOGLE" | "OPENROUTER"
+  model         String
+  actionType    String   // "PITCH" | "REPLY"
+  prompt        String   @db.Text
+  response      String?  @db.Text
+  status        String   // "SUCCESS" | "FAILED"
+  errorMessage  String?  @db.Text
+  createdAt     DateTime @default(now())
+}
+

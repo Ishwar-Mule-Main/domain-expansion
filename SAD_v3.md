@@ -96,7 +96,7 @@ TLS 1.2 min / 1.3 preferred; Vercel-managed Let's Encrypt; `HSTS max-age=3153600
 ## 7. Data Security & Privacy
 
 ### 7.1 Classification & Encryption
-Lead/waitlist data: Confidential, PostgreSQL, TLS + AES-256 at rest (Neon-managed). Admin credentials: Secret, bcrypt. API keys: Secret, Vercel encrypted env. Content: Sanity TLS + at-rest. Images: Cloudinary TLS. Analytics: GA4 (Google-managed). Prospect lists, SMTP credentials (Gmail user/App password), and Gemini API keys: stored in Neon PostgreSQL database with TLS + AES-256 encryption at rest. (Future: apply column-level vault encryption using AES-256-GCM prior to storage).
+Lead/waitlist data: Confidential, PostgreSQL, TLS + AES-256 at rest (Neon-managed). Admin credentials: Secret, bcrypt. API keys: Secret, Vercel encrypted env. Content: Sanity TLS + at-rest. Images: Cloudinary TLS. Analytics: GA4 (Google-managed). Prospect lists, SMTP credentials (Gmail user/App password), Gemini API keys, and OpenRouter API keys: stored in Neon PostgreSQL database with TLS + AES-256 encryption at rest. (Future: apply column-level vault encryption using AES-256-GCM prior to storage).
 
 ### 7.2 Retention
 Leads (converted) 3y; leads (lost/spam) 6mo auto-delete; admin sessions 30d/on-logout; GA4 14mo; blog content indefinite; TechGuild waitlist until launch + 1y.

@@ -37,13 +37,17 @@ interface Stats {
 }
 
 export default function EmailCampaignsPage() {
-  // Tabs: 'reports' | 'prospects' | 'settings'
-  const [activeTab, setActiveTab] = useState<"reports" | "prospects" | "settings">("reports");
+  // Tabs: 'reports' | 'prospects' | 'settings' | 'brain'
+  const [activeTab, setActiveTab] = useState<"reports" | "prospects" | "settings" | "brain">("reports");
 
   // Settings state
   const [gmailUser, setGmailUser] = useState("connect.domainexpansion@gmail.com");
   const [gmailAppPassword, setGmailAppPassword] = useState("");
   const [geminiApiKey, setGeminiApiKey] = useState("");
+  const [openRouterApiKey, setOpenRouterApiKey] = useState("");
+  const [openRouterModel, setOpenRouterModel] = useState("google/gemini-2.0-flash");
+  const [preferredProvider, setPreferredProvider] = useState("GOOGLE");
+  const [fallbackEnabled, setFallbackEnabled] = useState(true);
   const [pitchPrompt, setPitchPrompt] = useState("");
   const [replyPrompt, setReplyPrompt] = useState("");
   const [dailyLimit, setDailyLimit] = useState(150);
@@ -79,6 +83,45 @@ export default function EmailCampaignsPage() {
   const [editedSubject, setEditedSubject] = useState("");
   const [editedBody, setEditedBody] = useState("");
   const [savingDraft, setSavingDraft] = useState(false);
+
+  // Master Brain Logs State
+  const [brainLogs, setBrainLogs] = useState<any[]>([]);
+  const [brainPage, setBrainPage] = useState(1);
+  const [brainTotalPages, setBrainTotalPages] = useState(1);
+  const [loadingBrainLogs, setLoadingBrainLogs] = useState(false);
+  const [brainSearchQuery, setBrainSearchQuery] = useState("");
+  const [brainStatusFilter, setBrainStatusFilter] = useState("all");
+
+  const fetchBrainLogs = async (page: number) => {
+    setLoadingBrainLogs(true);
+    try {
+      const res = await fetch(
+        `/api/admin/email/logs?page=${page}&limit=20&status=${brainStatusFilter}&q=${encodeURIComponent(brainSearchQuery)}`
+      );
+      const data = await res.json();
+      if (data.success) {
+        setBrainLogs(data.logs);
+        setBrainTotalPages(data.pagination.pages);
+        setBrainPage(data.pagination.page);
+      }
+    } catch (err) {
+      console.error("Failed to load brain logs:", err);
+    } finally {
+      setLoadingBrainLogs(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "brain") {
+      fetchBrainLogs(1);
+    }
+  }, [activeTab, brainStatusFilter]);
+
+  const handleBrainSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setBrainPage(1);
+    fetchBrainLogs(1);
+  };
 
   // Fetch initial configs and queue data
   useEffect(() => {
@@ -160,6 +203,10 @@ export default function EmailCampaignsPage() {
         setGmailUser(data.settings.gmailUser);
         setGmailAppPassword(data.settings.gmailAppPassword);
         setGeminiApiKey(data.settings.geminiApiKey);
+        setOpenRouterApiKey(data.settings.openRouterApiKey || "");
+        setOpenRouterModel(data.settings.openRouterModel || "google/gemini-2.0-flash");
+        setPreferredProvider(data.settings.preferredProvider || "GOOGLE");
+        setFallbackEnabled(data.settings.fallbackEnabled !== false);
         setPitchPrompt(data.settings.pitchPrompt);
         setReplyPrompt(data.settings.replyPrompt);
         setDailyLimit(data.settings.dailyLimit);
@@ -181,6 +228,10 @@ export default function EmailCampaignsPage() {
           gmailUser,
           gmailAppPassword,
           geminiApiKey,
+          openRouterApiKey,
+          openRouterModel,
+          preferredProvider,
+          fallbackEnabled,
           pitchPrompt,
           replyPrompt,
           dailyLimit,
@@ -517,11 +568,11 @@ export default function EmailCampaignsPage() {
       </div>
 
       {/* Settings warning */}
-      {(!gmailAppPassword || !geminiApiKey) && (
+      {(!gmailAppPassword || (!geminiApiKey && !openRouterApiKey)) && (
         <div className="p-4 rounded-xl bg-amber-500/5 border border-amber-500/20 text-amber-400 text-xs flex gap-3 items-center">
           <ShieldAlert className="h-5 w-5 shrink-0" />
           <div>
-            <span className="font-bold">Setup Required:</span> Gmail App Passwords and Gemini API key are missing. Configure credentials in the <strong>Settings tab</strong> below to begin automated sending.
+            <span className="font-bold">Setup Required:</span> Gmail App Passwords and at least one AI provider API key (Gemini or OpenRouter) are missing. Configure credentials in the <strong>Settings tab</strong> below to begin automated sending.
           </div>
         </div>
       )}
@@ -563,6 +614,19 @@ export default function EmailCampaignsPage() {
           }`}
         >
           ⚙️ Settings Panel
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab("brain");
+            fetchBrainLogs(1);
+          }}
+          className={`px-5 py-3 text-xs font-mono font-bold uppercase tracking-wider border-b-2 transition-all ${
+            activeTab === "brain"
+              ? "border-[#FF6200] text-white bg-white/2"
+              : "border-transparent text-[#888898] hover:text-white"
+          }`}
+        >
+          🧠 Master Brain Logs
         </button>
       </div>
 
@@ -961,46 +1025,94 @@ export default function EmailCampaignsPage() {
 
             {/* AI Config */}
             <div className="flex flex-col gap-4">
-              <h4 className="font-mono text-xs text-[#FF8C42] uppercase tracking-wider font-bold">Google Gemini AI Engine</h4>
+              <h4 className="font-mono text-xs text-[#FF8C42] uppercase tracking-wider font-bold">AI Language Model Providers</h4>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-mono text-[#888898]">Gemini API Key:</label>
-                <input
-                  type="password"
-                  value={geminiApiKey}
-                  onChange={(e) => setGeminiApiKey(e.target.value)}
-                  className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none font-mono"
-                  placeholder="AIzaSy..."
-                />
-                <span className="text-[9px] text-[#5A5A6A]">
-                  Acquire a free API key from Google AI Studio. 1,500 daily requests allow 100% free daily operations.
-                </span>
-              </div>
-
-              {/* Threshold sliders */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-mono text-[#888898]">Daily Send Limit:</label>
+                  <label className="text-[11px] font-mono text-[#888898]">Preferred Provider:</label>
+                  <select
+                    value={preferredProvider}
+                    onChange={(e) => setPreferredProvider(e.target.value)}
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none cursor-pointer"
+                  >
+                    <option value="GOOGLE">Google Gemini API</option>
+                    <option value="OPENROUTER">OpenRouter API</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1.5 justify-end">
+                  <label className="flex items-center gap-2 text-[11px] font-mono text-[#888898] cursor-pointer py-2">
+                    <input
+                      type="checkbox"
+                      checked={fallbackEnabled}
+                      onChange={(e) => setFallbackEnabled(e.target.checked)}
+                      className="rounded border-[#2E2E2E] text-[#FF6200] focus:ring-0 cursor-pointer bg-black/40"
+                    />
+                    Enable Auto-Fallback / Failover
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-mono text-[#888898]">Gemini API Key:</label>
                   <input
-                    type="number"
-                    value={dailyLimit}
-                    onChange={(e) => setDailyLimit(Number(e.target.value))}
-                    min={1}
-                    max={500}
-                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                    type="password"
+                    value={geminiApiKey}
+                    onChange={(e) => setGeminiApiKey(e.target.value)}
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none font-mono"
+                    placeholder="AIzaSy..."
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-mono text-[#888898]">Cooldown (Seconds):</label>
+                  <label className="text-[11px] font-mono text-[#888898]">OpenRouter API Key:</label>
                   <input
-                    type="number"
-                    value={intervalSeconds}
-                    onChange={(e) => setIntervalSeconds(Number(e.target.value))}
-                    min={10}
-                    max={1200}
-                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                    type="password"
+                    value={openRouterApiKey}
+                    onChange={(e) => setOpenRouterApiKey(e.target.value)}
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none font-mono"
+                    placeholder="sk-or-v1-..."
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-mono text-[#888898]">OpenRouter Model ID:</label>
+                  <input
+                    type="text"
+                    value={openRouterModel}
+                    onChange={(e) => setOpenRouterModel(e.target.value)}
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none font-mono"
+                    placeholder="google/gemini-2.0-flash"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-mono text-[#888898]">Daily Send Limit:</label>
+                    <input
+                      type="number"
+                      value={dailyLimit}
+                      onChange={(e) => setDailyLimit(Number(e.target.value))}
+                      min={1}
+                      max={500}
+                      className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-mono text-[#888898]">Cooldown (s):</label>
+                    <input
+                      type="number"
+                      value={intervalSeconds}
+                      onChange={(e) => setIntervalSeconds(Number(e.target.value))}
+                      min={10}
+                      max={1200}
+                      className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1059,6 +1171,150 @@ export default function EmailCampaignsPage() {
           </div>
         </div>
       )}
+
+      {/* Tab 4: Master Brain Logs */}
+      {activeTab === "brain" && (
+        <div className="flex flex-col gap-6">
+          <form onSubmit={handleBrainSearchSubmit} className="flex flex-col sm:flex-row gap-4 items-center bg-[#141414] border border-[#2E2E2E] p-4 rounded-xl">
+            <div className="relative flex-grow w-full">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#888898]">
+                <Search className="h-4 w-4" />
+              </span>
+              <input
+                type="text"
+                placeholder="Search logs by email, prompt, response, model, error..."
+                value={brainSearchQuery}
+                onChange={(e) => setBrainSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 border border-[#2E2E2E] rounded-lg text-xs text-white placeholder-[#888898] focus:outline-none focus:ring-1 focus:ring-[#FF6200] focus:border-[#FF6200] bg-black/40 transition-all"
+              />
+            </div>
+
+            <div className="w-full sm:w-48 shrink-0">
+              <select
+                value={brainStatusFilter}
+                onChange={(e) => setBrainStatusFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-[#2E2E2E] rounded-lg text-xs text-white bg-black/40 focus:outline-none focus:ring-1 focus:ring-[#FF6200] cursor-pointer"
+              >
+                <option value="all">All Outcomes</option>
+                <option value="SUCCESS">SUCCESS</option>
+                <option value="FAILED">FAILED</option>
+              </select>
+            </div>
+
+            <Button type="submit" className="text-xs py-2 px-6 shrink-0 w-full sm:w-auto">
+              Search Logs
+            </Button>
+          </form>
+
+          <div className="p-6 rounded-xl border border-[#2E2E2E] bg-[#141414] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse min-w-[900px]">
+                <thead>
+                  <tr className="border-b border-[#2E2E2E]/60 text-[#888898] font-mono uppercase tracking-wider">
+                    <th className="pb-3 font-semibold">Date & Time</th>
+                    <th className="pb-3 font-semibold">Prospect</th>
+                    <th className="pb-3 font-semibold">Provider / Model</th>
+                    <th className="pb-3 font-semibold">Prompt Snippet</th>
+                    <th className="pb-3 font-semibold">Output / Error</th>
+                    <th className="pb-3 font-semibold">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#2E2E2E]/40 text-[#ACACB8]">
+                  {brainLogs.map((log) => (
+                    <tr key={log.id} className="hover:bg-white/2 transition-colors align-top">
+                      <td className="py-4 font-mono text-[10px] text-[#888898] whitespace-nowrap">
+                        {new Date(log.createdAt).toLocaleString()}
+                      </td>
+                      <td className="py-4">
+                        <span className="font-mono text-[10px] text-white break-all max-w-[150px] block">
+                          {log.prospectEmail || "N/A"}
+                        </span>
+                      </td>
+                      <td className="py-4 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-white font-mono text-[10px] uppercase">
+                            {log.provider}
+                          </span>
+                          <span className="text-[10px] text-[#888898] font-mono mt-0.5">
+                            {log.model}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 max-w-[200px]">
+                        <p className="line-clamp-2 text-[#888898] leading-relaxed animate-none" title={log.prompt}>
+                          {log.prompt}
+                        </p>
+                      </td>
+                      <td className="py-4 max-w-[250px]">
+                        {log.status === "SUCCESS" ? (
+                          <div
+                            className="line-clamp-2 text-emerald-400 font-mono text-[10px] leading-relaxed"
+                            title={log.response || ""}
+                            dangerouslySetInnerHTML={{ __html: log.response || "" }}
+                          ></div>
+                        ) : (
+                          <p className="line-clamp-2 text-red-400 font-mono text-[10px] leading-relaxed" title={log.errorMessage || ""}>
+                            {log.errorMessage}
+                          </p>
+                        )}
+                      </td>
+                      <td className="py-4">
+                        <Badge variant={log.status === "SUCCESS" ? "success" : "orange"}>
+                          {log.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {brainLogs.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center font-mono text-[#5A5A6A]">
+                        {loadingBrainLogs ? "Loading log records..." : "No logs found matching filters."}
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {brainTotalPages > 1 && (
+              <div className="flex items-center justify-between mt-6 pt-6 border-t border-[#2E2E2E]/60">
+                <span className="text-xs text-[#888898] font-mono">
+                  Page {brainPage} of {brainTotalPages}
+                </span>
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => {
+                      const prev = Math.max(1, brainPage - 1);
+                      setBrainPage(prev);
+                      fetchBrainLogs(prev);
+                    }}
+                    disabled={brainPage === 1}
+                    variant="outline"
+                    className="py-1 px-2.5 h-8 text-[11px] font-mono flex items-center"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Previous
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const next = Math.min(brainTotalPages, brainPage + 1);
+                      setBrainPage(next);
+                      fetchBrainLogs(next);
+                    }}
+                    disabled={brainPage === brainTotalPages}
+                    variant="outline"
+                    className="py-1 px-2.5 h-8 text-[11px] font-mono flex items-center"
+                  >
+                    Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
 
       {/* Edit Pitch Draft Modal Component */}
       {editingProspect && (

@@ -39,9 +39,10 @@ async function handleProcess(request: Request) {
       return NextResponse.json({ success: false, message: "Email automation is currently inactive." });
     }
 
-    // 4. Verify SMTP & Gemini credentials
-    if (!settings.gmailUser || !settings.gmailAppPassword || !settings.geminiApiKey) {
-      return NextResponse.json({ success: false, message: "SMTP or Gemini configuration details are incomplete." }, { status: 400 });
+    // 4. Verify SMTP & AI credentials
+    const hasAIConfig = settings.geminiApiKey || settings.openRouterApiKey;
+    if (!settings.gmailUser || !settings.gmailAppPassword || !hasAIConfig) {
+      return NextResponse.json({ success: false, message: "SMTP or AI configuration details are incomplete." }, { status: 400 });
     }
 
     // 5. Enforce Daily Limit (sent logs since midnight UTC)
@@ -124,8 +125,9 @@ async function handleProcess(request: Request) {
           company: prospect.company,
           industry: prospect.industry,
           website: prospect.website,
-          pitchPrompt: settings.pitchPrompt,
-          apiKey: settings.geminiApiKey,
+          prospectId: prospect.id,
+          prospectEmail: prospect.email,
+          settings,
         });
 
         subject = generation.subject;

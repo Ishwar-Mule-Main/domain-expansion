@@ -115,6 +115,8 @@ Email Automation endpoints:
 - `POST /api/admin/email/upload`: CSV parser endpoint that validates fields and chunk-saves data into database.
 - `GET/POST /api/admin/email/process`: Automated generator and sender worker triggered by scheduler cron (authorized via matching token context) or manual admin clicks.
 - `GET/POST /api/admin/email/sync-replies`: Connects to Gmail via IMAP, fetches headers, matches address to DB, and logs conversation conversions.
+- `GET /api/admin/email/logs`: Paginated endpoint to fetch all success/failure Master Brain AI generation logs.
+
 
 ### 5.3 Hardening
 Server-only secrets; CORS restricted to `https://domainexpansion.in`; 50KB body cap; strict HTTP method enforcement (405 otherwise); sanitized production errors (no stack traces); idempotency keys on writes.
