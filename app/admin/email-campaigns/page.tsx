@@ -55,6 +55,11 @@ export default function EmailCampaignsPage() {
   const [isActive, setIsActive] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
 
+  // OpenRouter models state
+  const [openRouterModels, setOpenRouterModels] = useState<{ id: string; name: string }[]>([]);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [isCustomModel, setIsCustomModel] = useState(false);
+
   // Prospects queue state
   const [prospects, setProspects] = useState<Prospect[]>([]);
   const [stats, setStats] = useState<Stats>({
@@ -123,10 +128,38 @@ export default function EmailCampaignsPage() {
     fetchBrainLogs(1);
   };
 
+  const fetchModels = async () => {
+    setLoadingModels(true);
+    try {
+      const res = await fetch("https://openrouter.ai/api/v1/models");
+      const data = await res.json();
+      if (data && Array.isArray(data.data)) {
+        const mapped = data.data.map((m: any) => ({
+          id: m.id,
+          name: m.name || m.id
+        })).sort((a: any, b: any) => a.name.localeCompare(b.name));
+        setOpenRouterModels(mapped);
+      }
+    } catch (err) {
+      console.error("Failed to fetch OpenRouter models:", err);
+      setOpenRouterModels([
+        { id: "google/gemini-2.0-flash", name: "Google: Gemini 2.0 Flash" },
+        { id: "google/gemini-2.0-flash-lite:free", name: "Google: Gemini 2.0 Flash Lite (Free)" },
+        { id: "google/gemini-1.5-flash", name: "Google: Gemini 1.5 Flash" },
+        { id: "google/gemini-1.5-pro", name: "Google: Gemini 1.5 Pro" },
+        { id: "meta-llama/llama-3-8b-instruct:free", name: "Meta: Llama 3 8B Instruct (Free)" },
+        { id: "deepseek/deepseek-chat", name: "DeepSeek: Chat" }
+      ]);
+    } finally {
+      setLoadingModels(false);
+    }
+  };
+
   // Fetch initial configs and queue data
   useEffect(() => {
     fetchSettings();
     fetchQueue(1);
+    fetchModels();
   }, []);
 
   // Syncing stats in reports tab regularly
@@ -1079,14 +1112,46 @@ export default function EmailCampaignsPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-mono text-[#888898]">OpenRouter Model ID:</label>
-                  <input
-                    type="text"
-                    value={openRouterModel}
-                    onChange={(e) => setOpenRouterModel(e.target.value)}
-                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none font-mono"
-                    placeholder="google/gemini-2.0-flash"
-                  />
+                  <div className="flex justify-between items-center">
+                    <label className="text-[11px] font-mono text-[#888898]">OpenRouter Model:</label>
+                    <button
+                      type="button"
+                      onClick={() => setIsCustomModel(!isCustomModel)}
+                      className="text-[9px] font-mono text-[#FF8C42] hover:underline cursor-pointer"
+                    >
+                      {isCustomModel ? "Select from list" : "Enter custom ID"}
+                    </button>
+                  </div>
+                  {isCustomModel ? (
+                    <input
+                      type="text"
+                      value={openRouterModel}
+                      onChange={(e) => setOpenRouterModel(e.target.value)}
+                      className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none font-mono"
+                      placeholder="google/gemini-2.0-flash"
+                    />
+                  ) : (
+                    <select
+                      value={openRouterModel}
+                      onChange={(e) => setOpenRouterModel(e.target.value)}
+                      className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none cursor-pointer font-mono"
+                    >
+                      {loadingModels ? (
+                        <option value="">Loading OpenRouter models...</option>
+                      ) : (
+                        <>
+                          {openRouterModels.map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.name}
+                            </option>
+                          ))}
+                        </>
+                      )}
+                      {openRouterModel && !openRouterModels.some((m) => m.id === openRouterModel) && (
+                        <option value={openRouterModel}>{openRouterModel}</option>
+                      )}
+                    </select>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
