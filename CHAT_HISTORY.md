@@ -61,7 +61,7 @@ This project is the full-stack website and admin portal for **Domain Expansion**
 |----------|----------------------------|
 | URL      | http://localhost:3000/admin |
 | Email    | info@domainexpansion.in    |
-| Password | DomainAdmin2026!           |
+| Password | DomainEx@26                |
 | Role     | SUPER_ADMIN                |
 
 > ⚠️ Change this password after first login!

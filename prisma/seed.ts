@@ -20,9 +20,9 @@ async function main() {
     return;
   }
 
-  // Hash password
+    // Hash password
   const salt = await bcrypt.genSalt(12);
-  const hashedPassword = await bcrypt.hash("DomainAdmin2026!", salt);
+  const hashedPassword = await bcrypt.hash("DomainEx@26", salt);
 
   // Create Super Admin User
   const admin = await (prisma as any).adminUser.create({
@@ -36,7 +36,7 @@ async function main() {
   console.log(`[Seed] Super Admin created successfully:
 - Email: ${admin.email}
 - Role:  ${admin.role}
-- Password: DomainAdmin2026! (change after first login)
+- Password: DomainEx@26 (change after first login)
 `);
 }
 
