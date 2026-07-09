@@ -93,3 +93,54 @@ model PortfolioItem {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+
+enum ProspectStatus {
+  PENDING
+  GENERATING
+  READY
+  SENDING
+  SENT
+  REPLIED
+  FAILED
+  UNSUBSCRIBED
+}
+
+model Prospect {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String
+  company       String?
+  industry      String?
+  website       String?
+  status        ProspectStatus @default(PENDING)
+  customSubject String?        @db.Text
+  customBody    String?        @db.Text
+  sentAt        DateTime?
+  repliedAt     DateTime?
+  logs          EmailLog[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model EmailLog {
+  id            String   @id @default(uuid())
+  prospectId    String
+  prospect      Prospect @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  prospectEmail String
+  action        String
+  details       String?  @db.Text
+  createdAt     DateTime @default(now())
+}
+
+model EmailSettings {
+  id                 String   @id @default(uuid())
+  gmailUser          String   @default("connect.domainexpansion@gmail.com")
+  gmailAppPassword   String   @default("")
+  geminiApiKey       String   @default("")
+  pitchPrompt        String   @default("Write a cold email to the prospect pitching our digital services at Domain Expansion. Highlight how we are a startup B2B digital agency and can help them grow by sharing our case studies. Keep it short, professional, and personalized to their company and industry. Ask if we can jump on a quick call.") @db.Text
+  replyPrompt        String   @default("You are an AI assistant at Domain Expansion. The prospect replied to our pitch email. Draft a friendly, professional response handling their questions, showing enthusiasm, and trying to book a meeting.") @db.Text
+  dailyLimit         Int      @default(150)
+  intervalSeconds    Int      @default(120)
+  isActive           Boolean  @default(false)
+  updatedAt          DateTime @updatedAt
+}

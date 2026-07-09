@@ -53,7 +53,7 @@ Unauthenticated → redirect /admin/login → POST /api/auth/signin → valid: c
 Min 12 chars, mixed complexity, bcrypt cost-12, time-limited reset (1h), no reuse of last 5, TOTP MFA in Phase 2.
 
 ### 3.5 Route Protection
-Middleware protects `/admin`, `/admin/:path*`, `/studio/:path*`; `/api/admin/*` and `GET /api/leads` require admin session; `POST /api/leads` and `POST /api/techguild-waitlist` public but rate-limited.
+Middleware protects `/admin`, `/admin/:path*`, `/studio/:path*`; `/api/admin/*` and `GET /api/leads` require admin session; `POST /api/leads` and `POST /api/techguild-waitlist` public but rate-limited. Admin automation endpoints `/api/admin/email/*` require valid admin session token authorization, except when trigger tokens are supplied via authorized query parameters matching the server `NEXTAUTH_SECRET` (allowing external cron scheduler integrations).
 
 ---
 
@@ -96,7 +96,7 @@ TLS 1.2 min / 1.3 preferred; Vercel-managed Let's Encrypt; `HSTS max-age=3153600
 ## 7. Data Security & Privacy
 
 ### 7.1 Classification & Encryption
-Lead/waitlist data: Confidential, PostgreSQL, TLS + AES-256 at rest (Neon-managed). Admin credentials: Secret, bcrypt. API keys: Secret, Vercel encrypted env. Content: Sanity TLS + at-rest. Images: Cloudinary TLS. Analytics: GA4 (Google-managed).
+Lead/waitlist data: Confidential, PostgreSQL, TLS + AES-256 at rest (Neon-managed). Admin credentials: Secret, bcrypt. API keys: Secret, Vercel encrypted env. Content: Sanity TLS + at-rest. Images: Cloudinary TLS. Analytics: GA4 (Google-managed). Prospect lists, SMTP credentials (Gmail user/App password), and Gemini API keys: stored in Neon PostgreSQL database with TLS + AES-256 encryption at rest. (Future: apply column-level vault encryption using AES-256-GCM prior to storage).
 
 ### 7.2 Retention
 Leads (converted) 3y; leads (lost/spam) 6mo auto-delete; admin sessions 30d/on-logout; GA4 14mo; blog content indefinite; TechGuild waitlist until launch + 1y.
@@ -111,7 +111,7 @@ Cookie consent banner (non-essential opt-in), GA4 IP anonymization, no cross-sit
 
 ## 8. API Security
 
-Public endpoints (leads, waitlist): no auth, rate-limited, hCaptcha, Zod. Admin endpoints: session-token auth (DELETE leads = Super Admin only). Hardening: no client-side API keys (all external calls server-side), CORS restricted to domainexpansion.in, 50KB body cap, strict HTTP method enforcement (405), sanitized production errors, idempotency keys on writes.
+Public endpoints (leads, waitlist): no auth, rate-limited, hCaptcha, Zod. Admin endpoints: session-token auth (DELETE leads = Super Admin only). Hardening: no client-side API keys (all external calls server-side), CORS restricted to domainexpansion.in, 50KB body cap (except chunked CSV payloads up to 1000 items under `/api/admin/email/upload`), strict HTTP method enforcement (405), sanitized production errors, idempotency keys on writes. Unsubscribe requests validate prospects by UUID parameters, logging a conversion event before updating the record status to opt-out.
 
 ---
 

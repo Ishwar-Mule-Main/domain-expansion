@@ -520,6 +520,32 @@ Same clean light layout/TOC. Twelve sections: Agreement; Use of Website; Intelle
 **Results & Analysis:** Organic traffic up 190%, bookings 3.5x, 50+ keywords on Page 1.
 **Takeaways:** Pair SEO discovery with a booking-optimized path to convert interest into revenue.
 
+## B15. AI Outreach Suite (`/admin/email-campaigns`)
+
+A premium dashboard interface designed for email marketing automation and queue management.
+
+**Layout & Components:**
+1. **Interactive Control Bar:** Sync replies button (calls IMAP client), Send Next button (calls manual trigger), and a toggle button to enable/disable the Auto-Pilot loop.
+2. **KPI Metrics Grid:**
+   - *Total Upload Pool:* Total prospects.
+   - *Total Emails Sent:* Sent + Replied count.
+   - *Delivery Rate:* Success SLA.
+   - *AI Response Rate:* Reply rate.
+3. **Tabbed Views:**
+   - **📈 Performance & Reports:**
+     - *Queue Status Distribution:* Progress bars representing status percentages (Pending, Preloader Ready, Sent, Replied, Processing, Failed, Unsubscribed).
+     - *Pilot Engine Logs:* Real-time terminal log viewer detailing automated send actions, countdowns, and network outcomes.
+   - **👥 Prospects Queue:**
+     - *CSV Loader:* Drag-and-drop file selector to ingest prospect databases with automatic server chunking.
+     - *Search & Filters:* Text query input and status selector filters.
+     - *Queue Table:* Interactive list showing prospect info, company/sector, email subject/body snippets, status badges, and action controls (Edit draft modal, Delete record).
+   - **⚙️ Settings Panel:**
+     - *SMTP Configuration:* Inputs for Gmail username and App passwords.
+     - *Gemini Config:* API key input, Daily send limit field, Cooldown interval slider.
+     - *Prompting Editor:* Multi-line textareas defining the system prompt for pitch email generation and follow-up responses.
+4. **Draft Editor Modal:** Pop-up window letting admins inspect, override, and manually save subject/HTML body versions of generated emails before they are dispatched.
+5. **List-Unsubscribe page (`/api/unsubscribe`):** Confirmation landing page styled with Domain Expansion brand colors, glowing radial dot overlay, unsubscribe confirmation, and back-to-home navigation button.
+
 ---
 
 ## PART D — IMPLEMENTATION NOTES

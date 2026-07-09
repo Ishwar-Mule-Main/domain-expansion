@@ -718,6 +718,9 @@ List view of portfolio items with: client name, category tags, status, created d
 **9.6 Newsletter Subscribers (Phase 2)**
 Table of newsletter subscribers with email, signup date, and subscription status. Export to CSV. Unsubscribe management.
 
+**9.7 AI Outreach Suite & Email Campaign Automation**
+Dashboard screen at `/admin/email-campaigns` to manage prospect cold-pitching queues. Includes: (1) CSV uploader for lists matching name, email, company, industry, and website; (2) metric cards counting total, sent, delivery rates, and replies; (3) dynamic settings panel configuring SMTP (Gmail user/App password), Gemini API keys, daily send limits, interval cooling seconds, and custom prompting templates; (4) manual editor modal to preview and override AI-generated subjects and HTML email drafts; (5) live autopilot loop status monitor logging execution and cooldown steps in real-time; (6) IMAP sync client scanning inbox folders to record replies; (7) unsubscribe link injection standardizing automated list-unsubscribe. (Phase 10)
+
 ---
 
 ## 10. Constraints, Assumptions & Out of Scope

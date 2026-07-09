@@ -89,6 +89,8 @@ Core models: **Lead** (contact + inquiry + status enum NEW→CONTACTED→IN_PROG
 
 TechGuild (Phase 2) additions: **Agency** (profile, services, locations, verificationStatus), **Client** (profile), **Project** (brief, budget, timeline, status, category), **Proposal** (agency→project, pricing, timeline, message), **Message** (agency↔client thread), **Review** (client→agency, outcome-weighted), **Transaction** (escrow, Phase 3). Relationships enforced with FKs; all access through Prisma (parameterized, no raw SQL).
 
+Email Automation additions (Phase 10): **Prospect** (email unique, name, company, industry, website, status enum PENDING/GENERATING/READY/SENDING/SENT/REPLIED/FAILED/UNSUBSCRIBED, customSubject, customBody, sentAt, repliedAt), **EmailLog** (prospectId FK cascade, action, details, createdAt), **EmailSettings** (gmailUser, gmailAppPassword, geminiApiKey, pitchPrompt, replyPrompt, dailyLimit, intervalSeconds, isActive).
+
 ---
 
 ## 5. API Design
@@ -100,11 +102,19 @@ TechGuild (Phase 2) additions: **Agency** (profile, services, locations, verific
 | /api/contact | POST | none | 3/IP/hr | hCaptcha |
 | /api/techguild-waitlist | POST | none | 1/IP/day | hCaptcha |
 | /api/blog, /api/blog/[slug] | GET | none | n/a | n/a |
+| /api/unsubscribe | GET | none | n/a | n/a |
 
 **Lead POST contract:** body `{name, email, phone?, company?, service, budget?, message, source?, captchaToken}`; validates via Zod, verifies hCaptcha server-side, rate-limits, persists via Prisma, sends Resend admin + confirmation emails; returns `200 {success,message}` / `400` / `429`.
 
 ### 5.2 Admin Endpoints
 `GET /api/admin/leads` (paginated, filters: status/service/dateFrom/dateTo), `PATCH /api/admin/leads/:id` (status/notes/assignedTo), `DELETE` (Super Admin), `GET /api/admin/stats`. All require a valid HttpOnly session cookie; 401 otherwise.
+
+Email Automation endpoints:
+- `GET/POST /api/admin/email/settings`: Fetches/saves SMTP configurations, prompts, and warm-up speed limits.
+- `GET/DELETE/PATCH /api/admin/email/prospects`: Paginated queue search, deletion (single or bulk queue wipe), and manual draft override updater.
+- `POST /api/admin/email/upload`: CSV parser endpoint that validates fields and chunk-saves data into database.
+- `GET/POST /api/admin/email/process`: Automated generator and sender worker triggered by scheduler cron (authorized via matching token context) or manual admin clicks.
+- `GET/POST /api/admin/email/sync-replies`: Connects to Gmail via IMAP, fetches headers, matches address to DB, and logs conversation conversions.
 
 ### 5.3 Hardening
 Server-only secrets; CORS restricted to `https://domainexpansion.in`; 50KB body cap; strict HTTP method enforcement (405 otherwise); sanitized production errors (no stack traces); idempotency keys on writes.
