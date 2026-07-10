@@ -50,9 +50,12 @@ async function fetchGoogleGemini(prompt: string, apiKey: string, useJsonSchema: 
   }
 
   const data = await response.json();
+  if (data.error) {
+    throw new Error(`Google API error: ${data.error.message || JSON.stringify(data.error)}`);
+  }
   const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!textContent) {
-    throw new Error("Failed to retrieve text content from Google Gemini response.");
+    throw new Error(`Failed to retrieve text content from Google Gemini response. Response: ${JSON.stringify(data)}`);
   }
   return textContent;
 }
@@ -91,9 +94,12 @@ async function fetchOpenRouter(prompt: string, apiKey: string, model: string, us
   }
 
   const data = await response.json();
+  if (data.error) {
+    throw new Error(`OpenRouter API error: ${data.error.message || JSON.stringify(data.error)}`);
+  }
   const textContent = data.choices?.[0]?.message?.content;
   if (!textContent) {
-    throw new Error("Failed to retrieve text content from OpenRouter response.");
+    throw new Error(`Failed to retrieve text content from OpenRouter response. Response: ${JSON.stringify(data)}`);
   }
   return textContent;
 }
