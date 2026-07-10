@@ -1,5 +1,40 @@
 import { prisma } from "../db/prisma";
 
+function cleanAndParseAIJson(text: string): any {
+  let cleaned = text.trim();
+  
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
+  }
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (err) {
+    console.warn("Standard JSON.parse failed, attempting regex extraction...", err);
+    
+    const subjectMatch = cleaned.match(/"subject"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    const bodyMatch = cleaned.match(/"body"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+
+    if (subjectMatch || bodyMatch) {
+      const unescape = (str: string) => {
+        return str
+          .replace(/\\"/g, '"')
+          .replace(/\\n/g, '\n')
+          .replace(/\\r/g, '\r')
+          .replace(/\\t/g, '\t')
+          .replace(/\\\\/g, '\\');
+      };
+      
+      return {
+        subject: subjectMatch ? unescape(subjectMatch[1]) : undefined,
+        body: bodyMatch ? unescape(bodyMatch[1]) : undefined
+      };
+    }
+    
+    throw err;
+  }
+}
+
 interface GenerateEmailArgs {
   name: string;
   company?: string | null;
@@ -238,7 +273,7 @@ export async function generatePitchEmail({
   });
 
   try {
-    const parsed = JSON.parse(textContent.trim());
+    const parsed = cleanAndParseAIJson(textContent);
     const target = parsed.output || parsed;
     return {
       subject: target.subject || parsed.subject || "Growth partnership opportunity with Domain Expansion",
@@ -247,9 +282,13 @@ export async function generatePitchEmail({
   } catch (err) {
     console.error("JSON parsing of pitch generation failed. Output text:", textContent);
     // Fallback parsing
+    let cleanBody = textContent.trim();
+    if (cleanBody.startsWith("```")) {
+      cleanBody = cleanBody.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
+    }
     return {
       subject: "Partnership opportunity with Domain Expansion",
-      body: textContent
+      body: cleanBody
     };
   }
 }
