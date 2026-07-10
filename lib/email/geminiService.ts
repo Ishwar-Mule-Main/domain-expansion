@@ -97,7 +97,11 @@ async function fetchOpenRouter(prompt: string, apiKey: string, model: string, us
   if (data.error) {
     throw new Error(`OpenRouter API error: ${data.error.message || JSON.stringify(data.error)}`);
   }
-  const textContent = data.choices?.[0]?.message?.content;
+  const choice = data.choices?.[0]?.message;
+  let textContent = choice?.content;
+  if (!textContent) {
+    textContent = choice?.reasoning || choice?.reasoning_content || (choice?.reasoning_details && Array.isArray(choice.reasoning_details) && choice.reasoning_details[0]?.text);
+  }
   if (!textContent) {
     throw new Error(`Failed to retrieve text content from OpenRouter response. Response: ${JSON.stringify(data)}`);
   }
@@ -235,9 +239,10 @@ export async function generatePitchEmail({
 
   try {
     const parsed = JSON.parse(textContent.trim());
+    const target = parsed.output || parsed;
     return {
-      subject: parsed.subject || "Growth partnership opportunity with Domain Expansion",
-      body: parsed.body || `Hi ${name}, <br><br>I hope this email finds you well. I'm reaching out from Domain Expansion...`,
+      subject: target.subject || parsed.subject || "Growth partnership opportunity with Domain Expansion",
+      body: target.body || parsed.body || `Hi ${name}, <br><br>I hope this email finds you well. I'm reaching out from Domain Expansion...`,
     };
   } catch (err) {
     console.error("JSON parsing of pitch generation failed. Output text:", textContent);
