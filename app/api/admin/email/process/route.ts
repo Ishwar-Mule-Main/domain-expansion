@@ -20,10 +20,13 @@ async function handleProcess(request: Request) {
     const token = searchParams.get("token");
     const force = searchParams.get("force") === "true"; // Bypass master toggle & timing restrictions for manual clicks
 
-    // 1. Authorization: NextAuth session OR query token matching NEXTAUTH_SECRET
+    // 1. Authorization: NextAuth session OR query token OR Vercel Cron auth header
     const session = await auth();
-    const isCronAuthorized = token && token === process.env.NEXTAUTH_SECRET;
-
+    const authHeader = request.headers.get("Authorization");
+    const isVercelCron = authHeader && process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`;
+    const isTokenCron = token && token === process.env.NEXTAUTH_SECRET;
+    const isCronAuthorized = isVercelCron || isTokenCron;
+ 
     if (!session && !isCronAuthorized) {
       return NextResponse.json({ success: false, message: "Unauthorized trigger" }, { status: 401 });
     }
@@ -37,6 +40,32 @@ async function handleProcess(request: Request) {
     // 3. Check master switch
     if (!settings.isActive && !force) {
       return NextResponse.json({ success: false, message: "Email automation is currently inactive." });
+    }
+ 
+    // 3.5 Enforce Business Hours & Business Days (Monday - Friday, 10 AM - 6 PM IST)
+    if (!force) {
+      const tzString = "Asia/Kolkata";
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: tzString,
+        hour12: false,
+        weekday: "long",
+        hour: "numeric",
+      });
+      const parts = formatter.formatToParts(new Date());
+      const partMap = Object.fromEntries(parts.map(p => [p.type, p.value]));
+      
+      const weekday = partMap.weekday; // "Monday", "Tuesday", etc.
+      const hour = parseInt(partMap.hour, 10); // 0-23
+      
+      const isBusinessDay = !["Saturday", "Sunday"].includes(weekday);
+      const isBusinessHour = hour >= 10 && hour < 18; // 10:00 AM to 5:59 PM (6:00 PM cutoff)
+      
+      if (!isBusinessDay || !isBusinessHour) {
+        return NextResponse.json({
+          success: false,
+          message: `Process halted. Out of business hours (Monday-Friday, 10:00 AM - 6:00 PM IST). Current local time: ${weekday}, ${hour}:00.`,
+        });
+      }
     }
 
     // 4. Verify SMTP & AI credentials
