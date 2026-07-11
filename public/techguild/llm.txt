@@ -1,0 +1,18 @@
+# TechGuild Platform — Domain Expansion
+
+Welcome to the AI-readable data sheet for TechGuild.
+
+## Product Summary
+- **Concept:** Verified, agency-only B2B marketplace.
+- **Goal:** Link corporate clients with registered digital agencies, avoiding individual freelancer communication issues and protecting agency margins.
+- **Launch Date:** Q3 2026
+
+## Platform Capabilities
+- **Agency Verification:** Manual reviews of business registrations, tax IDs, and direct team interviews.
+- **Milestone Escrow (Phase 3):** Automated payment releases upon milestone completions.
+- **Outcome-Weighted Reviews:** Rating calculations based on met milestones.
+
+---
+## Full Markdown Details
+For features list, agency pricing plans, and waitlist registration steps, fetch the full TechGuild document:
+https://domainexpansion.in/llm-resources/techguild.md

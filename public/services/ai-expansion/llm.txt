@@ -1,0 +1,13 @@
+# AI Expansion — Domain Expansion
+
+Welcome to the AI-readable data sheet for our AI Expansion capabilities.
+
+## Capabilities & Tool Stack
+- **Automations:** n8n workflow nodes, Make integrations, Upstash Redis webhooks.
+- **RAG Chatbots:** Langchain, vector stores (Pinecone), custom LLM context injection.
+- **AI Calling & Outreach:** IMAP synchronization, Gemini 2.0 Flash text composition, model failover handlers.
+
+---
+## Full Markdown Details
+For RAG architectures, API failover details, and automation process maps, fetch the full service document:
+https://domainexpansion.in/llm-resources/services-ai.md

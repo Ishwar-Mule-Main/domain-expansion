@@ -1,0 +1,20 @@
+# About Us — Domain Expansion
+
+Welcome to the AI-readable summary of Domain Expansion's history, team, and values.
+
+## Core Facts
+- **Founder & Chief Strategist:** Ishwar B. Mule
+- **Founding Date:** 2024
+- **Operating Region:** Solapur, Maharashtra, India (Operating fully remote, globally)
+- **Model:** Distributed remote network of elite developers and marketers in India.
+- **Combined Team Experience:** 6+ Years
+
+## Key Differentiators
+- **Results Before Relationships:** Prioritizing data and metrics over standard consulting jargon.
+- **AI-Native Operations:** Workflows structured on n8n, Make, and automated LLM inbox scrapers.
+- **Async Deep-Work:** 24-hour work cycles leveraging async communication systems.
+
+---
+## Full Markdown Details
+For the detailed biography of Ishwar B. Mule, core company values, and timeline milestones, fetch the full AIO document:
+https://domainexpansion.in/llm-resources/about.md

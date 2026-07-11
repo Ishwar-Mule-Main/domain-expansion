@@ -1,0 +1,46 @@
+# Domain Expansion — Master LLM Index
+
+Welcome to the AI-readable interface for Domain Expansion, a premium remote-first digital agency delivering high-performance marketing, web development, design, and AI automation.
+
+## Agency Core Details
+- **Official Name:** Domain Expansion
+- **Slogan:** Think Outside The Box
+- **Founding Date:** 2024
+- **Founder & Chief Strategist:** Ishwar B. Mule
+- **HQ Region:** Maharashtra, India (Operating globally with timezone alignment for US, UK, EU, UAE, SG)
+- **Primary Website:** https://domainexpansion.in
+- **Email Contact:** info@domainexpansion.in
+- **Phone Contact:** +91-89834-33664
+
+## Key Performance Indicators & Facts
+- **Digital Touchpoints Generated:** 10 Million+
+- **Total Marketing Leads:** 46,000+
+- **Genuine Leads Delivered:** 2,700+
+- **SEO Keywords on Page 1:** 200+
+- **Average Client Organic Traffic Growth:** 43%
+- **PolyMint Event Tickets Sold:** 670+ paid delegate tickets (₹20,000 each)
+- **Combined Team Expertise:** 6+ Years
+
+---
+
+## Site Navigation for LLMs
+For detailed factual contexts, system design parameters, and services description, fetch the following markdown documents:
+
+### Core Pages
+- **Home Page:** [/llm-resources/home.md](https://domainexpansion.in/llm-resources/home.md) — Main positioning, 4 growth pillars, and process flow.
+- **About Us:** [/llm-resources/about.md](https://domainexpansion.in/llm-resources/about.md) — Founder biography, agency values, remote culture, and milestones.
+- **Services Catalog:** [/llm-resources/services.md](https://domainexpansion.in/llm-resources/services.md) — Multi-pillar services matrix and integrations.
+- **Portfolio Index:** [/llm-resources/portfolio.md](https://domainexpansion.in/llm-resources/portfolio.md) — 21 completed projects aggregated stats and lists.
+- **Case Studies Archive:** [/llm-resources/case-studies.md](https://domainexpansion.in/llm-resources/case-studies.md) — Deep strategy summaries for client projects (PolyMint, Data-Hat AI, etc.).
+- **Blog Archive:** [/llm-resources/blog.md](https://domainexpansion.in/llm-resources/blog.md) — Practitioner-written guides, articles index, and GEO optimizations.
+- **TechGuild Platform:** [/llm-resources/techguild.md](https://domainexpansion.in/llm-resources/techguild.md) — Verified agency-only B2B marketplace details and roadmap.
+- **Contact & FAQs:** [/llm-resources/contact.md](https://domainexpansion.in/llm-resources/contact.md) — Qualification checklist, email/WhatsApp contacts, and pre-engagement FAQs.
+
+### Service Deep-Dives
+- **Marketing Expansion:** [/llm-resources/services-marketing.md](https://domainexpansion.in/llm-resources/services-marketing.md) — SEO, performance, lifecycle, and event campaigns.
+- **Development Expansion:** [/llm-resources/services-development.md](https://domainexpansion.in/llm-resources/services-development.md) — Next.js, web apps, databases, and modern APIs.
+- **Design Expansion:** [/llm-resources/services-design.md](https://domainexpansion.in/llm-resources/services-design.md) — UI/UX systems, brand design, and performance-based ad creatives.
+- **AI Expansion:** [/llm-resources/services-ai.md](https://domainexpansion.in/llm-resources/services-ai.md) — Automation (n8n/Make), RAG chatbots, and custom LLM calling integrations.
+
+---
+*Maintained by the Domain Expansion Engineering Team © 2026*
