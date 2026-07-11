@@ -7,8 +7,79 @@ import path from "path";
 export const dynamic = "force-dynamic";
 
 /**
+ * Call Gemini Imagen 3 to generate an image
+ */
+async function generateImageWithGemini(prompt: string, apiKey: string): Promise<Buffer | null> {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        instances: [{ prompt }],
+        parameters: {
+          sampleCount: 1,
+          outputMimeType: "image/png",
+          aspectRatio: "16:9",
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.warn(`[Gemini Imagen API] Error (${response.status}):`, errorText);
+      return null;
+    }
+
+    const data = await response.json();
+    const b64 = data.predictions?.[0]?.bytesBase64Encoded;
+    if (!b64) {
+      console.warn("[Gemini Imagen API] No image data returned in predictions");
+      return null;
+    }
+
+    return Buffer.from(b64, "base64");
+  } catch (err) {
+    console.error("[Gemini Imagen API] call failed:", err);
+    return null;
+  }
+}
+
+/**
+ * Resilient image processing: saves buffer to local directory, or falls back to Base64 in read-only filesystems.
+ */
+async function saveImageResilient(buffer: Buffer, slug: string): Promise<string> {
+  try {
+    const dirPath = path.join(process.cwd(), "public", "blog");
+    await fs.mkdir(dirPath, { recursive: true });
+    const filePath = path.join(dirPath, `${slug}.png`);
+    await fs.writeFile(filePath, buffer);
+    console.log(`[Regenerate Image API] Cover image saved locally to: ${filePath}`);
+    return `/blog/${slug}.png`;
+  } catch (err) {
+    console.warn("[Regenerate Image API] Read-only file system (Vercel). Storing image as Base64 data URL directly in DB.");
+    return `data:image/png;base64,${buffer.toString("base64")}`;
+  }
+}
+
+/**
+ * Fallback to Pollinations AI and download/process
+ */
+async function downloadAndProcessFallback(imageUrl: string, slug: string): Promise<string> {
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    const arrayBuffer = await response.arrayBuffer();
+    return await saveImageResilient(Buffer.from(arrayBuffer), slug);
+  } catch (err) {
+    console.error(`[Regenerate Image API] Pollinations fallback download failed, returning URL:`, err);
+    return imageUrl;
+  }
+}
+
+/**
  * POST /api/admin/blog/regenerate-image
- * Re-creates the featured cover image for a blog post and stores it in the local blog image folder
+ * Re-creates the featured cover image for a blog post using Gemini Imagen 3 (with Pollinations AI fallback)
  */
 export async function POST(request: Request) {
   try {
@@ -31,32 +102,29 @@ export async function POST(request: Request) {
 
     // Generate a beautiful, category-specific image prompt based on the title
     const categoryKeyword = post.categoryLabel || post.category;
-    const basePrompt = `A premium, sleek dark-themed technology banner image for a professional tech article titled "${post.title}". Category: ${categoryKeyword}. Minimalist, vector graphics style, vibrant accents of orange and purple, no text, no labels, ultra-high definition, 16:9 aspect ratio.`;
-    const cleanPrompt = encodeURIComponent(basePrompt.trim().substring(0, 200));
-    const randomSeed = Math.floor(Math.random() * 100000);
-    const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=1024&height=576&nologo=true&seed=${randomSeed}`;
+    const basePrompt = `A premium, sleek dark-themed technology banner image for a professional tech article titled "${post.title}". Category: ${categoryKeyword}. Minimalist, vector graphics style, vibrant accents of orange and purple, no text, no labels, ultra-high definition, 16:9 aspect ratio. Make sure the visual is clean, premium, and free of messy AI text artifacts. If text is needed, it must be spelled correctly. Otherwise, a purely visual tech illustration without text is preferred.`;
 
-    let featuredImage = imageUrl;
-    try {
-      // Try to save image locally
-      const response = await fetch(imageUrl);
-      if (!response.ok) {
-        throw new Error(`HTTP error fetching image from Pollinations AI: ${response.status}`);
+    const settings = await prisma.emailSettings.findFirst();
+    const geminiApiKey = settings?.geminiApiKey;
+
+    let featuredImage = "";
+
+    // 1. Try Gemini Imagen 3
+    if (geminiApiKey) {
+      console.log(`[Regenerate Image API] Attempting to generate image using Gemini Imagen 3 API...`);
+      const buffer = await generateImageWithGemini(basePrompt, geminiApiKey);
+      if (buffer) {
+        featuredImage = await saveImageResilient(buffer, post.slug);
       }
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+    }
 
-      const dirPath = path.join(process.cwd(), "public", "blog");
-      await fs.mkdir(dirPath, { recursive: true });
-
-      const filePath = path.join(dirPath, `${post.slug}.png`);
-      await fs.writeFile(filePath, buffer);
-
-      featuredImage = `/blog/${post.slug}.png`;
-      console.log(`[Regenerate Image API] Image saved locally to: ${filePath}`);
-    } catch (writeErr: any) {
-      console.warn("[Regenerate Image API] Failed to save locally (read-only system/serverless?), falling back to remote CDN URL:", writeErr.message || String(writeErr));
-      featuredImage = imageUrl;
+    // 2. Fallback to Pollinations AI
+    if (!featuredImage) {
+      console.log(`[Regenerate Image API] Gemini Imagen failed/skipped. Falling back to Pollinations AI...`);
+      const cleanPrompt = encodeURIComponent(basePrompt.trim().substring(0, 200));
+      const randomSeed = Math.floor(Math.random() * 100000);
+      const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=1024&height=576&nologo=true&seed=${randomSeed}`;
+      featuredImage = await downloadAndProcessFallback(imageUrl, post.slug);
     }
 
     // Update database

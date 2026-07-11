@@ -14,25 +14,72 @@ interface BlogGenerationResult {
 }
 
 /**
- * Download cover image from Pollinations AI and save to public assets folder
+ * Call Gemini Imagen 3 to generate an image
  */
-async function downloadAndSaveImage(imageUrl: string, slug: string): Promise<string> {
+async function generateImageWithGemini(prompt: string, apiKey: string): Promise<Buffer | null> {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        instances: [{ prompt }],
+        parameters: {
+          sampleCount: 1,
+          outputMimeType: "image/png",
+          aspectRatio: "16:9",
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.warn(`[Gemini Imagen API] Error (${response.status}):`, errorText);
+      return null;
+    }
+
+    const data = await response.json();
+    const b64 = data.predictions?.[0]?.bytesBase64Encoded;
+    if (!b64) {
+      console.warn("[Gemini Imagen API] No image data returned in predictions");
+      return null;
+    }
+
+    return Buffer.from(b64, "base64");
+  } catch (err) {
+    console.error("[Gemini Imagen API] call failed:", err);
+    return null;
+  }
+}
+
+/**
+ * Resilient image processing: saves buffer to local directory, or falls back to Base64 in read-only filesystems.
+ */
+async function saveImageResilient(buffer: Buffer, slug: string): Promise<string> {
+  try {
+    const dirPath = path.join(process.cwd(), "public", "blog");
+    await fs.mkdir(dirPath, { recursive: true });
+    const filePath = path.join(dirPath, `${slug}.png`);
+    await fs.writeFile(filePath, buffer);
+    console.log(`[Blog Agent] Cover image saved locally to: ${filePath}`);
+    return `/blog/${slug}.png`;
+  } catch (err) {
+    console.warn("[Blog Agent] Read-only file system (Vercel). Storing image as Base64 data URL directly in DB.");
+    return `data:image/png;base64,${buffer.toString("base64")}`;
+  }
+}
+
+/**
+ * Fallback to Pollinations AI and download/process
+ */
+async function downloadAndProcessFallback(imageUrl: string, slug: string): Promise<string> {
   try {
     const response = await fetch(imageUrl);
     if (!response.ok) throw new Error(`HTTP error ${response.status}`);
     const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const dirPath = path.join(process.cwd(), "public", "blog");
-    await fs.mkdir(dirPath, { recursive: true });
-
-    const filePath = path.join(dirPath, `${slug}.png`);
-    await fs.writeFile(filePath, buffer);
-
-    console.log(`[Blog Agent] Cover image saved locally to: ${filePath}`);
-    return `/blog/${slug}.png`;
+    return await saveImageResilient(Buffer.from(arrayBuffer), slug);
   } catch (err) {
-    console.error(`[Blog Agent] Failed to save image locally, falling back to remote URL:`, err);
+    console.error(`[Blog Agent] Pollinations fallback download failed, returning URL:`, err);
     return imageUrl;
   }
 }
@@ -181,7 +228,8 @@ export async function generatePillarBlog(pillar: string, settings: any) {
        - Use headings (<h2> and <h3>), formatted bullet lists, bold text, code blocks (<pre><code>), tables with real data parameters, and an alert box (<div class="alert alert-important">) for essential guidance.
     5. ReadTime: Estimated read time (e.g. "15 min read").
     6. SchemaMarkup: Stringified JSON-LD schema object mapping author (Ishwar Mule), publisher (Domain Expansion), and dynamic TechArticle/FAQ details.
-    7. ImagePrompt: A highly descriptive prompt for Pollinations AI to generate a horizontal, beautiful tech-oriented, sleek dark-themed visual matching the article.
+    7. ImagePrompt: A highly descriptive prompt for Google's Imagen 3 model to generate a horizontal, beautiful tech-oriented, sleek dark-themed visual matching the article. 
+       - DESIGN RULES: Make sure the visual is clean, premium, and free of messy AI text artifacts. If text labeling is requested, specify correct, proper, and exact lettering. Otherwise, a purely visual, symbolic digital art illustration without any text is preferred.
 
     Return your output strictly as a JSON object containing:
     {
@@ -216,13 +264,26 @@ export async function generatePillarBlog(pillar: string, settings: any) {
       throw new Error(`Failed to parse AI output as JSON: ${resultText.substring(0, 100)}...`);
     }
 
-    // Generate Pollinations AI image link using the generated imagePrompt
-    const cleanPrompt = encodeURIComponent(parsed.imagePrompt.trim().substring(0, 150));
-    const randomSeed = Math.floor(Math.random() * 100000);
-    const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=1024&height=576&nologo=true&seed=${randomSeed}`;
+    let featuredImage = "";
+    const geminiApiKey = settings.geminiApiKey;
 
-    // Download and save generated cover image locally
-    const featuredImage = await downloadAndSaveImage(imageUrl, parsed.slug);
+    // Use Gemini Imagen 3 if API Key is available
+    if (geminiApiKey) {
+      console.log(`[Blog Agent] Attempting to generate cover image using Gemini Imagen 3 API...`);
+      const buffer = await generateImageWithGemini(parsed.imagePrompt, geminiApiKey);
+      if (buffer) {
+        featuredImage = await saveImageResilient(buffer, parsed.slug);
+      }
+    }
+
+    // Fallback to Pollinations AI if Gemini image generation failed or was skipped
+    if (!featuredImage) {
+      console.log(`[Blog Agent] Gemini Imagen failed or was skipped. Falling back to Pollinations AI...`);
+      const cleanPrompt = encodeURIComponent(parsed.imagePrompt.trim().substring(0, 150));
+      const randomSeed = Math.floor(Math.random() * 100000);
+      const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=1024&height=576&nologo=true&seed=${randomSeed}`;
+      featuredImage = await downloadAndProcessFallback(imageUrl, parsed.slug);
+    }
 
     const formattedDate = new Date().toLocaleDateString("en-US", {
       month: "long",
