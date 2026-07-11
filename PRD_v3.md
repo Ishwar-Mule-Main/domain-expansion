@@ -721,6 +721,9 @@ Table of newsletter subscribers with email, signup date, and subscription status
 **9.7 AI Outreach Suite & Email Campaign Automation**
 Dashboard screen at `/admin/email-campaigns` to manage prospect cold-pitching queues. Includes: (1) CSV uploader for lists matching name, email, company, industry, and website; (2) metric cards counting total, sent, delivery rates, and replies; (3) dynamic settings panel configuring SMTP (Gmail user/App password), Gemini API keys, daily send limits, interval cooling seconds, and custom prompting templates; (4) manual editor modal to preview and override AI-generated subjects and HTML email drafts; (5) live autopilot loop status monitor logging execution and cooldown steps in real-time; (6) IMAP sync client scanning inbox folders to record replies; (7) unsubscribe link injection standardizing automated list-unsubscribe. (Phase 10)
 
+**9.8 Autonomous Blog AI Agent & Sitemap Indexer Agent**
+Dashboard screen at `/admin/blog-agent` to monitor and manage automated blogging operations. Includes: (1) Daily News Research Agent that uses Gemini search grounding tools to fetch industry news and select the highest traffic-driving topic for each of the 4 service pillars (`marketing`, `development`, `design`, `ai`); (2) Content Generation Engine that synthesizes unique, human-friendly, EEAT-compliant, and SEO/GEO/AEO/AIO-optimized HTML article drafts and nested JSON-LD schema graphs; (3) AI Image Generator that integrates Pollinations AI to dynamically create dark-themed tech visual headers; (4) Sitemap dynamic indexing agent that records URLs to the database and registers them inside dynamically generated `/sitemap.xml`; (5) Scheduled Cron Automation running at 9:00 AM IST (3:30 AM UTC) daily, with manual overrides allowing instant single-click generations and histories log monitoring. (Phase 10)
+
 ---
 
 ## 10. Constraints, Assumptions & Out of Scope

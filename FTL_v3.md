@@ -86,6 +86,12 @@ One ticket per FSD B1 section: **2.1** shell + SEO/JSON-LD; **2.2** Hero; **2.3*
 ## PHASE 10 — TechGuild MVP (post-launch, ~54h)
 10.1 subdomain; 10.2 agency registration/profile; 10.3 email verification; 10.4 client registration/project posting; 10.5 agency browse/search; 10.6 proposal submission; 10.7 in-platform messaging; 10.8 admin agency approval; 10.9 review/rating; 10.10 logged-in dashboard; 10.11 notifications; 10.12 mobile QA.
 
+## PHASE 11 — AI Operations Suite & Dynamic Blogging (~20h)
+- **11.1** AI Outreach Suite (prospect management, SMTP email drafts creator, IMAP sync engine). *P1, 8h*
+- **11.2** Autonomous Daily Blog AI Agent (Gemini search grounding research, HTML article generator, Pollinations AI visual fetcher). *P1, 6h*
+- **11.3** Sitemap dynamic indexing agent (SitemapUrl dynamic registration DB sync). *P1, 3h*
+- **11.4** Admin UI & Vercel Cron Scheduling (cron trigger endpoints, log monitoring table, layout route integration). *P1, 3h*
+
 ---
 
 ## Effort Summary
@@ -103,6 +109,7 @@ One ticket per FSD B1 section: **2.1** shell + SEO/JSON-LD; **2.2** Hero; **2.3*
 | 9 Deploy | ~5h |
 | **Website total (0–9)** | **~190h (~6 weeks solo)** |
 | 10 TechGuild MVP | ~54h (~8 weeks) |
+| 11 AI Operations Suite | ~20h (~1 week) |
 
 ---
 

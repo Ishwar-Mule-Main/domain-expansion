@@ -53,7 +53,7 @@ Unauthenticated → redirect /admin/login → POST /api/auth/signin → valid: c
 Min 12 chars, mixed complexity, bcrypt cost-12, time-limited reset (1h), no reuse of last 5, TOTP MFA in Phase 2.
 
 ### 3.5 Route Protection
-Middleware protects `/admin`, `/admin/:path*`, `/studio/:path*`; `/api/admin/*` and `GET /api/leads` require admin session; `POST /api/leads` and `POST /api/techguild-waitlist` public but rate-limited. Admin automation endpoints `/api/admin/email/*` require valid admin session token authorization, except when trigger tokens are supplied via authorized query parameters matching the server `NEXTAUTH_SECRET` (allowing external cron scheduler integrations).
+Middleware protects `/admin`, `/admin/:path*`, `/studio/:path*`; `/api/admin/*` and `GET /api/leads` require admin session; `POST /api/leads` and `POST /api/techguild-waitlist` public but rate-limited. Admin automation endpoints `/api/admin/email/*` and `/api/admin/blog/*` require valid admin session token authorization, except when trigger tokens are supplied via authorized header or query parameters matching the server `CRON_SECRET` or `NEXTAUTH_SECRET` (allowing external cron scheduler integrations).
 
 ---
 

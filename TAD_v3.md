@@ -91,6 +91,8 @@ TechGuild (Phase 2) additions: **Agency** (profile, services, locations, verific
 
 Email Automation additions (Phase 10): **Prospect** (email unique, name, company, industry, website, status enum PENDING/GENERATING/READY/SENDING/SENT/REPLIED/FAILED/UNSUBSCRIBED, customSubject, customBody, sentAt, repliedAt), **EmailLog** (prospectId FK cascade, action, details, createdAt), **EmailSettings** (gmailUser, gmailAppPassword, geminiApiKey, pitchPrompt, replyPrompt, dailyLimit, intervalSeconds, isActive).
 
+AI Blogging & Sitemap additions (Phase 10): **BlogPost** (slug unique, title, excerpt, category, categoryLabel, date, readTime, author, authorRole, authorImage, coverGradient, featuredImage, bodyHTML, popular, schemaMarkup), **SitemapUrl** (url unique, lastModified, changeFrequency, priority), **BlogAgentLog** (piller, status, topicSelected, errorMessage).
+
 ---
 
 ## 5. API Design
@@ -116,6 +118,13 @@ Email Automation endpoints:
 - `GET/POST /api/admin/email/process`: Automated generator and sender worker triggered by scheduler cron (authorized via matching token context) or manual admin clicks.
 - `GET/POST /api/admin/email/sync-replies`: Connects to Gmail via IMAP, fetches headers, matches address to DB, and logs conversation conversions.
 - `GET /api/admin/email/logs`: Paginated endpoint to fetch all success/failure Master Brain AI generation logs.
+
+AI Blogging & Sitemap endpoints:
+- `GET /api/admin/blog/generate-daily`: Autonomous trigger endpoint run by Vercel scheduler crons to generate daily articles.
+- `POST /api/admin/blog/run-agent`: Manual trigger endpoint enabling administrators to execute an AI generation run for a specific service pillar.
+- `GET /api/admin/blog/history`: Returns logs list of agent runs and dynamically generated articles.
+- `POST /api/admin/sitemap/register`: Sitemap Agent registration endpoint indexing dynamic website URLs.
+- `GET /api/blog`: Returns list of dynamized database blog posts.
 
 
 ### 5.3 Hardening

@@ -546,6 +546,18 @@ A premium dashboard interface designed for email marketing automation and queue 
 4. **Draft Editor Modal:** Pop-up window letting admins inspect, override, and manually save subject/HTML body versions of generated emails before they are dispatched.
 5. **List-Unsubscribe page (`/api/unsubscribe`):** Confirmation landing page styled with Domain Expansion brand colors, glowing radial dot overlay, unsubscribe confirmation, and back-to-home navigation button.
 
+## B16. AI Blog Agent & Sitemap Indexer (`/admin/blog-agent`)
+
+A premium dashboard interface designed to manage autonomous news research, content generation, dynamic sitemap indexing, and logs monitoring.
+
+**Layout & Components:**
+1. **Interactive Control Bar:** Action trigger buttons for each of the 4 service pillars (`marketing`, `development`, `design`, `ai`), manual page refresh button, and a daily Vercel Cron status indicator.
+2. **KPI Stats overview:** Pillars status tracker displaying live counts of dynamically generated publications per pillar, and status indicators of the last agent runs.
+3. **Pillars Panel:** Grid cards detailing each pillar's scope and providing single-click action buttons to trigger manual AI research and generation loops instantly.
+4. **Agent Run Logs (Left Column):** Vertical feed listing chronological logs of all executions (successes and failures), displaying parsed topic headlines, timestamps, or full stack error logs in case of failure.
+5. **Dynamic Publications Index (Right Column):** Paginated search results list showcasing all dynamic posts created by the agent, showing categories, read times, excerpt snippets, dynamic URLs, and direct links to view the live blog page.
+6. **Dynamic Sitemap Sync:** Dynamic index status showing dynamic URLs registered in the database and automatically synchronized inside `/sitemap.xml`.
+
 ---
 
 ## PART D — IMPLEMENTATION NOTES
