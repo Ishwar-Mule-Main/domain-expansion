@@ -116,6 +116,19 @@ NEXTAUTH_SECRET="3bc3b6c2f37c357f897df890b0e5138e6dfd15024479bd72b153b6fa0f214cb
 - Registered `/admin/email-campaigns` directly in the navigation sidebar at `app/admin/layout.tsx`.
 - Integrated Settings panels for OpenRouter keys, fallback toggle configurations, and a paginated Master Brain Logs grid in the admin front-end dashboard.
 
+## Phase 11 — Analytics, Search Engines, LLMs Static Directory & Resilient Blog AI Agent (2026-07-11)
+- **Vercel Analytics & Speed Insights:** Installed `@vercel/analytics` and `@vercel/speed-insights` and integrated them into `app/layout.tsx`.
+- **Search Console Setup & Google Analytics Fallback:** Added Google Search Console verification meta tag in root layout and verified fallback tracking ID in `lib/analytics.ts`.
+- **LLM Discovery Directory & robots.txt:** Created root `public/llms.txt` linking 12 custom profile markdown documents in `/public/llm-resources/` to assist web agents and search engines. Configured `app/robots.ts` to whitelist AI crawlers and explicitly block test bots, and scaled cron schedules in `vercel.json` to once-per-day for Hobby compatibility.
+- **Resilient Daily Blog AI Agent:**
+  - Integrated Google's Gemini Imagen 3 (`imagen-3.0-generate-002:predict`) as the primary cover image generator with a fallback to Pollinations AI.
+  - Made filesystem writes serverless-friendly: if saving locally to `/public/blog/` fails (such as on Vercel's read-only file system), the generator catches the write error and saves the image as a Base64 data URL directly in the database (`featuredImage`).
+  - Strict Word Count & Keywords: Updated the generation prompt to write comprehensive E-E-A-T articles exceeding 3,000 words (min 2,500 words) containing a detailed "SEO Research & Keyword Matrix" (Primary, LSI, and Cluster Keywords).
+- **Admin Dashboard & Pilot Engine Controls:**
+  - Autopilot switch: Created Settings API `/api/admin/blog/settings` and hooked it up to a new toggle button on the admin dashboard. Daily cron skips generation if autopilot is disabled.
+  - Pilot Engine Logs: Renamed the tab to "Pilot Engine Logs" and added a real-time active status card flashing when the engine is actively generating content.
+  - Image Regeneration: Created `/api/admin/blog/regenerate-image` API route and added a manual "Re-create Cover Image" action button next to each post in the dashboard table.
+
 ---
 
 ## Commands Reference
