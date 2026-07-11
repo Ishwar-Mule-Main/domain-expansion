@@ -11,6 +11,8 @@ import Preloader from "@/components/ui/Preloader";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { ScrollProgress } from "@/components/ui/ScrollProgress";
 import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const bricolageGrotesque = Bricolage_Grotesque({
   variable: "--font-display",
@@ -52,6 +54,8 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col bg-[#0D0D0D] text-[#F3F4F6]">
         <Preloader />
         <GoogleAnalytics />
+        <Analytics />
+        <SpeedInsights />
         <SmoothScroll>
           <ScrollProgress />
           <Cursor />
