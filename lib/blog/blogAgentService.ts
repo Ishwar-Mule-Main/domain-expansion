@@ -1,5 +1,7 @@
 import { prisma } from "../db/prisma";
 import { registerSitemapUrl } from "../sitemap/sitemapAgent";
+import fs from "fs/promises";
+import path from "path";
 
 interface BlogGenerationResult {
   title: string;
@@ -9,6 +11,30 @@ interface BlogGenerationResult {
   readTime: string;
   schemaMarkup: string;
   imagePrompt: string;
+}
+
+/**
+ * Download cover image from Pollinations AI and save to public assets folder
+ */
+async function downloadAndSaveImage(imageUrl: string, slug: string): Promise<string> {
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const dirPath = path.join(process.cwd(), "public", "blog");
+    await fs.mkdir(dirPath, { recursive: true });
+
+    const filePath = path.join(dirPath, `${slug}.png`);
+    await fs.writeFile(filePath, buffer);
+
+    console.log(`[Blog Agent] Cover image saved locally to: ${filePath}`);
+    return `/blog/${slug}.png`;
+  } catch (err) {
+    console.error(`[Blog Agent] Failed to save image locally, falling back to remote URL:`, err);
+    return imageUrl;
+  }
 }
 
 /**
@@ -147,8 +173,13 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     4. BodyHTML: Complete, long-form post body in HTML format.
        - STRICT TONE RULE: Avoid standard AI clichés (e.g. "in today's fast-paced digital world", "delve", "testament", "pave the way", "demystify", "vital", "crucial", "beacon").
        - MUST read like a highly opinionated, seasoned human practitioner wrote it based on first-hand experiences (EEAT Framework).
+       - LENGTH RULE: The article must be extremely detailed, exhaustive, and comprehensive, reaching at least 3,000 words (minimum 2,500 words). Expand on all points, providing full step-by-step implementations, real code files/scripts, and database setup instructions where appropriate. Do not use placeholders or summaries.
+       - RESEARCH & KEYWORDS: You must include a section in the body named "SEO Research & Keyword Matrix" (as an <aside> or standard section) detailing:
+         * The Primary Target Keyword chosen for the article.
+         * Related LSI keywords woven throughout.
+         * Topical cluster keywords (showing parent topic and sub-topics) to guide LLM search agents indexing.
        - Use headings (<h2> and <h3>), formatted bullet lists, bold text, code blocks (<pre><code>), tables with real data parameters, and an alert box (<div class="alert alert-important">) for essential guidance.
-    5. ReadTime: Estimated read time (e.g. "8 min read").
+    5. ReadTime: Estimated read time (e.g. "15 min read").
     6. SchemaMarkup: Stringified JSON-LD schema object mapping author (Ishwar Mule), publisher (Domain Expansion), and dynamic TechArticle/FAQ details.
     7. ImagePrompt: A highly descriptive prompt for Pollinations AI to generate a horizontal, beautiful tech-oriented, sleek dark-themed visual matching the article.
 
@@ -190,6 +221,9 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     const randomSeed = Math.floor(Math.random() * 100000);
     const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=1024&height=576&nologo=true&seed=${randomSeed}`;
 
+    // Download and save generated cover image locally
+    const featuredImage = await downloadAndSaveImage(imageUrl, parsed.slug);
+
     const formattedDate = new Date().toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
@@ -206,7 +240,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
         categoryLabel,
         date: formattedDate,
         readTime: parsed.readTime,
-        featuredImage: imageUrl,
+        featuredImage,
         bodyHTML: parsed.bodyHTML,
         schemaMarkup: parsed.schemaMarkup,
       },
@@ -218,7 +252,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
         categoryLabel,
         date: formattedDate,
         readTime: parsed.readTime,
-        featuredImage: imageUrl,
+        featuredImage,
         bodyHTML: parsed.bodyHTML,
         schemaMarkup: parsed.schemaMarkup,
       },

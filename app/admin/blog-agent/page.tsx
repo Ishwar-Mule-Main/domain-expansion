@@ -62,6 +62,10 @@ export default function BlogAgentDashboard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [runningPillar, setRunningPillar] = useState<string | null>(null);
   
+  // Autopilot settings state
+  const [blogAutopilot, setBlogAutopilot] = useState<boolean>(true);
+  const [togglingAutopilot, setTogglingAutopilot] = useState<boolean>(false);
+  
   // Search & Filter state
   const [blogSearchQuery, setBlogSearchQuery] = useState<string>("");
   const [blogCategoryFilter, setBlogCategoryFilter] = useState<string>("all");
@@ -88,12 +92,40 @@ export default function BlogAgentDashboard() {
         setLogs(data.logs || []);
         setSitemaps(data.sitemaps || []);
       }
+
+      // Fetch autopilot settings status
+      const settingsRes = await fetch("/api/admin/blog/settings");
+      const settingsData = await settingsRes.json();
+      if (settingsData.success) {
+        setBlogAutopilot(settingsData.blogAutopilot);
+      }
     } catch (err) {
-      console.error("Failed to load blog agent history:", err);
+      console.error("Failed to load blog agent history / settings:", err);
     } finally {
       setLoading(false);
     }
   }
+
+  const handleToggleAutopilot = async () => {
+    setTogglingAutopilot(true);
+    try {
+      const res = await fetch("/api/admin/blog/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blogAutopilot: !blogAutopilot }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setBlogAutopilot(data.blogAutopilot);
+      } else {
+        alert("Failed to toggle autopilot settings.");
+      }
+    } catch (err: any) {
+      alert(`Error toggling autopilot: ${err.message || String(err)}`);
+    } finally {
+      setTogglingAutopilot(false);
+    }
+  };
 
   useEffect(() => {
     loadHistory();
@@ -276,11 +308,29 @@ export default function BlogAgentDashboard() {
             )}
           </span>
         </div>
-        <div className="p-4 rounded-xl border border-[#2E2E2E] bg-[#141414]">
+        <div className="p-4 rounded-xl border border-[#2E2E2E] bg-[#141414] flex flex-col justify-between">
           <span className="text-[10px] font-mono text-[#ACACB8] uppercase tracking-wider block">Auto-Pilot Cron Scheduler</span>
-          <span className="text-sm font-bold text-[#22C55E] mt-2 flex items-center gap-1.5 uppercase tracking-wide">
-            <span className="h-2 w-2 rounded-full bg-[#22C55E] animate-pulse"></span> Active
-          </span>
+          <button 
+            disabled={togglingAutopilot}
+            onClick={handleToggleAutopilot}
+            className={`mt-2 py-1 px-3 rounded-lg border text-xs font-mono uppercase font-bold flex items-center gap-1.5 justify-center w-full transition-all cursor-none ${
+              blogAutopilot 
+                ? "bg-[#22C55E]/10 border-[#22C55E]/20 text-[#22C55E] hover:bg-[#22C55E]/20" 
+                : "bg-red-500/10 border-red-500/20 text-red-400 hover:bg-red-500/20"
+            }`}
+          >
+            {blogAutopilot ? (
+              <>
+                <span className="h-2 w-2 rounded-full bg-[#22C55E] animate-pulse"></span>
+                Active
+              </>
+            ) : (
+              <>
+                <span className="h-2 w-2 rounded-full bg-red-500"></span>
+                Inactive
+              </>
+            )}
+          </button>
         </div>
       </div>
 
@@ -324,7 +374,7 @@ export default function BlogAgentDashboard() {
               : "border-transparent text-[#ACACB8] hover:text-white"
           }`}
         >
-          <Clock className="h-4 w-4" /> Agent Run History ({logs.length})
+          <Clock className="h-4 w-4" /> Pilot Engine Logs ({logs.length})
         </button>
       </div>
 
@@ -627,7 +677,19 @@ export default function BlogAgentDashboard() {
               </div>
 
               <div className="flex flex-col gap-3 pr-1 max-h-[600px] overflow-y-auto">
-                {logs.length === 0 ? (
+                {runningPillar && (
+                  <div className="p-4 rounded-lg border border-[#FF6200]/30 bg-[#FF6200]/5 flex items-center gap-3 text-xs text-left animate-pulse">
+                    <RefreshCw className="h-4.5 w-4.5 animate-spin text-[#FF6200]" />
+                    <div>
+                      <span className="font-bold text-[#FF8C42] font-mono uppercase text-[9px] tracking-wider block">PILOT ENGINE ACTIVE RUN</span>
+                      <p className="text-[#ACACB8] text-[11px] mt-0.5 leading-relaxed">
+                        Currently researching the latest tech news, validating entities, performing search grounding, and drafting a comprehensive 3,000+ word article for the <strong>{runningPillar}</strong> expansion pillar...
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {logs.length === 0 && !runningPillar ? (
                   <div className="p-12 text-center border border-[#2E2E2E] border-dashed rounded-xl text-[#888898]">
                     <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p className="text-xs font-mono">No execution logs found.</p>

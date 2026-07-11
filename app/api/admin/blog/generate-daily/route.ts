@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runDailyBlogAgent } from "@/lib/blog/blogAgentService";
+import { prisma } from "@/lib/db/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,13 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Check if autopilot is active
+    const settings = await prisma.emailSettings.findFirst();
+    if (settings && !settings.blogAutopilot) {
+      console.log("[Cron Engine] Daily Blog Agent run skipped: Autopilot is turned off.");
+      return NextResponse.json({ success: true, message: "Blog Agent Autopilot is currently inactive." });
+    }
+
     console.log("[Cron Engine] Running Daily Blog Agent loops at 9:00 AM IST equivalent...");
     const results = await runDailyBlogAgent();
     return NextResponse.json({ success: true, results });

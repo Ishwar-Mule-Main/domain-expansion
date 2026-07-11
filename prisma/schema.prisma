@@ -146,6 +146,7 @@ model EmailSettings {
   dailyLimit         Int      @default(150)
   intervalSeconds    Int      @default(120)
   isActive           Boolean  @default(false)
+  blogAutopilot      Boolean  @default(true)
   updatedAt          DateTime @updatedAt
 }
 
