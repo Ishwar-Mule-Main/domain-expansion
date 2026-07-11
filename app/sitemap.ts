@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
 import { projects } from "@/lib/data/projects";
 import { blogPosts } from "@/lib/data/blog";
+import { prisma } from "@/lib/db/prisma";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://domainexpansion.in";
 
   // Base static pages
@@ -62,11 +63,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.6,
   }));
 
+  // Dynamic dynamic entries from DB
+  let dbPages: MetadataRoute.Sitemap = [];
+  try {
+    const urls = await prisma.sitemapUrl.findMany();
+    dbPages = urls.map((u) => ({
+      url: u.url,
+      lastModified: new Date(u.lastModified),
+      changeFrequency: u.changeFrequency as any,
+      priority: u.priority,
+    }));
+  } catch (err) {
+    console.error("[Sitemap System] Failed to fetch dynamic database sitemap URLs:", err);
+  }
+
   return [
     ...staticPages,
     ...servicePages,
     ...portfolioPages,
     ...caseStudyPages,
     ...blogPages,
+    ...dbPages,
   ];
 }
+

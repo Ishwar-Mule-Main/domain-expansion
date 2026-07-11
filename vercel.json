@@ -3,6 +3,10 @@
     {
       "path": "/api/admin/email/process",
       "schedule": "*/6 4-12 * * 1-5"
+    },
+    {
+      "path": "/api/admin/blog/generate-daily",
+      "schedule": "30 3 * * *"
     }
   ]
 }

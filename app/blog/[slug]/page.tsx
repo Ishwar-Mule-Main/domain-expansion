@@ -18,16 +18,60 @@ export async function generateStaticParams() {
   }));
 }
 
+import { prisma } from "@/lib/db/prisma";
+
 export default async function BlogPostDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+
+  // Fetch all db dynamic posts
+  let dbPosts: any[] = [];
+  try {
+    dbPosts = await prisma.blogPost.findMany();
+  } catch (err) {
+    console.error("[Blog Detail] Failed to query dynamic database posts:", err);
+  }
+
+  const combinedAll = [...dbPosts, ...blogPosts];
+
+  let post = blogPosts.find((p) => p.slug === slug);
+  let customSchema: any = null;
+
+  if (!post) {
+    const dbPost = dbPosts.find((p) => p.slug === slug);
+    if (dbPost) {
+      post = {
+        slug: dbPost.slug,
+        title: dbPost.title,
+        excerpt: dbPost.excerpt,
+        category: dbPost.category as any,
+        categoryLabel: dbPost.categoryLabel,
+        date: dbPost.date,
+        readTime: dbPost.readTime,
+        author: dbPost.author,
+        authorRole: dbPost.authorRole,
+        authorImage: dbPost.authorImage,
+        coverGradient: dbPost.coverGradient,
+        featuredImage: dbPost.featuredImage || undefined,
+        bodyHTML: dbPost.bodyHTML,
+        popular: dbPost.popular,
+      };
+
+      if (dbPost.schemaMarkup) {
+        try {
+          customSchema = JSON.parse(dbPost.schemaMarkup);
+        } catch (e) {
+          console.error("Failed to parse custom JSON-LD schema:", e);
+        }
+      }
+    }
+  }
 
   if (!post) {
     notFound();
   }
 
-  // Find 3 related blog posts
-  const relatedPosts = blogPosts
+  // Find 3 related blog posts from combinedAll
+  const relatedPosts = combinedAll
     .filter((p) => p.slug !== post.slug)
     .map((p) => {
       let score = 0;
@@ -132,6 +176,7 @@ export default async function BlogPostDetailPage({ params }: PageProps) {
     <main className="min-h-screen bg-white text-[#0D0D0D]">
       <JsonLd schema={breadcrumbSchema} />
       <JsonLd schema={articleSchema} />
+      {customSchema && <JsonLd schema={customSchema} />}
       {/* SECTION 1 — Article Hero */}
       <section className="relative pt-24 pb-16 border-b border-[#E5E5E5] bg-[#F8F8F8]">
         <div className="mx-auto max-w-4xl px-6 md:px-8 relative z-10 text-left">

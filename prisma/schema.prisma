@@ -163,3 +163,43 @@ model MasterBrainLog {
   createdAt     DateTime @default(now())
 }
 
+model BlogPost {
+  id             String   @id @default(uuid())
+  slug           String   @unique
+  title          String
+  excerpt        String   @db.Text
+  category       String   // "marketing" | "development" | "design" | "ai" | "news"
+  categoryLabel  String
+  date           String   // e.g. "June 18, 2026"
+  readTime       String
+  author         String   @default("Ishwar Mule")
+  authorRole     String   @default("Founder & CEO")
+  authorImage    String   @default("/Team Members/Ishwar Mule.png")
+  coverGradient  String   @default("from-[#FF6200]/30 to-[#6D28D9]/20")
+  featuredImage  String?  @db.Text
+  bodyHTML       String   @db.Text
+  popular        Boolean  @default(false)
+  schemaMarkup   String?  @db.Text  // Custom SEO/AEO/GEO/AIO JSON-LD schema
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SitemapUrl {
+  id              String   @id @default(uuid())
+  url             String   @unique
+  lastModified    DateTime @default(now())
+  changeFrequency String   @default("weekly")
+  priority        Float    @default(0.6)
+  createdAt       DateTime @default(now())
+}
+
+model BlogAgentLog {
+  id            String   @id @default(uuid())
+  piller        String   // "marketing" | "development" | "design" | "ai"
+  status        String   // "SUCCESS" | "FAILED"
+  topicSelected String?  @db.Text
+  errorMessage  String?  @db.Text
+  createdAt     DateTime @default(now())
+}
+
+

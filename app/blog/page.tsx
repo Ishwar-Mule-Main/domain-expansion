@@ -20,18 +20,42 @@ const categories = [
 export default function BlogArchivePage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [dbPosts, setDbPosts] = useState<BlogPost[]>([]);
   const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
   const [emailInput, setEmailInput] = useState<string>("");
   const [newsletterSubscribed, setNewsletterSubscribed] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const postsPerPage = 6;
 
+  // Fetch db-registered articles
+  useEffect(() => {
+    async function loadDbBlogs() {
+      try {
+        const res = await fetch("/api/blog");
+        const data = await res.json();
+        if (data.success && data.posts) {
+          setDbPosts(data.posts);
+        }
+      } catch (err) {
+        console.error("[Blogs Front] Failed to load dynamic database blogs:", err);
+      }
+    }
+    loadDbBlogs();
+  }, []);
+
+  const combinedAll = [...dbPosts, ...blogPosts].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+
   // The primary SEO case study is featured at the top
-  const featuredPost = blogPosts.find((p) => p.slug === "seo-geo-marketing-ai-blueprint") || blogPosts[0];
+  const featuredPost = combinedAll.find((p) => p.slug === "seo-geo-marketing-ai-blueprint") || combinedAll[0];
 
   useEffect(() => {
     // Filter by category and search query
-    let list = blogPosts;
+    let list = [...dbPosts, ...blogPosts];
+    
+    // Sort descending by publication date
+    list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     if (activeCategory !== "all") {
       list = list.filter((p) => p.category === activeCategory);
@@ -49,20 +73,20 @@ export default function BlogArchivePage() {
 
     setFilteredPosts(list);
     setCurrentPage(1); // reset to page 1 on filter
-  }, [activeCategory, searchQuery]);
+  }, [activeCategory, searchQuery, dbPosts]);
 
   // Compute category counts dynamically
   const categoryCounts = categories.reduce((acc, cat) => {
     if (cat.id === "all") {
-      acc[cat.id] = blogPosts.length;
+      acc[cat.id] = combinedAll.length;
     } else {
-      acc[cat.id] = blogPosts.filter((p) => p.category === cat.id).length;
+      acc[cat.id] = combinedAll.filter((p) => p.category === cat.id).length;
     }
     return acc;
   }, {} as Record<string, number>);
 
   // Popular posts filter (labeled as popular)
-  const popularPosts = blogPosts.filter((p) => p.popular);
+  const popularPosts = combinedAll.filter((p) => p.popular);
 
   // Pagination calculation
   const indexOfLastPost = currentPage * postsPerPage;

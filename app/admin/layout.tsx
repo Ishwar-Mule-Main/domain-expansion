@@ -2,7 +2,7 @@ import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { BarChart3, Database, FolderGit2, LogOut, Mail, Shield, Users } from "lucide-react";
+import { BarChart3, Database, FolderGit2, LogOut, Mail, Newspaper, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
 interface AdminLayoutProps {
@@ -83,6 +83,13 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
               className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-mono font-bold uppercase text-[#ACACB8] hover:text-white hover:bg-white/5 transition-all"
             >
               <Mail className="h-4 w-4 text-[#FF8C42]" /> Email Campaigns
+            </Link>
+
+            <Link
+              href="/admin/blog-agent"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-mono font-bold uppercase text-[#ACACB8] hover:text-white hover:bg-white/5 transition-all"
+            >
+              <Newspaper className="h-4 w-4 text-[#FF8C42]" /> Blog AI Agent
             </Link>
           </nav>
         </div>
