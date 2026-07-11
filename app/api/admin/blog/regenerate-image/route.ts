@@ -36,26 +36,33 @@ export async function POST(request: Request) {
     const randomSeed = Math.floor(Math.random() * 100000);
     const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=1024&height=576&nologo=true&seed=${randomSeed}`;
 
-    // Download image from Pollinations AI and write locally
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-      throw new Error(`HTTP error fetching image from Pollinations AI: ${response.status}`);
+    let featuredImage = imageUrl;
+    try {
+      // Try to save image locally
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP error fetching image from Pollinations AI: ${response.status}`);
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const dirPath = path.join(process.cwd(), "public", "blog");
+      await fs.mkdir(dirPath, { recursive: true });
+
+      const filePath = path.join(dirPath, `${post.slug}.png`);
+      await fs.writeFile(filePath, buffer);
+
+      featuredImage = `/blog/${post.slug}.png`;
+      console.log(`[Regenerate Image API] Image saved locally to: ${filePath}`);
+    } catch (writeErr: any) {
+      console.warn("[Regenerate Image API] Failed to save locally (read-only system/serverless?), falling back to remote CDN URL:", writeErr.message || String(writeErr));
+      featuredImage = imageUrl;
     }
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
-    const dirPath = path.join(process.cwd(), "public", "blog");
-    await fs.mkdir(dirPath, { recursive: true });
-
-    const filePath = path.join(dirPath, `${post.slug}.png`);
-    await fs.writeFile(filePath, buffer);
-
-    const localUrl = `/blog/${post.slug}.png`;
 
     // Update database
     const updatedPost = await prisma.blogPost.update({
       where: { id },
-      data: { featuredImage: localUrl },
+      data: { featuredImage },
     });
 
     return NextResponse.json({ success: true, post: updatedPost });
