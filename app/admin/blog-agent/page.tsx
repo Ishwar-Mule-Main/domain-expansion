@@ -18,7 +18,8 @@ import {
   Plus,
   Trash2,
   BookOpen,
-  Newspaper
+  Newspaper,
+  Image as ImageIcon
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
@@ -65,6 +66,7 @@ export default function BlogAgentDashboard() {
   // Autopilot settings state
   const [blogAutopilot, setBlogAutopilot] = useState<boolean>(true);
   const [togglingAutopilot, setTogglingAutopilot] = useState<boolean>(false);
+  const [regeneratingPostId, setRegeneratingPostId] = useState<string | null>(null);
   
   // Search & Filter state
   const [blogSearchQuery, setBlogSearchQuery] = useState<string>("");
@@ -150,6 +152,29 @@ export default function BlogAgentDashboard() {
       alert(`Error triggering agent: ${err.message || String(err)}`);
     } finally {
       setRunningPillar(null);
+    }
+  };
+
+  const regenerateImage = async (id: string) => {
+    if (!confirm("Are you sure you want to re-create the cover image for this blog post? It will download a new image and replace the current one.")) return;
+    setRegeneratingPostId(id);
+    try {
+      const res = await fetch("/api/admin/blog/regenerate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Image successfully re-created and saved to your blog folder!");
+        await loadHistory();
+      } else {
+        alert(`Failed to re-create image: ${data.error || "Unknown error"}`);
+      }
+    } catch (err: any) {
+      alert(`Error re-creating image: ${err.message || String(err)}`);
+    } finally {
+      setRegeneratingPostId(null);
     }
   };
 
@@ -532,6 +557,20 @@ export default function BlogAgentDashboard() {
                               >
                                 <ExternalLink className="h-3.5 w-3.5" />
                               </Link>
+                              <button
+                                disabled={regeneratingPostId === post.id}
+                                onClick={() => regenerateImage(post.id)}
+                                className={`p-1.5 rounded border border-[#2E2E2E] bg-black/20 text-yellow-500 hover:text-yellow-400 hover:border-yellow-500/50 hover:bg-yellow-950/10 transition-all ${
+                                  regeneratingPostId === post.id ? "animate-spin cursor-not-allowed" : "cursor-none"
+                                }`}
+                                title="Re-create Cover Image"
+                              >
+                                {regeneratingPostId === post.id ? (
+                                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <ImageIcon className="h-3.5 w-3.5" />
+                                )}
+                              </button>
                               <button
                                 onClick={() => deleteBlogPost(post.id)}
                                 className="p-1.5 rounded border border-[#2E2E2E] bg-black/20 text-red-400 hover:text-red-300 hover:border-red-500/50 hover:bg-red-950/20 transition-all"
