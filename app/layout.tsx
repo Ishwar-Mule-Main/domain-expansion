@@ -30,6 +30,9 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Digital Marketing & Web Development Agency in India | Domain Expansion",
   description: "Domain Expansion is a remote, results-driven digital agency delivering Marketing, Development, Design, and AI services. 10M+ touchpoints, 2,700+ leads generated.",
+  verification: {
+    google: "oXe1HQS0dxzvRU6wkQlQx1uJoV28v00gdFVNEZBcnkc",
+  },
 };
 
 export default async function RootLayout({
