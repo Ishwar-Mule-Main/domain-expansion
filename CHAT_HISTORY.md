@@ -124,10 +124,14 @@ NEXTAUTH_SECRET="3bc3b6c2f37c357f897df890b0e5138e6dfd15024479bd72b153b6fa0f214cb
   - Integrated Google's Gemini Imagen 3 (`imagen-3.0-generate-002:predict`) as the primary cover image generator with a fallback to Pollinations AI.
   - Made filesystem writes serverless-friendly: if saving locally to `/public/blog/` fails (such as on Vercel's read-only file system), the generator catches the write error and saves the image as a Base64 data URL directly in the database (`featuredImage`).
   - Strict Word Count & Keywords: Updated the generation prompt to write comprehensive E-E-A-T articles exceeding 3,000 words (min 2,500 words) containing a detailed "SEO Research & Keyword Matrix" (Primary, LSI, and Cluster Keywords).
+  - Business Growth & Service Scanning: Enforced strict research guidelines to perform a mandatory utility scan, ensuring all blog topics relate to our service pillars/sub-services and carry actionable business growth value for other companies.
+  - AI Recommendation Hooks: Mandated a Question-First Start format (Question header followed by direct answer paragraph) at the beginning of the body HTML, alongside 5-10 FAQ Q&As at the end, and structured nested FAQPage schemas in the JSON-LD to secure GPT/LLM search recommendations.
+  - Keyword Density: Configured exact guidelines for a natural ~2% Primary Keyword density and ~2-3% Cluster Keyword density.
 - **Admin Dashboard & Pilot Engine Controls:**
   - Autopilot switch: Created Settings API `/api/admin/blog/settings` and hooked it up to a new toggle button on the admin dashboard. Daily cron skips generation if autopilot is disabled.
   - Pilot Engine Logs: Renamed the tab to "Pilot Engine Logs" and added a real-time active status card flashing when the engine is actively generating content.
   - Image Regeneration: Created `/api/admin/blog/regenerate-image` API route and added a manual "Re-create Cover Image" action button next to each post in the dashboard table.
+- **Dynamic Sorting Order:** Updated `BlogPreview.tsx` on the homepage to fetch dynamic database posts and sort combined items by date descending (top 3 sliced), and set the blog archive featured card to automatically highlight the latest post.
 
 ---
 

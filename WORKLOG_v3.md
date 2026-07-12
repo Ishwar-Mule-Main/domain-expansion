@@ -151,10 +151,14 @@ Verify cron execution on the live Vercel environment and gather user feedback on
   - Integrated Gemini's `imagen-3.0-generate-002:predict` model as the primary image generator, falling back to Pollinations AI if needed.
   - Made image saving serverless-friendly: if saving locally to `/public/blog/` fails (due to read-only systems on Vercel), it automatically converts the buffer and saves the image as a Base64 data URL directly in the database (`featuredImage`).
   - Prompt Quality: Expanded generator prompt rules to request clean, premium, artifact-free visual symbolic illustrations.
+  - Value Scanning & Topic Selection: Added strict instructions to search and select topics directly related to service pillars and carrying actionable growth value for other companies.
+  - AIO/GEO Optimization: Mandated a Question-First Start layout at the top of the body HTML and a Q&A section with 5-10 FAQs at the end, coupled with nested FAQPage schema codes.
+  - Keyword density rules: Enforced target constraints of ~2% Primary target keywords and ~2-3% Cluster keywords.
 - **Interactive Autopilot controls & Pilot Logs:**
   - Autopilot Toggle: Implemented `/api/admin/blog/settings` API route and added an interactive toggle button to the admin dashboard. The daily cron runner skipped execution if autopilot is turned off.
   - Pilot Engine Logs: Renamed the tab to "Pilot Engine Logs" and added a real-time active status card flashing when the engine is actively generating content.
   - Image Regeneration: Created `/api/admin/blog/regenerate-image` API route and added a manual "Re-create Cover Image" action button next to each post in the dashboard table.
+- **Dynamic Sorting Order:** Updated the homepage `BlogPreview.tsx` component to fetch dynamic database posts, sorting and slicing the top 3 by date descending. Set the featured card on the blog archive to automatically highlight the latest post.
 
 ### 2026-07-11 — Session 10 (Phase 10 — AI Outreach Suite & Email Campaigns)
 - Created the AI Outreach Suite dashboard under `/admin/email-campaigns`.
