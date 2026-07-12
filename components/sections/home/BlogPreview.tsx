@@ -10,11 +10,7 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import * as ga from "@/lib/analytics";
-import { blogPosts } from "@/lib/data/blog";
-
-// Display the 3 most recent articles dynamically
-const articles = blogPosts.slice(0, 3);
-
+import { blogPosts, BlogPost } from "@/lib/data/blog";
 
 export function BlogPreview() {
   const [emailInput, setEmailInput] = useState("");
@@ -22,6 +18,7 @@ export function BlogPreview() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [articles, setArticles] = useState<BlogPost[]>([]);
 
   // Lead Form States
   const [name, setName] = useState("");
@@ -30,6 +27,31 @@ export function BlogPreview() {
   const [budget, setBudget] = useState("₹50,000 - ₹2,00,000");
   const [message, setMessage] = useState("");
   const [honeypot, setHoneypot] = useState(""); // Bot honeypot
+
+  // Fetch db-registered articles and sort with static posts
+  useEffect(() => {
+    async function loadBlogs() {
+      try {
+        const res = await fetch("/api/blog");
+        const data = await res.json();
+        let dbPosts = [];
+        if (data.success && data.posts) {
+          dbPosts = data.posts;
+        }
+        const combined = [...dbPosts, ...blogPosts].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        setArticles(combined.slice(0, 3));
+      } catch (err) {
+        console.error("[BlogPreview] Failed to fetch dynamic blogs:", err);
+        const combined = [...blogPosts].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        setArticles(combined.slice(0, 3));
+      }
+    }
+    loadBlogs();
+  }, []);
 
   const handleCtaClick = (e: React.FormEvent) => {
     e.preventDefault();

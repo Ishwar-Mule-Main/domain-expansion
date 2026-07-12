@@ -47,8 +47,8 @@ export default function BlogArchivePage() {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  // The primary SEO case study is featured at the top
-  const featuredPost = combinedAll.find((p) => p.slug === "seo-geo-marketing-ai-blueprint") || combinedAll[0];
+  // The latest post is featured at the top
+  const featuredPost = combinedAll[0];
 
   useEffect(() => {
     // Filter by category and search query

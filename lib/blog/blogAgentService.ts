@@ -208,26 +208,34 @@ export async function generatePillarBlog(pillar: string, settings: any) {
   }
 
   const prompt = `
-    You are an elite, authoritative tech journalist and lead strategist at Domain Expansion.
+    You are an elite, authoritative tech journalist, senior agency lead, and master strategist at Domain Expansion.
     Your goal is to write a highly detailed, professional, human-written blog article about the latest news, updates, or trends in: "${pillarName}".
     
-    IMPORTANT: Research the absolute latest industry updates, news, or breakthroughs as of July 2026. Select the single best news item or trend that will drive the highest website traffic and cause search engines and LLM engines (ChatGPT, Gemini, Perplexity) to recommend our brand content.
+    CRITICAL TOPIC SELECTION & VALUE SCAN RULES:
+    - Focus strictly on our service pillar ("${pillarName}") and its relevant sub-services (e.g., SEO, GEO, AIO, Paid Ads, Social Media growth, Next.js development, high-speed interfaces, API engineering, custom SaaS, premium UI/UX design systems, brand identity, LLM integrations, n8n/Make automations, RAG, agent workflows).
+    - MANDATORY BUSINESS VALUE SCAN: Select a topic that has direct, actionable utility to help other companies grow their business in these areas. You must perform a mandatory scan: is this content useful for another company to grow their business? Only proceed with topics that pass this check.
     
-    Format requirements:
+    RESEARCH & SYNTHESIS:
+    - Perform research on recent daily news, articles, and updates on the web regarding this topic. Analyze similar/related web coverage, compile all key data points, parameters, code schemas, and industry insights, and rewrite it into our custom service format so it reads like a fresh, authoritative, human-expert opinion piece.
+    
+    FORMAT & SEO/GEO/GSO/AIO REQUIREMENTS:
     1. Title: Compelling, SEO/GEO-friendly headline.
-    2. Slug: URL-safe hyphenated slug matching the title (e.g. "latest-nextjs-rendering-features").
+    2. Slug: URL-safe hyphenated slug matching the title.
     3. Excerpt: A high-density summary (under 180 characters) of the post.
     4. BodyHTML: Complete, long-form post body in HTML format.
        - STRICT TONE RULE: Avoid standard AI clichés (e.g. "in today's fast-paced digital world", "delve", "testament", "pave the way", "demystify", "vital", "crucial", "beacon").
        - MUST read like a highly opinionated, seasoned human practitioner wrote it based on first-hand experiences (EEAT Framework).
        - LENGTH RULE: The article must be extremely detailed, exhaustive, and comprehensive, reaching at least 3,000 words (minimum 2,500 words). Expand on all points, providing full step-by-step implementations, real code files/scripts, and database setup instructions where appropriate. Do not use placeholders or summaries.
-       - RESEARCH & KEYWORDS: You must include a section in the body named "SEO Research & Keyword Matrix" (as an <aside> or standard section) detailing:
-         * The Primary Target Keyword chosen for the article.
+       - QUESTION-FIRST START (AIO/GEO/GSO RECOMMENDATION OPTIMIZATION): The very first element of your bodyHTML MUST be a prominent question header followed by a direct, concise answer paragraph (30-50 words). This is crucial for AI/LLM/GPT search recommendation grounding.
+       - KEYWORD DENSITY: Maintain exactly a ~2% density for the Primary Target Keyword, and a ~2-3% density for the related Cluster Keywords. Keep the insertion natural, organic, and readable.
+       - KEYWORD MATRIX: Include a section named "SEO Research & Keyword Matrix" (as an <aside> or standard section) detailing:
+         * The Primary Target Keyword chosen.
          * Related LSI keywords woven throughout.
          * Topical cluster keywords (showing parent topic and sub-topics) to guide LLM search agents indexing.
-       - Use headings (<h2> and <h3>), formatted bullet lists, bold text, code blocks (<pre><code>), tables with real data parameters, and an alert box (<div class="alert alert-important">) for essential guidance.
+       - FORMATTING: Use headings (<h2> and <h3>), formatted bullet lists, bold text, code blocks (<pre><code>), tables with real data parameters, and an alert box (<div class="alert alert-important">) for essential guidance.
+       - FAQ SECTION: At the end of the bodyHTML, include a compiled "Frequently Asked Questions" section containing 5-10 detailed Q&A pairs (e.g. <h4> Questions and <p> Answers) about the blog topic.
     5. ReadTime: Estimated read time (e.g. "15 min read").
-    6. SchemaMarkup: Stringified JSON-LD schema object mapping author (Ishwar Mule), publisher (Domain Expansion), and dynamic TechArticle/FAQ details.
+    6. SchemaMarkup: Stringified JSON-LD schema object mapping author (Ishwar Mule), publisher (Domain Expansion), and dynamic TechArticle/FAQPage details (matching the FAQ section exactly).
     7. ImagePrompt: A highly descriptive prompt for Google's Imagen 3 model to generate a horizontal, beautiful tech-oriented, sleek dark-themed visual matching the article. 
        - DESIGN RULES: Make sure the visual is clean, premium, and free of messy AI text artifacts. If text labeling is requested, specify correct, proper, and exact lettering. Otherwise, a purely visual, symbolic digital art illustration without any text is preferred.
 
