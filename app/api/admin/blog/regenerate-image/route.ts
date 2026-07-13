@@ -6,44 +6,6 @@ import path from "path";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Call Gemini Imagen 3 to generate an image
- */
-async function generateImageWithGemini(prompt: string, apiKey: string): Promise<Buffer | null> {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        instances: [{ prompt }],
-        parameters: {
-          sampleCount: 1,
-          outputMimeType: "image/png",
-          aspectRatio: "16:9",
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.warn(`[Gemini Imagen API] Error (${response.status}):`, errorText);
-      return null;
-    }
-
-    const data = await response.json();
-    const b64 = data.predictions?.[0]?.bytesBase64Encoded;
-    if (!b64) {
-      console.warn("[Gemini Imagen API] No image data returned in predictions");
-      return null;
-    }
-
-    return Buffer.from(b64, "base64");
-  } catch (err) {
-    console.error("[Gemini Imagen API] call failed:", err);
-    return null;
-  }
-}
 
 /**
  * Resilient image processing: saves buffer to local directory, or falls back to Base64 in read-only filesystems.
@@ -105,19 +67,9 @@ export async function POST(request: Request) {
     const basePrompt = `A premium, sleek dark-themed technology banner image for a professional tech article titled "${post.title}". Category: ${categoryKeyword}. Minimalist, vector graphics style, vibrant accents of orange and purple, no text, no labels, ultra-high definition, 16:9 aspect ratio. Make sure the visual is clean, premium, and free of messy AI text artifacts. If text is needed, it must be spelled correctly. Otherwise, a purely visual tech illustration without text is preferred.`;
 
     const settings = await prisma.emailSettings.findFirst();
-    const geminiApiKey = settings?.geminiApiKey;
     const blogImageModel = (settings as any)?.blogImageModel || "playgroundai/playground-v2.5";
 
     let featuredImage = "";
-
-    // 1. If Gemini Imagen is selected, use it
-    if (blogImageModel === "gemini-imagen" && geminiApiKey) {
-      console.log(`[Regenerate Image API] Attempting to generate image using Gemini Imagen 3 API...`);
-      const buffer = await generateImageWithGemini(basePrompt, geminiApiKey);
-      if (buffer) {
-        featuredImage = await saveImageResilient(buffer, post.slug);
-      }
-    }
 
     // 2. Fallback / Standard model configuration via Pollinations
     if (!featuredImage) {

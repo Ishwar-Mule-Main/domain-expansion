@@ -13,44 +13,6 @@ interface BlogGenerationResult {
   imagePrompt: string;
 }
 
-/**
- * Call Gemini Imagen 3 to generate an image
- */
-async function generateImageWithGemini(prompt: string, apiKey: string): Promise<Buffer | null> {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        instances: [{ prompt }],
-        parameters: {
-          sampleCount: 1,
-          outputMimeType: "image/png",
-          aspectRatio: "16:9",
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.warn(`[Gemini Imagen API] Error (${response.status}):`, errorText);
-      return null;
-    }
-
-    const data = await response.json();
-    const b64 = data.predictions?.[0]?.bytesBase64Encoded;
-    if (!b64) {
-      console.warn("[Gemini Imagen API] No image data returned in predictions");
-      return null;
-    }
-
-    return Buffer.from(b64, "base64");
-  } catch (err) {
-    console.error("[Gemini Imagen API] call failed:", err);
-    return null;
-  }
-}
 
 /**
  * Resilient image processing: saves buffer to local directory, or falls back to Base64 in read-only filesystems.
@@ -84,54 +46,6 @@ async function downloadAndProcessFallback(imageUrl: string, slug: string): Promi
   }
 }
 
-/**
- * Call Google Gemini with optional search grounding
- */
-async function fetchGeminiWithGrounding(prompt: string, apiKey: string, useSearch: boolean): Promise<string> {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-  const requestBody: any = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: {
-        type: "OBJECT",
-        properties: {
-          title: { type: "STRING" },
-          slug: { type: "STRING" },
-          excerpt: { type: "STRING" },
-          bodyHTML: { type: "STRING" },
-          readTime: { type: "STRING" },
-          schemaMarkup: { type: "STRING" },
-          imagePrompt: { type: "STRING" },
-        },
-        required: ["title", "slug", "excerpt", "bodyHTML", "readTime", "schemaMarkup", "imagePrompt"],
-      },
-    },
-  };
-
-  if (useSearch) {
-    requestBody.tools = [{ googleSearch: {} }];
-  }
-
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(requestBody),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API error (${response.status}): ${errorText}`);
-  }
-
-  const data = await response.json();
-  const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!textContent) {
-    throw new Error("Empty response from Gemini API");
-  }
-  return textContent;
-}
 
 /**
  * Free web search tool using DuckDuckGo html interface.
@@ -254,11 +168,10 @@ async function fetchOpenRouterBlog(prompt: string, apiKey: string, model: string
  */
 export async function generatePillarBlog(pillar: string, settings: any) {
   const openRouterApiKey = settings.openRouterApiKey;
-  const geminiApiKey = settings.geminiApiKey;
 
-  // Resilient check: require at least one API key
-  if (!openRouterApiKey && !geminiApiKey) {
-    const err = "Failed: Both OpenRouter and Gemini API Keys are missing.";
+  // Resilient check: require OpenRouter API key
+  if (!openRouterApiKey) {
+    const err = "Failed: OpenRouter API Key is missing.";
     await prisma.blogAgentLog.create({
       data: { piller: pillar, status: "FAILED", errorMessage: err },
     });
@@ -367,9 +280,9 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     }
   }
 
-  if (useFallbackModel && geminiApiKey) {
-    console.log(`[Research Agent] Running fallback outline generation via Gemini...`);
-    const fallbackText = await fetchGeminiWithGrounding(researchPrompt, geminiApiKey, false);
+  if (useFallbackModel) {
+    console.log(`[Research Agent] Running fallback outline generation via OpenRouter (google/gemini-2.0-flash)...`);
+    const fallbackText = await fetchOpenRouterBlog(researchPrompt, openRouterApiKey, "google/gemini-2.0-flash", true);
     let cleaned = fallbackText.trim();
     if (cleaned.startsWith("```")) {
       cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
@@ -450,9 +363,9 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     }
   }
 
-  if (useFallbackWriter && geminiApiKey) {
-    console.log(`[Blog Writer Agent] Running fallback writing agent via Gemini...`);
-    const fallbackText = await fetchGeminiWithGrounding(writerPrompt, geminiApiKey, false);
+  if (useFallbackWriter) {
+    console.log(`[Blog Writer Agent] Running fallback writing agent via OpenRouter (google/gemini-2.0-flash)...`);
+    const fallbackText = await fetchOpenRouterBlog(writerPrompt, openRouterApiKey, "google/gemini-2.0-flash", true);
     let cleaned = fallbackText.trim();
     if (cleaned.startsWith("```")) {
       cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
@@ -479,12 +392,13 @@ export async function generatePillarBlog(pillar: string, settings: any) {
   try {
     featuredImage = await downloadAndProcessFallback(playgroundUrl, writerParsed.slug);
   } catch (err) {
-    console.warn("[Image Creator Agent] Playground v2.5 generation failed. Trying Gemini Imagen fallback...", err);
-    if (geminiApiKey) {
-      const buffer = await generateImageWithGemini(writerParsed.imagePrompt, geminiApiKey);
-      if (buffer) {
-        featuredImage = await saveImageResilient(buffer, writerParsed.slug);
-      }
+    console.warn("[Image Creator Agent] Playground v2.5 generation failed. Trying Flux model fallback...", err);
+    try {
+      const fluxUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?model=flux&width=1024&height=576&nologo=true&seed=${randomSeed}`;
+      featuredImage = await downloadAndProcessFallback(fluxUrl, writerParsed.slug);
+    } catch (fluxErr) {
+      console.warn("[Image Creator Agent] Flux fallback failed as well, using direct image link fallback...", fluxErr);
+      featuredImage = playgroundUrl;
     }
   }
 
@@ -556,17 +470,17 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     }
   }
 
-  if (useReviewerFallback && geminiApiKey) {
+  if (useReviewerFallback) {
     try {
-      console.log("[Reviewer Agent] Running fallback reviewer via Gemini...");
-      const fallbackText = await fetchGeminiWithGrounding(reviewerPrompt, geminiApiKey, false);
+      console.log("[Reviewer Agent] Running fallback reviewer via OpenRouter (google/gemini-2.0-flash)...");
+      const fallbackText = await fetchOpenRouterBlog(reviewerPrompt, openRouterApiKey, "google/gemini-2.0-flash", true);
       let cleaned = fallbackText.trim();
       if (cleaned.startsWith("```")) {
         cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
       }
       reviewerParsed = JSON.parse(cleaned);
     } catch (err) {
-      console.warn("[Reviewer Agent] Gemini fallback failed, utilizing direct writer output.", err);
+      console.warn("[Reviewer Agent] OpenRouter fallback failed, utilizing direct writer output.", err);
     }
   }
 

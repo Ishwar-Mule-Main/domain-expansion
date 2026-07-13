@@ -943,7 +943,6 @@ export default function BlogAgentDashboard() {
                     <option value="playgroundai/playground-v2.5">Playground AI v2.5</option>
                     <option value="flux">Flux Schnell</option>
                     <option value="sana">Sana Model</option>
-                    <option value="gemini-imagen">Gemini Imagen 3 (requires Gemini API key)</option>
                   </select>
                   <span className="text-[9px] text-[#888898]">Default: playgroundai/playground-v2.5</span>
                 </div>
