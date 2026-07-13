@@ -56,7 +56,7 @@ interface SitemapUrl {
 }
 
 export default function BlogAgentDashboard() {
-  const [activeTab, setActiveTab] = useState<"overview" | "articles" | "sitemap" | "logs">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "articles" | "sitemap" | "logs" | "settings">("overview");
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [logs, setLogs] = useState<BlogAgentLog[]>([]);
   const [sitemaps, setSitemaps] = useState<SitemapUrl[]>([]);
@@ -67,6 +67,14 @@ export default function BlogAgentDashboard() {
   const [blogAutopilot, setBlogAutopilot] = useState<boolean>(true);
   const [togglingAutopilot, setTogglingAutopilot] = useState<boolean>(false);
   const [regeneratingPostId, setRegeneratingPostId] = useState<string | null>(null);
+
+  // Model & API Settings states
+  const [openRouterApiKey, setOpenRouterApiKey] = useState<string>("");
+  const [blogResearchModel, setBlogResearchModel] = useState<string>("mistralai/mistral-nemo:free");
+  const [blogWriterModel, setBlogWriterModel] = useState<string>("qwen/qwen-2.5-72b-instruct:free");
+  const [blogImageModel, setBlogImageModel] = useState<string>("playgroundai/playground-v2.5");
+  const [blogReviewerModel, setBlogReviewerModel] = useState<string>("qwen/qwen3-coder:free");
+  const [savingSettings, setSavingSettings] = useState<boolean>(false);
   
   // Search & Filter state
   const [blogSearchQuery, setBlogSearchQuery] = useState<string>("");
@@ -100,6 +108,11 @@ export default function BlogAgentDashboard() {
       const settingsData = await settingsRes.json();
       if (settingsData.success) {
         setBlogAutopilot(settingsData.blogAutopilot);
+        setOpenRouterApiKey(settingsData.openRouterApiKey || "");
+        setBlogResearchModel(settingsData.blogResearchModel || "mistralai/mistral-nemo:free");
+        setBlogWriterModel(settingsData.blogWriterModel || "qwen/qwen-2.5-72b-instruct:free");
+        setBlogImageModel(settingsData.blogImageModel || "playgroundai/playground-v2.5");
+        setBlogReviewerModel(settingsData.blogReviewerModel || "qwen/qwen3-coder:free");
       }
     } catch (err) {
       console.error("Failed to load blog agent history / settings:", err);
@@ -126,6 +139,35 @@ export default function BlogAgentDashboard() {
       alert(`Error toggling autopilot: ${err.message || String(err)}`);
     } finally {
       setTogglingAutopilot(false);
+    }
+  };
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingSettings(true);
+    try {
+      const res = await fetch("/api/admin/blog/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          blogAutopilot,
+          openRouterApiKey,
+          blogResearchModel,
+          blogWriterModel,
+          blogImageModel,
+          blogReviewerModel,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Blog Agent Settings saved successfully!");
+      } else {
+        alert("Failed to save settings.");
+      }
+    } catch (err: any) {
+      alert(`Error saving settings: ${err.message || String(err)}`);
+    } finally {
+      setSavingSettings(false);
     }
   };
 
@@ -400,6 +442,16 @@ export default function BlogAgentDashboard() {
           }`}
         >
           <Clock className="h-4 w-4" /> Pilot Engine Logs ({logs.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("settings")}
+          className={`px-4 py-2.5 text-xs font-mono font-bold uppercase border-b-2 transition-all flex items-center gap-1.5 ${
+            activeTab === "settings"
+              ? "border-[#FF6200] text-white bg-white/5"
+              : "border-transparent text-[#ACACB8] hover:text-white"
+          }`}
+        >
+          <Cpu className="h-4 w-4" /> Agent Settings
         </button>
       </div>
 
@@ -779,6 +831,95 @@ export default function BlogAgentDashboard() {
                 )}
               </div>
             </div>
+          )}
+
+          {/* TAB 5: AGENT SETTINGS */}
+          {activeTab === "settings" && (
+            <form onSubmit={handleSaveSettings} className="flex flex-col gap-6 text-left max-w-2xl bg-[#141414] border border-[#2E2E2E] p-6 rounded-xl">
+              <div className="flex flex-col gap-1">
+                <h3 className="text-sm font-mono uppercase text-white font-bold tracking-wider flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-[#FF6200]" /> Multi-Agent Engine Configurations
+                </h3>
+                <p className="text-[11px] text-[#888898]">Configure OpenRouter API Key and model selectors for each of the four agents in the content pipeline.</p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-mono uppercase text-[#ACACB8] font-bold">OpenRouter API Key</label>
+                <input
+                  type="password"
+                  placeholder="sk-or-v1-..."
+                  value={openRouterApiKey}
+                  onChange={(e) => setOpenRouterApiKey(e.target.value)}
+                  className="px-3 py-2 rounded-lg border border-[#2E2E2E] bg-black/40 text-xs text-white focus:outline-none focus:border-[#FF6200] font-mono w-full"
+                />
+                <span className="text-[10px] text-[#888898] leading-relaxed">
+                  Required to invoke Mistral Nemo, Qwen 2.5 72B, and Qwen 3 Coder. Safe storage under the database EmailSettings configuration.
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-mono uppercase text-[#ACACB8] font-bold">1. Research Agent Model</label>
+                  <input
+                    type="text"
+                    value={blogResearchModel}
+                    onChange={(e) => setBlogResearchModel(e.target.value)}
+                    className="px-3 py-2 rounded-lg border border-[#2E2E2E] bg-black/40 text-xs text-white focus:outline-none focus:border-[#FF6200] font-mono"
+                  />
+                  <span className="text-[9px] text-[#888898]">Default: mistralai/mistral-nemo:free</span>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-mono uppercase text-[#ACACB8] font-bold">2. Writer Agent Model</label>
+                  <input
+                    type="text"
+                    value={blogWriterModel}
+                    onChange={(e) => setBlogWriterModel(e.target.value)}
+                    className="px-3 py-2 rounded-lg border border-[#2E2E2E] bg-black/40 text-xs text-white focus:outline-none focus:border-[#FF6200] font-mono"
+                  />
+                  <span className="text-[9px] text-[#888898]">Default: qwen/qwen-2.5-72b-instruct:free</span>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-mono uppercase text-[#ACACB8] font-bold">3. Image Creator Model</label>
+                  <input
+                    type="text"
+                    value={blogImageModel}
+                    onChange={(e) => setBlogImageModel(e.target.value)}
+                    className="px-3 py-2 rounded-lg border border-[#2E2E2E] bg-black/40 text-xs text-white focus:outline-none focus:border-[#FF6200] font-mono"
+                  />
+                  <span className="text-[9px] text-[#888898]">Default: playgroundai/playground-v2.5</span>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-xs font-mono uppercase text-[#ACACB8] font-bold">4. Reviewer Agent Model</label>
+                  <input
+                    type="text"
+                    value={blogReviewerModel}
+                    onChange={(e) => setBlogReviewerModel(e.target.value)}
+                    className="px-3 py-2 rounded-lg border border-[#2E2E2E] bg-black/40 text-xs text-white focus:outline-none focus:border-[#FF6200] font-mono"
+                  />
+                  <span className="text-[9px] text-[#888898]">Default: qwen/qwen3-coder:free</span>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[#2E2E2E] flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={savingSettings}
+                  variant="primary"
+                  className="font-mono text-xs uppercase py-2 px-6 flex items-center gap-1.5 cursor-none text-white bg-[#FF6200] hover:bg-[#FF6200]/90"
+                >
+                  {savingSettings ? (
+                    <>
+                      <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Saving Settings...
+                    </>
+                  ) : (
+                    "Save Agent Settings"
+                  )}
+                </Button>
+              </div>
+            </form>
           )}
         </div>
       )}

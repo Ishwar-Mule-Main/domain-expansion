@@ -132,6 +132,14 @@ NEXTAUTH_SECRET="3bc3b6c2f37c357f897df890b0e5138e6dfd15024479bd72b153b6fa0f214cb
   - Pilot Engine Logs: Renamed the tab to "Pilot Engine Logs" and added a real-time active status card flashing when the engine is actively generating content.
   - Image Regeneration: Created `/api/admin/blog/regenerate-image` API route and added a manual "Re-create Cover Image" action button next to each post in the dashboard table.
 - **Dynamic Sorting Order:** Updated `BlogPreview.tsx` on the homepage to fetch dynamic database posts and sort combined items by date descending (top 3 sliced), and set the blog archive featured card to automatically highlight the latest post.
+- **Multi-Agent Blogging Pipeline & Models Admin Configuration:**
+  - Designed and implemented a four-agent autonomous pipeline:
+    1. **Research Agent (Mistral Nemo Free):** Queries DuckDuckGo for trending Reddit/Quora posts, filters for direct business growth value (value-scan check), gathers up to 5 topics, and generates a structured outline.
+    2. **Blog Writer Agent (Qwen 2.5 72B Free):** Synthesizes outline with the system instructions inside `blogagentprompt.txt`, writing long-form posts (>3000 words), maintaining keyword densities (~2% primary, ~2-3% cluster), question-first start block, FAQ section, and image prompt for Playground.
+    3. **Image Creator Agent (Playground v2.5):** Calls Pollinations API using `playground-v2.5` model to generate aesthetic vector-like cover art.
+    4. **Reviewer Agent (Qwen 3 Coder Free):** Reviews alignment, formatting, HTML correctness, and publishes to database and sitemap.
+  - **Prisma Schema Update:** Added `blogResearchModel`, `blogWriterModel`, `blogImageModel`, and `blogReviewerModel` columns to `EmailSettings` table.
+  - **Settings Admin Panel & API:** Built a Settings Tab in the blog-agent admin dashboard to configure the OpenRouter API Key and modify models for each of the four agents dynamically. Updated settings GET/POST API routes to persist model configurations.
 
 ---
 

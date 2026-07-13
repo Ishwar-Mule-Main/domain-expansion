@@ -142,6 +142,16 @@ Verify cron execution on the live Vercel environment and gather user feedback on
 - Built dynamic details page template [page.tsx](file:///d:/demo%202/app/blog/[slug]/page.tsx) utilizing static params pre-generation (`generateStaticParams`) for all 10 articles.
 - Verified Next.js compilation builds successfully with 70 pre-rendered static routes (`npm run build`).
 
+### 2026-07-13 — Session 12 (Phase 11 — Multi-Agent Content Pipeline & Customizable Agent Settings)
+- **DuckDuckGo Scraper Integration:** Created a free web search parsing script using DuckDuckGo html search queries to search Reddit/Quora trending posts and retrieve organic results.
+- **Four-Agent Pipeline Implementation:**
+  - Research Agent (Mistral Nemo Free): Processes raw web results, performs a mandatory business scan for growth utility, gathers up to 5 topics, and generates a structured outline.
+  - Blog Writer Agent (Qwen 2.5 72B Free): Generates a >3000-word article based on `blogagentprompt.txt`, aligning primary/cluster keyword densities, Question-First hook start, and FAQ list.
+  - Image Creator Agent (Playground v2.5): Invokes Pollinations AI using `playground-v2.5` to generate aesthetic vector-style visual headers.
+  - Reviewer Agent (Qwen 3 Coder Free): Review, polish, clean, and verify post details before DB upsert and sitemap auto-registration.
+- **Database Schema Upgrades:** Expanded Prisma schema `EmailSettings` model to support `blogResearchModel`, `blogWriterModel`, `blogImageModel`, and `blogReviewerModel`. Run `npx prisma db push` successfully.
+- **Settings Dashboard UI:** Integrated a dedicated "Agent Settings" Tab inside the blog-agent dashboard UI where users can configure the OpenRouter API key and dynamically change the model for each of the four agents.
+
 ### 2026-07-11 — Session 11 (Phase 11 — Analytics, SEO, LLMs Discovery, and Resilient Blog AI Agent)
 - **Vercel Analytics & Speed Insights:** Installed `@vercel/analytics` and `@vercel/speed-insights` and integrated them into [app/layout.tsx](file:///d:/demo%202/app/layout.tsx).
 - **SEO & Google Search Console:** Added verification tags in the root layout metadata and confirmed fallback tracking ID `G-SDP6017P4T` in [lib/analytics.ts](file:///d:/demo%202/lib/analytics.ts).

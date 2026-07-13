@@ -147,6 +147,10 @@ model EmailSettings {
   intervalSeconds    Int      @default(120)
   isActive           Boolean  @default(false)
   blogAutopilot      Boolean  @default(true)
+  blogResearchModel  String   @default("mistralai/mistral-nemo:free")
+  blogWriterModel    String   @default("qwen/qwen-2.5-72b-instruct:free")
+  blogImageModel     String   @default("playgroundai/playground-v2.5")
+  blogReviewerModel  String   @default("qwen/qwen3-coder:free")
   updatedAt          DateTime @updatedAt
 }
 

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db/prisma";
 export const dynamic = "force-dynamic";
 
 /**
- * GET current blog autopilot setting
+ * GET current blog settings
  */
 export async function GET() {
   try {
@@ -16,11 +16,26 @@ export async function GET() {
 
     let settings = await prisma.emailSettings.findFirst();
     if (!settings) {
-      // Return default true if no settings exist
-      return NextResponse.json({ success: true, blogAutopilot: true });
+      return NextResponse.json({
+        success: true,
+        blogAutopilot: true,
+        openRouterApiKey: "",
+        blogResearchModel: "mistralai/mistral-nemo:free",
+        blogWriterModel: "qwen/qwen-2.5-72b-instruct:free",
+        blogImageModel: "playgroundai/playground-v2.5",
+        blogReviewerModel: "qwen/qwen3-coder:free",
+      });
     }
 
-    return NextResponse.json({ success: true, blogAutopilot: settings.blogAutopilot });
+    return NextResponse.json({
+      success: true,
+      blogAutopilot: settings.blogAutopilot,
+      openRouterApiKey: settings.openRouterApiKey,
+      blogResearchModel: settings.blogResearchModel,
+      blogWriterModel: settings.blogWriterModel,
+      blogImageModel: settings.blogImageModel,
+      blogReviewerModel: settings.blogReviewerModel,
+    });
   } catch (err: any) {
     console.error("[Blog Settings GET] Error:", err);
     return NextResponse.json({ success: false, error: err.message || String(err) }, { status: 500 });
@@ -28,7 +43,7 @@ export async function GET() {
 }
 
 /**
- * POST update blog autopilot setting
+ * POST update blog settings
  */
 export async function POST(request: Request) {
   try {
@@ -38,28 +53,48 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { blogAutopilot } = body;
-
-    if (blogAutopilot === undefined) {
-      return NextResponse.json({ success: false, message: "blogAutopilot parameter is required" }, { status: 400 });
-    }
+    const { 
+      blogAutopilot, 
+      openRouterApiKey, 
+      blogResearchModel, 
+      blogWriterModel, 
+      blogImageModel, 
+      blogReviewerModel 
+    } = body;
 
     let settings = await prisma.emailSettings.findFirst();
+    
+    const updateData: any = {};
+    if (blogAutopilot !== undefined) updateData.blogAutopilot = Boolean(blogAutopilot);
+    if (openRouterApiKey !== undefined) updateData.openRouterApiKey = openRouterApiKey;
+    if (blogResearchModel !== undefined) updateData.blogResearchModel = blogResearchModel;
+    if (blogWriterModel !== undefined) updateData.blogWriterModel = blogWriterModel;
+    if (blogImageModel !== undefined) updateData.blogImageModel = blogImageModel;
+    if (blogReviewerModel !== undefined) updateData.blogReviewerModel = blogReviewerModel;
+
     if (settings) {
       settings = await prisma.emailSettings.update({
         where: { id: settings.id },
-        data: { blogAutopilot: Boolean(blogAutopilot) },
+        data: updateData,
       });
     } else {
       settings = await prisma.emailSettings.create({
         data: {
           gmailUser: "connect.domainexpansion@gmail.com",
-          blogAutopilot: Boolean(blogAutopilot),
+          ...updateData,
         },
       });
     }
 
-    return NextResponse.json({ success: true, blogAutopilot: settings.blogAutopilot });
+    return NextResponse.json({
+      success: true,
+      blogAutopilot: settings.blogAutopilot,
+      openRouterApiKey: settings.openRouterApiKey,
+      blogResearchModel: settings.blogResearchModel,
+      blogWriterModel: settings.blogWriterModel,
+      blogImageModel: settings.blogImageModel,
+      blogReviewerModel: settings.blogReviewerModel,
+    });
   } catch (err: any) {
     console.error("[Blog Settings POST] Error:", err);
     return NextResponse.json({ success: false, error: err.message || String(err) }, { status: 500 });
