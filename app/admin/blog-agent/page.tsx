@@ -75,6 +75,8 @@ export default function BlogAgentDashboard() {
   const [blogImageModel, setBlogImageModel] = useState<string>("playgroundai/playground-v2.5");
   const [blogReviewerModel, setBlogReviewerModel] = useState<string>("qwen/qwen3-coder:free");
   const [savingSettings, setSavingSettings] = useState<boolean>(false);
+  const [openRouterModels, setOpenRouterModels] = useState<{ id: string; name: string }[]>([]);
+  const [loadingModels, setLoadingModels] = useState<boolean>(false);
   
   // Search & Filter state
   const [blogSearchQuery, setBlogSearchQuery] = useState<string>("");
@@ -171,8 +173,35 @@ export default function BlogAgentDashboard() {
     }
   };
 
+  async function loadModels() {
+    setLoadingModels(true);
+    try {
+      const res = await fetch("/api/admin/email/models");
+      const data = await res.json();
+      if (data && data.success && Array.isArray(data.data)) {
+        const sorted = data.data.map((m: any) => ({
+          id: m.id,
+          name: m.name || m.id
+        })).sort((a: any, b: any) => a.name.localeCompare(b.name));
+        setOpenRouterModels(sorted);
+      }
+    } catch (err) {
+      console.error("Failed to load models list:", err);
+      setOpenRouterModels([
+        { id: "mistralai/mistral-nemo:free", name: "Mistral: Mistral Nemo (Free)" },
+        { id: "qwen/qwen-2.5-72b-instruct:free", name: "Qwen: 2.5 72B Instruct (Free)" },
+        { id: "qwen/qwen3-coder:free", name: "Qwen: Qwen 3 Coder (Free)" },
+        { id: "google/gemini-2.0-flash", name: "Google: Gemini 2.0 Flash" },
+        { id: "meta-llama/llama-3-8b-instruct:free", name: "Meta: Llama 3 8B Instruct (Free)" }
+      ]);
+    } finally {
+      setLoadingModels(false);
+    }
+  }
+
   useEffect(() => {
     loadHistory();
+    loadModels();
   }, []);
 
   const triggerAgentRun = async (pillar: string) => {
@@ -860,45 +889,85 @@ export default function BlogAgentDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-mono uppercase text-[#ACACB8] font-bold">1. Research Agent Model</label>
-                  <input
-                    type="text"
+                  <select
                     value={blogResearchModel}
                     onChange={(e) => setBlogResearchModel(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-[#2E2E2E] bg-black/40 text-xs text-white focus:outline-none focus:border-[#FF6200] font-mono"
-                  />
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none cursor-pointer font-mono"
+                  >
+                    {loadingModels ? (
+                      <option value="">Loading OpenRouter models...</option>
+                    ) : (
+                      openRouterModels.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))
+                    )}
+                    {blogResearchModel && !openRouterModels.some((m) => m.id === blogResearchModel) && (
+                      <option value={blogResearchModel}>{blogResearchModel}</option>
+                    )}
+                  </select>
                   <span className="text-[9px] text-[#888898]">Default: mistralai/mistral-nemo:free</span>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-mono uppercase text-[#ACACB8] font-bold">2. Writer Agent Model</label>
-                  <input
-                    type="text"
+                  <select
                     value={blogWriterModel}
                     onChange={(e) => setBlogWriterModel(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-[#2E2E2E] bg-black/40 text-xs text-white focus:outline-none focus:border-[#FF6200] font-mono"
-                  />
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none cursor-pointer font-mono"
+                  >
+                    {loadingModels ? (
+                      <option value="">Loading OpenRouter models...</option>
+                    ) : (
+                      openRouterModels.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))
+                    )}
+                    {blogWriterModel && !openRouterModels.some((m) => m.id === blogWriterModel) && (
+                      <option value={blogWriterModel}>{blogWriterModel}</option>
+                    )}
+                  </select>
                   <span className="text-[9px] text-[#888898]">Default: qwen/qwen-2.5-72b-instruct:free</span>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-mono uppercase text-[#ACACB8] font-bold">3. Image Creator Model</label>
-                  <input
-                    type="text"
+                  <select
                     value={blogImageModel}
                     onChange={(e) => setBlogImageModel(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-[#2E2E2E] bg-black/40 text-xs text-white focus:outline-none focus:border-[#FF6200] font-mono"
-                  />
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none cursor-pointer font-mono"
+                  >
+                    <option value="playgroundai/playground-v2.5">Playground AI v2.5</option>
+                    <option value="flux">Flux Schnell</option>
+                    <option value="sana">Sana Model</option>
+                    <option value="gemini-imagen">Gemini Imagen 3 (requires Gemini API key)</option>
+                  </select>
                   <span className="text-[9px] text-[#888898]">Default: playgroundai/playground-v2.5</span>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label className="text-xs font-mono uppercase text-[#ACACB8] font-bold">4. Reviewer Agent Model</label>
-                  <input
-                    type="text"
+                  <select
                     value={blogReviewerModel}
                     onChange={(e) => setBlogReviewerModel(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-[#2E2E2E] bg-black/40 text-xs text-white focus:outline-none focus:border-[#FF6200] font-mono"
-                  />
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none cursor-pointer font-mono"
+                  >
+                    {loadingModels ? (
+                      <option value="">Loading OpenRouter models...</option>
+                    ) : (
+                      openRouterModels.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))
+                    )}
+                    {blogReviewerModel && !openRouterModels.some((m) => m.id === blogReviewerModel) && (
+                      <option value={blogReviewerModel}>{blogReviewerModel}</option>
+                    )}
+                  </select>
                   <span className="text-[9px] text-[#888898]">Default: qwen/qwen3-coder:free</span>
                 </div>
               </div>
