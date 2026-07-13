@@ -56,7 +56,7 @@ async function saveImageResilient(buffer: Buffer, slug: string): Promise<string>
     await fs.writeFile(filePath, buffer);
     console.log(`[Regenerate Image API] Cover image saved locally to: ${filePath}`);
     return `/blog/${slug}.png`;
-  } catch (err) {
+  } catch {
     console.warn("[Regenerate Image API] Read-only file system (Vercel). Storing image as Base64 data URL directly in DB.");
     return `data:image/png;base64,${buffer.toString("base64")}`;
   }
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
 
     const settings = await prisma.emailSettings.findFirst();
     const geminiApiKey = settings?.geminiApiKey;
-    const blogImageModel = settings?.blogImageModel || "playgroundai/playground-v2.5";
+    const blogImageModel = (settings as any)?.blogImageModel || "playgroundai/playground-v2.5";
 
     let featuredImage = "";
 
@@ -139,8 +139,9 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, post: updatedPost });
-  } catch (err: any) {
-    console.error("[Regenerate Image API] Failed:", err);
-    return NextResponse.json({ success: false, error: err.message || String(err) }, { status: 500 });
+  } catch (err) {
+    const error = err as Error;
+    console.error("[Regenerate Image API] Failed:", error);
+    return NextResponse.json({ success: false, error: error.message || String(error) }, { status: 500 });
   }
 }
