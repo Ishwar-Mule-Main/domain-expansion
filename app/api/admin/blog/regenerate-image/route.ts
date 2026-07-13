@@ -106,11 +106,12 @@ export async function POST(request: Request) {
 
     const settings = await prisma.emailSettings.findFirst();
     const geminiApiKey = settings?.geminiApiKey;
+    const blogImageModel = settings?.blogImageModel || "playgroundai/playground-v2.5";
 
     let featuredImage = "";
 
-    // 1. Try Gemini Imagen 3
-    if (geminiApiKey) {
+    // 1. If Gemini Imagen is selected, use it
+    if (blogImageModel === "gemini-imagen" && geminiApiKey) {
       console.log(`[Regenerate Image API] Attempting to generate image using Gemini Imagen 3 API...`);
       const buffer = await generateImageWithGemini(basePrompt, geminiApiKey);
       if (buffer) {
@@ -118,12 +119,16 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Fallback to Pollinations AI
+    // 2. Fallback / Standard model configuration via Pollinations
     if (!featuredImage) {
-      console.log(`[Regenerate Image API] Gemini Imagen failed/skipped. Falling back to Pollinations AI...`);
+      console.log(`[Regenerate Image API] Utilizing third agent model parameter: ${blogImageModel}`);
+      let imgModel = blogImageModel;
+      if (imgModel.includes("/")) {
+        imgModel = imgModel.split("/")[1]; // extract base model name (e.g. "playground-v2.5")
+      }
       const cleanPrompt = encodeURIComponent(basePrompt.trim().substring(0, 200));
       const randomSeed = Math.floor(Math.random() * 100000);
-      const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=1024&height=576&nologo=true&seed=${randomSeed}`;
+      const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?model=${encodeURIComponent(imgModel)}&width=1024&height=576&nologo=true&seed=${randomSeed}`;
       featuredImage = await downloadAndProcessFallback(imageUrl, post.slug);
     }
 
