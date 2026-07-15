@@ -172,15 +172,17 @@ function cleanAndParseJSON(jsonStr: string): any {
   try {
     return JSON.parse(cleaned);
   } catch (err: any) {
-    console.warn("[JSON Clean Parser] Standard JSON.parse failed. Attempting sanitization of control characters...", err);
+    console.warn("[JSON Clean Parser] Standard JSON.parse failed. Attempting sanitization of control characters and backslashes...", err);
     try {
       // Replace raw newlines, carriage returns, and tabs inside double-quoted string literals
       const sanitized = cleaned.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"/g, (match, p1) => {
-        const cleanedVal = p1
+        let val = p1
           .replace(/\n/g, "\\n")
           .replace(/\r/g, "\\r")
           .replace(/\t/g, "\\t");
-        return `"${cleanedVal}"`;
+        // Escape invalid backslashes that are not followed by valid JSON escape sequence characters
+        val = val.replace(/\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})/g, "\\\\");
+        return `"${val}"`;
       });
       return JSON.parse(sanitized);
     } catch (innerErr: any) {
