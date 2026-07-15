@@ -46,11 +46,21 @@ export default async function RootLayout({
   const pathname = headersList.get("x-pathname") || "";
   const isAdminPage = pathname.startsWith("/admin") || pathname.startsWith("/studio");
 
+  // Normalize canonical URL (strip trailing slashes except for root /)
+  let canonicalPath = pathname;
+  if (canonicalPath.endsWith("/") && canonicalPath !== "/") {
+    canonicalPath = canonicalPath.slice(0, -1);
+  }
+  const canonicalUrl = `https://domainexpansion.in${canonicalPath}`;
+
   return (
     <html
       lang="en"
       className={`${bricolageGrotesque.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="canonical" href={canonicalUrl} />
+      </head>
       <body className="min-h-full flex flex-col bg-[#0D0D0D] text-[#F3F4F6]">
         <Preloader />
         <GoogleAnalytics />
