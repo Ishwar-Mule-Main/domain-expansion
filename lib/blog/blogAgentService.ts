@@ -397,6 +397,154 @@ export async function generatePillarBlog(pillar: string, settings: any) {
   console.log(`[Blog Writer Agent] Article generation complete. Title: "${writerParsed.title}"`);
 
   // ==========================================
+  // FEEDBACK & REVISION LOOP (Agent 2 <-> Agent 4)
+  // ==========================================
+  let reviewerParsed = {
+    isApproved: true,
+    errors: [] as string[],
+    title: writerParsed.title,
+    excerpt: writerParsed.excerpt,
+    bodyHTML: writerParsed.bodyHTML,
+    schemaMarkup: writerParsed.schemaMarkup,
+  };
+
+  const maxAttempts = 3;
+  let attempt = 0;
+  let approved = false;
+
+  while (attempt < maxAttempts) {
+    attempt++;
+    console.log(`[Reviewer Agent] Reviewing draft (Attempt ${attempt}/${maxAttempts}) using ${settings.blogReviewerModel || "qwen/qwen3-coder:free"}...`);
+
+    const reviewerPrompt = `
+      You are an Automated Chief Editorial Bot and CMS Publisher for Domain Expansion. Your job is to review a provided blog draft against our strict rules and output a verified, publication-ready Markdown layout.
+
+      Your Evaluation Task:
+      1. Strip out any sentences that violate the Banned AI Words protocol (never use: delve, testament, tapestry, beacon, furthermore, moreover, robust, utilize, leverage, streamline, optimize, revolutionizing, game-changer, dynamic, paramount, transformative, look no further, in today's fast-paced digital world, it is crucial to note, unlock your potential, puzzle, landscape, underscore, demystify, key takeaways, in today's digital landscape).
+      2. Ensure no paragraph exceeds 3 sentences. Ensure clear '##' and '###' long-tail markdown headers are correctly distributed.
+      3. Verify that the AIO/GEO Snippet Block is present at the absolute top (prominent question heading and direct 30-50 words answer paragraph).
+      4. Verify that a valid JSON-LD Schema string block is placed at the absolute bottom (or is provided).
+
+      If all checkpoints are ok, set "isApproved" to true and return the verified title, excerpt, bodyHTML (must be valid HTML with structured tags, headings, bullets, tables), and schemaMarkup.
+      If there are violations, set "isApproved" to false and list all specific violations in the "errors" array so they can be logged.
+
+      Input Blog Details to Review:
+      - Title: ${writerParsed.title}
+      - Excerpt: ${writerParsed.excerpt}
+      - BodyHTML: ${writerParsed.bodyHTML}
+      - SchemaMarkup: ${writerParsed.schemaMarkup}
+
+      Return your output strictly as a JSON object containing:
+      {
+        "isApproved": boolean,
+        "errors": string[],
+        "title": string,
+        "excerpt": string,
+        "bodyHTML": string,
+        "schemaMarkup": string
+      }
+    `;
+
+    let useReviewerFallback = !openRouterApiKey;
+    if (!useReviewerFallback) {
+      try {
+        const reviewerResponse = await fetchOpenRouterBlog(
+          reviewerPrompt,
+          openRouterApiKey,
+          settings.blogReviewerModel || "qwen/qwen3-coder:free"
+        );
+        reviewerParsed = cleanAndParseJSON(reviewerResponse);
+      } catch (err) {
+        console.warn("[Reviewer Agent] Qwen Coder failed or JSON invalid, using fallback parsing...", err);
+        useReviewerFallback = true;
+      }
+    }
+
+    if (useReviewerFallback) {
+      try {
+        console.log("[Reviewer Agent] Running fallback reviewer via OpenRouter (openrouter/free)...");
+        const fallbackText = await fetchOpenRouterBlog(reviewerPrompt, openRouterApiKey, "openrouter/free", true);
+        reviewerParsed = cleanAndParseJSON(fallbackText);
+      } catch (err) {
+        console.warn("[Reviewer Agent] OpenRouter fallback failed, utilizing direct writer output.", err);
+      }
+    }
+
+    if (reviewerParsed.isApproved) {
+      approved = true;
+      console.log(`[Reviewer Agent] Draft approved on attempt ${attempt}!`);
+      break;
+    }
+
+    console.warn(`[Reviewer Agent] Draft REJECTED on attempt ${attempt}. Violations:\n${(reviewerParsed.errors || []).map(e => `- ${e}`).join("\n")}`);
+
+    if (attempt < maxAttempts) {
+      console.log(`[Blog Writer Agent] Reworking content to address reviewer feedback (Attempt ${attempt + 1}/${maxAttempts})...`);
+      const revisionPrompt = `
+        ${systemInstructions}
+
+        You are the Second Agent: The Blog Writer Agent.
+        Your previous draft was REJECTED by the Chief Editorial Bot because of formatting or styling violations.
+        Please rewrite/rework the article to fix all identified errors. Ensure no paragraph exceeds 3 sentences, the Question-First hook is at the top, the Schema block is at the bottom, and no banned words are used.
+
+        Identified Errors to Fix:
+        ${(reviewerParsed.errors || ["Failed design/editorial criteria validation checks."]).map(e => `- ${e}`).join("\n")}
+
+        Previous Rejected Draft:
+        - Title: ${writerParsed.title}
+        - Excerpt: ${writerParsed.excerpt}
+        - BodyHTML: ${writerParsed.bodyHTML}
+        - SchemaMarkup: ${writerParsed.schemaMarkup}
+
+        Return your output strictly as a JSON object containing:
+        {
+          "title": string,
+          "slug": string,
+          "excerpt": string,
+          "bodyHTML": string,
+          "readTime": string,
+          "schemaMarkup": string,
+          "imagePrompt": string
+        }
+      `;
+
+      let revisedResponse = "";
+      try {
+        revisedResponse = await fetchOpenRouterBlog(
+          revisionPrompt,
+          openRouterApiKey,
+          settings.blogWriterModel || "qwen/qwen-2.5-72b-instruct:free"
+        );
+      } catch (err) {
+        console.warn("[Blog Writer Agent] Rework failed via Qwen, trying fallback...", err);
+        try {
+          revisedResponse = await fetchOpenRouterBlog(
+            revisionPrompt,
+            openRouterApiKey,
+            "openrouter/free",
+            true
+          );
+        } catch (fbErr) {
+          console.error("[Blog Writer Agent] Fallback rework failed too:", fbErr);
+        }
+      }
+      if (revisedResponse) {
+        writerParsed = cleanAndParseJSON(revisedResponse);
+      }
+    }
+  }
+
+  if (!approved) {
+    const errorMsg = `Chief Editorial Bot Rejected Publication after ${maxAttempts} attempts:\n` + (reviewerParsed.errors || ["Failed design/editorial criteria validation checks."]).map((e: string) => `- ${e}`).join("\n");
+    throw new Error(errorMsg);
+  }
+
+  const finalBodyHTML = reviewerParsed.bodyHTML || writerParsed.bodyHTML;
+  const finalTitle = reviewerParsed.title || writerParsed.title;
+  const finalExcerpt = reviewerParsed.excerpt || writerParsed.excerpt;
+  const finalSchema = reviewerParsed.schemaMarkup || writerParsed.schemaMarkup;
+
+  // ==========================================
   // AGENT 3: FEATURED IMAGE CREATOR (Playground v2.5)
   // ==========================================
   console.log(`[Image Creator Agent] Generating featured cover image using playgroundai/playground-v2.5 model...`);
@@ -424,85 +572,6 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     console.warn("[Image Creator Agent] Both Playground and Gemini failed. Using direct image link fallback...");
     featuredImage = playgroundUrl;
   }
-
-  // ==========================================
-  // AGENT 4: REVIEWER AGENT (Qwen 3 Coder Free via OpenRouter)
-  // ==========================================
-  console.log(`[Reviewer Agent] Reviewing formatting, CSS design systems alignment, and polishing using ${settings.blogReviewerModel || "qwen/qwen3-coder:free"}...`);
-
-  const reviewerPrompt = `
-    You are an Automated Chief Editorial Bot and CMS Publisher for Domain Expansion. Your job is to review a provided blog draft against our strict rules and output a verified, publication-ready Markdown layout.
-
-    Your Evaluation Task:
-    1. Strip out any sentences that violate the Banned AI Words protocol (never use: delve, testament, tapestry, beacon, furthermore, moreover, robust, utilize, leverage, streamline, optimize, revolutionizing, game-changer, dynamic, paramount, transformative, look no further, in today's fast-paced digital world, it is crucial to note, unlock your potential, puzzle, landscape, underscore, demystify, key takeaways, in today's digital landscape).
-    2. Ensure no paragraph exceeds 3 sentences. Ensure clear '##' and '###' long-tail markdown headers are correctly distributed.
-    3. Verify that the AIO/GEO Snippet Block is present at the absolute top (prominent question heading and direct 30-50 words answer paragraph).
-    4. Verify that a valid JSON-LD Schema string block is placed at the absolute bottom (or is provided).
-
-    If all checkpoints are ok, set "isApproved" to true and return the verified title, excerpt, bodyHTML (must be valid HTML with structured tags, headings, bullets, tables), and schemaMarkup.
-    If there are violations, set "isApproved" to false and list all specific violations in the "errors" array so they can be logged.
-
-    Input Blog Details to Review:
-    - Title: ${writerParsed.title}
-    - Excerpt: ${writerParsed.excerpt}
-    - BodyHTML: ${writerParsed.bodyHTML}
-    - SchemaMarkup: ${writerParsed.schemaMarkup}
-
-    Return your output strictly as a JSON object containing:
-    {
-      "isApproved": boolean,
-      "errors": string[],
-      "title": string,
-      "excerpt": string,
-      "bodyHTML": string,
-      "schemaMarkup": string
-    }
-  `;
-
-  let reviewerParsed = {
-    isApproved: true,
-    errors: [] as string[],
-    title: writerParsed.title,
-    excerpt: writerParsed.excerpt,
-    bodyHTML: writerParsed.bodyHTML,
-    schemaMarkup: writerParsed.schemaMarkup,
-  };
-
-  let useReviewerFallback = !openRouterApiKey;
-  if (!useReviewerFallback) {
-    try {
-      const reviewerResponse = await fetchOpenRouterBlog(
-        reviewerPrompt,
-        openRouterApiKey,
-        settings.blogReviewerModel || "qwen/qwen3-coder:free"
-      );
-      reviewerParsed = cleanAndParseJSON(reviewerResponse);
-    } catch (err) {
-      console.warn("[Reviewer Agent] Qwen Coder failed or JSON invalid, using fallback parsing...", err);
-      useReviewerFallback = true;
-    }
-  }
-
-  if (useReviewerFallback) {
-    try {
-      console.log("[Reviewer Agent] Running fallback reviewer via OpenRouter (openrouter/free)...");
-      const fallbackText = await fetchOpenRouterBlog(reviewerPrompt, openRouterApiKey, "openrouter/free", true);
-      reviewerParsed = cleanAndParseJSON(fallbackText);
-    } catch (err) {
-      console.warn("[Reviewer Agent] OpenRouter fallback failed, utilizing direct writer output.", err);
-    }
-  }
-
-  // Validate editorial bot approval
-  if (!reviewerParsed.isApproved) {
-    const errorMsg = `Chief Editorial Bot Rejected Publication:\n` + (reviewerParsed.errors || ["Failed design/editorial criteria validation checks."]).map((e: string) => `- ${e}`).join("\n");
-    throw new Error(errorMsg);
-  }
-
-  const finalBodyHTML = reviewerParsed.bodyHTML || writerParsed.bodyHTML;
-  const finalTitle = reviewerParsed.title || writerParsed.title;
-  const finalExcerpt = reviewerParsed.excerpt || writerParsed.excerpt;
-  const finalSchema = reviewerParsed.schemaMarkup || writerParsed.schemaMarkup;
 
   const formattedDate = new Date().toLocaleDateString("en-US", {
     month: "long",
