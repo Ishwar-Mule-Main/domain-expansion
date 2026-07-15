@@ -281,8 +281,8 @@ export async function generatePillarBlog(pillar: string, settings: any) {
   }
 
   if (useFallbackModel) {
-    console.log(`[Research Agent] Running fallback outline generation via OpenRouter (google/gemini-2.0-flash)...`);
-    const fallbackText = await fetchOpenRouterBlog(researchPrompt, openRouterApiKey, "google/gemini-2.0-flash", true);
+    console.log(`[Research Agent] Running fallback outline generation via OpenRouter (openrouter/free)...`);
+    const fallbackText = await fetchOpenRouterBlog(researchPrompt, openRouterApiKey, "openrouter/free", true);
     let cleaned = fallbackText.trim();
     if (cleaned.startsWith("```")) {
       cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
@@ -364,8 +364,8 @@ export async function generatePillarBlog(pillar: string, settings: any) {
   }
 
   if (useFallbackWriter) {
-    console.log(`[Blog Writer Agent] Running fallback writing agent via OpenRouter (google/gemini-2.0-flash)...`);
-    const fallbackText = await fetchOpenRouterBlog(writerPrompt, openRouterApiKey, "google/gemini-2.0-flash", true);
+    console.log(`[Blog Writer Agent] Running fallback writing agent via OpenRouter (openrouter/free)...`);
+    const fallbackText = await fetchOpenRouterBlog(writerPrompt, openRouterApiKey, "openrouter/free", true);
     let cleaned = fallbackText.trim();
     if (cleaned.startsWith("```")) {
       cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
@@ -472,8 +472,8 @@ export async function generatePillarBlog(pillar: string, settings: any) {
 
   if (useReviewerFallback) {
     try {
-      console.log("[Reviewer Agent] Running fallback reviewer via OpenRouter (google/gemini-2.0-flash)...");
-      const fallbackText = await fetchOpenRouterBlog(reviewerPrompt, openRouterApiKey, "google/gemini-2.0-flash", true);
+      console.log("[Reviewer Agent] Running fallback reviewer via OpenRouter (openrouter/free)...");
+      const fallbackText = await fetchOpenRouterBlog(reviewerPrompt, openRouterApiKey, "openrouter/free", true);
       let cleaned = fallbackText.trim();
       if (cleaned.startsWith("```")) {
         cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
