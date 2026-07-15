@@ -118,6 +118,72 @@ const nextConfig: NextConfig = {
         destination: "https://domainexpansion.in",
         permanent: true,
       },
+      {
+        source: "/xmlrpc.php",
+        has: [
+          {
+            type: "host",
+            value: "data-hat.domainexpansion.in",
+          },
+        ],
+        destination: "https://domainexpansion.in",
+        permanent: true,
+      },
+      {
+        source: "/services/ai-automation",
+        destination: "/services/ai-expansion",
+        permanent: true,
+      },
+      {
+        source: "/services/ai-automation/",
+        destination: "/services/ai-expansion",
+        permanent: true,
+      },
+      {
+        source: "/services/development",
+        destination: "/services/development-expansion",
+        permanent: true,
+      },
+      {
+        source: "/services/design",
+        destination: "/services/design-expansion",
+        permanent: true,
+      },
+      {
+        source: "/services/marketing",
+        destination: "/services/marketing-expansion",
+        permanent: true,
+      },
+      {
+        source: "/portfolio/organoindia",
+        destination: "/portfolio",
+        permanent: true,
+      },
+      {
+        source: "/portfolio/agristox",
+        destination: "/portfolio",
+        permanent: true,
+      },
+      {
+        source: "/portfolio/meat-me-foods",
+        destination: "/portfolio",
+        permanent: true,
+      },
+      {
+        source: "/blog/nextjs-performance-optimization/__next.blog/:path*",
+        destination: "/blog",
+        permanent: true,
+      },
+      {
+        source: "/services/ai-automation.html",
+        destination: "/services/ai-expansion",
+        permanent: true,
+      },
+      {
+        source: "/contact/",
+        destination: "/contact",
+        permanent: true,
+      },
     ];
   },
 };
