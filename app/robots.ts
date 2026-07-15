@@ -33,7 +33,7 @@ export default function robots(): MetadataRoute.Robots {
   const aiRules = allowedAIBots.map((bot) => ({
     userAgent: bot,
     allow: "/",
-    disallow: ["/admin", "/api", "/studio"],
+    disallow: ["/admin", "/api", "/studio", "/_next/*", "/__next*"],
   }));
 
   const testBotRules = disallowedTestBots.map((bot) => ({
@@ -46,7 +46,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/api", "/studio"],
+        disallow: ["/admin", "/api", "/studio", "/_next/*", "/__next*"],
       },
       ...aiRules,
       ...testBotRules,

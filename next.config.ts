@@ -50,6 +50,76 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/blog/web3-infrastructure-scaling",
+        destination: "/blog",
+        permanent: true,
+      },
+      {
+        source: "/projects/loom-video-messaging",
+        destination: "/portfolio/polymint-prca",
+        permanent: true,
+      },
+      {
+        source: "/projects/agristox-platform",
+        destination: "/portfolio/polymint-prca",
+        permanent: true,
+      },
+      {
+        source: "/blog/nextjs-performance-optimization",
+        destination: "/blog",
+        permanent: true,
+      },
+      {
+        source: "/projects/organo-sustainable-living",
+        destination: "/portfolio/polymint-prca",
+        permanent: true,
+      },
+      {
+        source: "/blog/geo-vs-seo-vs-aio",
+        destination: "/blog/seo-geo-marketing-ai-blueprint",
+        permanent: true,
+      },
+      {
+        source: "/projects/datahat-analytics",
+        destination: "/portfolio/data-hat-ai",
+        permanent: true,
+      },
+      {
+        source: "/blog/email-deliverability-deep-dive",
+        destination: "/blog",
+        permanent: true,
+      },
+      {
+        source: "/blog/ai-automation-cut-cac",
+        destination: "/blog",
+        permanent: true,
+      },
+      {
+        source: "/home",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/home/",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/wp-json/:path*",
+        has: [
+          {
+            type: "host",
+            value: "data-hat.domainexpansion.in",
+          },
+        ],
+        destination: "https://domainexpansion.in",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
