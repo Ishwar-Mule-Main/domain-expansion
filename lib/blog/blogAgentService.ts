@@ -160,6 +160,37 @@ async function fetchOpenRouterBlog(prompt: string, apiKey: string, model: string
 }
 
 /**
+ * Resilient JSON parsing helper that strips markdown ticks and sanitizes raw 
+ * unescaped control characters (like literal newlines/tabs) inside string values.
+ */
+function cleanAndParseJSON(jsonStr: string): any {
+  let cleaned = jsonStr.trim();
+  if (cleaned.startsWith("```")) {
+    cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
+  }
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (err: any) {
+    console.warn("[JSON Clean Parser] Standard JSON.parse failed. Attempting sanitization of control characters...", err);
+    try {
+      // Replace raw newlines, carriage returns, and tabs inside double-quoted string literals
+      const sanitized = cleaned.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"/g, (match, p1) => {
+        const cleanedVal = p1
+          .replace(/\n/g, "\\n")
+          .replace(/\r/g, "\\r")
+          .replace(/\t/g, "\\t");
+        return `"${cleanedVal}"`;
+      });
+      return JSON.parse(sanitized);
+    } catch (innerErr: any) {
+      console.error("[JSON Clean Parser] Sanitization failed as well:", innerErr);
+      throw new Error(`Invalid JSON format: ${err.message || String(err)}`);
+    }
+  }
+}
+
+/**
  * Generate a daily blog post using a four-agent pipeline:
  * 1. Research Agent (Mistral Nemo Free): Searches Q&A platforms, scans for business growth value, generates outline.
  * 2. Blog Writer Agent (Qwen 2.5 72B Free): Writes deep-dive 3000-word post using blogagentprompt.txt and outputs image prompt.
@@ -269,11 +300,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     try {
       console.log(`[Research Agent] Generating outline using mistralai/mistral-nemo:free...`);
       const nemoResponse = await fetchOpenRouterBlog(researchPrompt, openRouterApiKey, "mistralai/mistral-nemo:free");
-      let cleaned = nemoResponse.trim();
-      if (cleaned.startsWith("```")) {
-        cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
-      }
-      researchParsed = JSON.parse(cleaned);
+      researchParsed = cleanAndParseJSON(nemoResponse);
     } catch (err) {
       console.warn("[Research Agent] Mistral Nemo OpenRouter failed or JSON invalid. Falling back to Gemini...", err);
       useFallbackModel = true;
@@ -283,11 +310,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
   if (useFallbackModel) {
     console.log(`[Research Agent] Running fallback outline generation via OpenRouter (openrouter/free)...`);
     const fallbackText = await fetchOpenRouterBlog(researchPrompt, openRouterApiKey, "openrouter/free", true);
-    let cleaned = fallbackText.trim();
-    if (cleaned.startsWith("```")) {
-      cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
-    }
-    researchParsed = JSON.parse(cleaned);
+    researchParsed = cleanAndParseJSON(fallbackText);
   }
 
   // Double fallback guard if parsing somehow failed completely
@@ -352,11 +375,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     try {
       console.log(`[Blog Writer Agent] Writing blog using qwen/qwen-2.5-72b-instruct:free...`);
       const qwenResponse = await fetchOpenRouterBlog(writerPrompt, openRouterApiKey, "qwen/qwen-2.5-72b-instruct:free");
-      let cleaned = qwenResponse.trim();
-      if (cleaned.startsWith("```")) {
-        cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
-      }
-      writerParsed = JSON.parse(cleaned);
+      writerParsed = cleanAndParseJSON(qwenResponse);
     } catch (err) {
       console.warn("[Blog Writer Agent] Qwen 72B failed or JSON invalid. Falling back to Gemini...", err);
       useFallbackWriter = true;
@@ -366,11 +385,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
   if (useFallbackWriter) {
     console.log(`[Blog Writer Agent] Running fallback writing agent via OpenRouter (openrouter/free)...`);
     const fallbackText = await fetchOpenRouterBlog(writerPrompt, openRouterApiKey, "openrouter/free", true);
-    let cleaned = fallbackText.trim();
-    if (cleaned.startsWith("```")) {
-      cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
-    }
-    writerParsed = JSON.parse(cleaned);
+    writerParsed = cleanAndParseJSON(fallbackText);
   }
 
   if (!writerParsed!) {
@@ -459,11 +474,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
         openRouterApiKey,
         settings.blogReviewerModel || "qwen/qwen3-coder:free"
       );
-      let cleaned = reviewerResponse.trim();
-      if (cleaned.startsWith("```")) {
-        cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
-      }
-      reviewerParsed = JSON.parse(cleaned);
+      reviewerParsed = cleanAndParseJSON(reviewerResponse);
     } catch (err) {
       console.warn("[Reviewer Agent] Qwen Coder failed or JSON invalid, using fallback parsing...", err);
       useReviewerFallback = true;
@@ -474,11 +485,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     try {
       console.log("[Reviewer Agent] Running fallback reviewer via OpenRouter (openrouter/free)...");
       const fallbackText = await fetchOpenRouterBlog(reviewerPrompt, openRouterApiKey, "openrouter/free", true);
-      let cleaned = fallbackText.trim();
-      if (cleaned.startsWith("```")) {
-        cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
-      }
-      reviewerParsed = JSON.parse(cleaned);
+      reviewerParsed = cleanAndParseJSON(fallbackText);
     } catch (err) {
       console.warn("[Reviewer Agent] OpenRouter fallback failed, utilizing direct writer output.", err);
     }
