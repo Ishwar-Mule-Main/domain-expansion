@@ -172,74 +172,100 @@ function cleanAndParseJSON(jsonStr: string): any {
   try {
     return JSON.parse(cleaned);
   } catch (err: any) {
-    console.warn("[JSON Clean Parser] Standard JSON.parse failed. Attempting sanitization and repair...", err);
+    console.warn("[JSON Clean Parser] Standard JSON.parse failed. Running state machine repair...", err);
     try {
-      // 1. Replace raw newlines, carriage returns, and tabs inside double-quoted string literals
-      let sanitized = cleaned.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"/g, (match, p1) => {
-        let val = p1
-          .replace(/\n/g, "\\n")
-          .replace(/\r/g, "\\r")
-          .replace(/\t/g, "\\t");
-        // Escape invalid backslashes that are not followed by valid JSON escape sequence characters
-        val = val.replace(/\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})/g, "\\\\");
-        return `"${val}"`;
-      });
-
-      // 2. Heuristic for truncated JSON (unterminated strings/braces)
-      let repaired = sanitized.trim();
-      const quoteCount = (repaired.match(/"/g) || []).length;
-      if (quoteCount % 2 !== 0) {
+      let insideString = false;
+      let escaped = false;
+      let repaired = '';
+      let lastStructuralChar = '';
+      let arrayDepth = 0;
+      
+      for (let i = 0; i < cleaned.length; i++) {
+        const char = cleaned[i];
+        
+        if (insideString) {
+          if (escaped) {
+            // Valid JSON escape check
+            if (char === '"' || char === '\\' || char === '/' || char === 'b' || char === 'f' || char === 'n' || char === 'r' || char === 't' || char === 'u') {
+              repaired += '\\' + char;
+            } else {
+              repaired += '\\\\' + char;
+            }
+            escaped = false;
+          } else if (char === '\\') {
+            escaped = true;
+          } else if (char === '"') {
+            // Peek next non-whitespace char
+            let nextChar = '';
+            for (let j = i + 1; j < cleaned.length; j++) {
+              if (!/\s/.test(cleaned[j])) {
+                nextChar = cleaned[j];
+                break;
+              }
+            }
+            
+            // Determine if key or value quote
+            let isKey = false;
+            if (lastStructuralChar === '{') {
+              isKey = true;
+            } else if (lastStructuralChar === ',') {
+              isKey = (arrayDepth === 0);
+            }
+            
+            let isClosingQuote = false;
+            if (isKey) {
+              isClosingQuote = (nextChar === ':');
+            } else {
+              isClosingQuote = (nextChar === ',' || nextChar === '}' || nextChar === ']' || nextChar === '');
+            }
+            
+            if (isClosingQuote) {
+              insideString = false;
+              repaired += '"';
+            } else {
+              repaired += '\\"';
+            }
+          } else if (char === '\n') {
+            repaired += '\\n';
+          } else if (char === '\r') {
+            repaired += '\\r';
+          } else if (char === '\t') {
+            repaired += '\\t';
+          } else {
+            repaired += char;
+          }
+        } else {
+          // Outside string
+          if (char === '"') {
+            insideString = true;
+            escaped = false;
+            repaired += '"';
+          } else {
+            repaired += char;
+            if (char === '{' || char === '}' || char === ',' || char === ':' || char === '[' || char === ']') {
+              lastStructuralChar = char;
+              if (char === '[') arrayDepth++;
+              if (char === ']') arrayDepth--;
+            }
+          }
+        }
+      }
+      
+      // Auto-close string if ended abruptly
+      if (insideString) {
         repaired += '"';
       }
+      
+      // Auto-close braces/brackets
       const openBraces = (repaired.match(/\{/g) || []).length;
       const closeBraces = (repaired.match(/\}/g) || []).length;
       if (openBraces > closeBraces) {
         repaired += "}".repeat(openBraces - closeBraces);
       }
-
-      // 3. Try parsing the repaired string
-      try {
-        return JSON.parse(repaired);
-      } catch (innerErr) {
-        console.warn("[JSON Clean Parser] Repaired JSON parsing failed. Attempting structural quote protection...", innerErr);
-        
-        // Heuristically escape double quotes inside values (e.g. unescaped HTML quotes)
-        const knownKeys = [
-          "selectedTopic", "reasoning", "primaryKeyword", "clusterKeywords", "outline",
-          "title", "slug", "excerpt", "bodyHTML", "readTime", "schemaMarkup", "imagePrompt",
-          "isApproved", "errors"
-        ];
-        
-        const KEY_QUOTE = "\uE000";
-        const VAL_QUOTE = "\uE001";
-        
-        let quoteRepaired = repaired;
-        // Protect keys
-        for (const key of knownKeys) {
-          const regex = new RegExp(`"${key}"\\s*:`, "g");
-          quoteRepaired = quoteRepaired.replace(regex, `${KEY_QUOTE}${key}${KEY_QUOTE}:`);
-        }
-        // Protect value starts
-        quoteRepaired = quoteRepaired.replace(/:\s*"/g, `:${VAL_QUOTE}`);
-        // Protect value ends
-        quoteRepaired = quoteRepaired.replace(/"\s*,/g, `${VAL_QUOTE},`);
-        quoteRepaired = quoteRepaired.replace(/"\s*\}/g, `${VAL_QUOTE}}`);
-        quoteRepaired = quoteRepaired.replace(/"\s*\]/g, `${VAL_QUOTE}]`);
-        // Protect array starts & item separators
-        quoteRepaired = quoteRepaired.replace(/\[\s*"/g, `[${VAL_QUOTE}`);
-        quoteRepaired = quoteRepaired.replace(/,\s*"/g, `,${VAL_QUOTE}`);
-        
-        // Escape remaining double quotes (which are literals inside the string values)
-        quoteRepaired = quoteRepaired.replace(/"/g, '\\"');
-        
-        // Restore structural quotes
-        quoteRepaired = quoteRepaired.split(KEY_QUOTE).join('"');
-        quoteRepaired = quoteRepaired.split(VAL_QUOTE).join('"');
-        
-        return JSON.parse(quoteRepaired);
-      }
+      
+      return JSON.parse(repaired);
     } catch (finalErr: any) {
-      console.error("[JSON Clean Parser] All parsing and repair attempts failed:", finalErr);
+      console.error("[JSON Clean Parser] State machine repair failed:", finalErr);
       throw new Error(`Invalid JSON format: ${err.message || String(err)}`);
     }
   }
