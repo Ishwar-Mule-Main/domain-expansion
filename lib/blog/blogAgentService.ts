@@ -300,7 +300,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     console.log(`[Blog Agent Workflow] Starting multi-agent pipeline for pillar: ${pillar}`);
     const researchParsed = await runResearchStep(pillar, settings);
     const writerParsed = await runWriterStep(pillar, researchParsed, settings);
-    const featuredImage = await runImageStep(writerParsed.imagePrompt, writerParsed.slug);
+    const featuredImage = await runImageStep(writerParsed.imagePrompt, writerParsed.slug, settings);
     const post = await runReviewerStep(pillar, writerParsed, featuredImage, settings);
     return post;
   } catch (err: any) {
@@ -516,9 +516,45 @@ export async function runWriterStep(
   return writerParsed;
 }
 
-export async function runImageStep(imagePrompt: string, slug: string): Promise<string> {
-  console.log(`[Image Creator Agent Step] Generating featured cover image using playgroundai/playground-v2.5 model...`);
-  
+export async function runImageStep(imagePrompt: string, slug: string, settings: any): Promise<string> {
+  const apiKey = settings?.openRouterApiKey;
+  const model = settings?.blogImageModel || "google/gemini-2.5-flash-image";
+
+  if (apiKey) {
+    try {
+      console.log(`[Image Creator Agent Step] Generating cover image via OpenRouter using model: ${model}...`);
+      const response = await fetch("https://openrouter.ai/api/v1/images", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "HTTP-Referer": "https://domainexpansion.in",
+          "X-Title": "Domain Expansion Blog System",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: model,
+          prompt: imagePrompt.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const b64Json = data?.data?.[0]?.b64_json;
+        if (b64Json) {
+          const buffer = Buffer.from(b64Json, "base64");
+          return await saveImageResilient(buffer, slug);
+        }
+      } else {
+        const errText = await response.text();
+        console.warn(`[Image Creator Agent Step] OpenRouter Image API failed with status ${response.status}: ${errText}`);
+      }
+    } catch (err) {
+      console.warn("[Image Creator Agent Step] Failed generating image via OpenRouter, falling back to Pollinations...", err);
+    }
+  }
+
+  // Fallback to Pollinations AI
+  console.log(`[Image Creator Agent Step] Generating cover image via Pollinations fallback...`);
   let featuredImage = "";
   const cleanPrompt = encodeURIComponent(imagePrompt.trim().substring(0, 180));
   const randomSeed = Math.floor(Math.random() * 100000);
@@ -527,12 +563,12 @@ export async function runImageStep(imagePrompt: string, slug: string): Promise<s
   try {
     featuredImage = await downloadAndProcessFallback(playgroundUrl, slug);
   } catch (err) {
-    console.warn("[Image Creator Agent Step] Playground v2.5 generation failed. Trying Flux model fallback...", err);
+    console.warn("[Image Creator Agent Step] Playground fallback failed. Trying Flux...", err);
     try {
       const fluxUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?model=flux&width=1024&height=576&nologo=true&seed=${randomSeed}`;
       featuredImage = await downloadAndProcessFallback(fluxUrl, slug);
     } catch (fluxErr) {
-      console.warn("[Image Creator Agent Step] Flux fallback failed as well, using direct image link fallback...", fluxErr);
+      console.warn("[Image Creator Agent Step] Flux fallback failed as well, using direct link...", fluxErr);
       featuredImage = playgroundUrl;
     }
   }

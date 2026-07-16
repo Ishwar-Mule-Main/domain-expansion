@@ -84,7 +84,7 @@ export default function BlogAgentDashboard() {
   const [openRouterApiKey, setOpenRouterApiKey] = useState<string>("");
   const [blogResearchModel, setBlogResearchModel] = useState<string>("mistralai/mistral-nemo:free");
   const [blogWriterModel, setBlogWriterModel] = useState<string>("qwen/qwen-2.5-72b-instruct:free");
-  const [blogImageModel, setBlogImageModel] = useState<string>("playgroundai/playground-v2.5");
+  const [blogImageModel, setBlogImageModel] = useState<string>("google/gemini-2.5-flash-image");
   const [blogReviewerModel, setBlogReviewerModel] = useState<string>("qwen/qwen3-coder:free");
   const [savingSettings, setSavingSettings] = useState<boolean>(false);
   const [openRouterModels, setOpenRouterModels] = useState<{ id: string; name: string }[]>([]);
@@ -125,7 +125,7 @@ export default function BlogAgentDashboard() {
         setOpenRouterApiKey(settingsData.openRouterApiKey || "");
         setBlogResearchModel(settingsData.blogResearchModel || "mistralai/mistral-nemo:free");
         setBlogWriterModel(settingsData.blogWriterModel || "qwen/qwen-2.5-72b-instruct:free");
-        setBlogImageModel(settingsData.blogImageModel || "playgroundai/playground-v2.5");
+        setBlogImageModel(settingsData.blogImageModel || "google/gemini-2.5-flash-image");
         setBlogReviewerModel(settingsData.blogReviewerModel || "qwen/qwen3-coder:free");
       }
     } catch (err) {
@@ -1353,11 +1353,20 @@ export default function BlogAgentDashboard() {
                     onChange={(e) => setBlogImageModel(e.target.value)}
                     className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none cursor-pointer font-mono"
                   >
-                    <option value="playgroundai/playground-v2.5">Playground AI v2.5</option>
-                    <option value="flux">Flux Schnell</option>
-                    <option value="sana">Sana Model</option>
+                    {loadingModels ? (
+                      <option value="">Loading OpenRouter models...</option>
+                    ) : (
+                      openRouterModels.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))
+                    )}
+                    {blogImageModel && !openRouterModels.some((m) => m.id === blogImageModel) && (
+                      <option value={blogImageModel}>{blogImageModel}</option>
+                    )}
                   </select>
-                  <span className="text-[9px] text-[#888898]">Default: playgroundai/playground-v2.5</span>
+                  <span className="text-[9px] text-[#888898]">Default: google/gemini-2.5-flash-image</span>
                 </div>
 
                 <div className="flex flex-col gap-2">

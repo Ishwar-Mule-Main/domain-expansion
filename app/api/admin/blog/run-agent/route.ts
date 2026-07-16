@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         if (!imagePrompt || !slug) {
           return NextResponse.json({ success: false, message: "Missing imagePrompt or slug data for step 3." }, { status: 400 });
         }
-        const featuredImage = await runImageStep(imagePrompt, slug);
+        const featuredImage = await runImageStep(imagePrompt, slug, settings);
         return NextResponse.json({ success: true, step: 3, featuredImage });
       }
 
