@@ -159,23 +159,23 @@ async function fetchOpenRouterBlog(prompt: string, apiKey: string, model: string
   }
 }
 
-/**
- * Resilient JSON parsing helper that strips markdown ticks and sanitizes raw 
- * unescaped control characters (like literal newlines/tabs) inside string values.
- */
 function cleanAndParseJSON(jsonStr: string): any {
   let cleaned = jsonStr.trim();
-  if (cleaned.startsWith("```")) {
-    cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/, "").replace(/\s*```$/, "").trim();
+  
+  // Extract JSON block if surrounded by conversational text
+  const startIdx = cleaned.indexOf("{");
+  const endIdx = cleaned.lastIndexOf("}");
+  if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+    cleaned = cleaned.substring(startIdx, endIdx + 1);
   }
 
   try {
     return JSON.parse(cleaned);
   } catch (err: any) {
-    console.warn("[JSON Clean Parser] Standard JSON.parse failed. Attempting sanitization of control characters and backslashes...", err);
+    console.warn("[JSON Clean Parser] Standard JSON.parse failed. Attempting sanitization and repair...", err);
     try {
-      // Replace raw newlines, carriage returns, and tabs inside double-quoted string literals
-      const sanitized = cleaned.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"/g, (match, p1) => {
+      // 1. Replace raw newlines, carriage returns, and tabs inside double-quoted string literals
+      let sanitized = cleaned.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"/g, (match, p1) => {
         let val = p1
           .replace(/\n/g, "\\n")
           .replace(/\r/g, "\\r")
@@ -184,9 +184,62 @@ function cleanAndParseJSON(jsonStr: string): any {
         val = val.replace(/\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})/g, "\\\\");
         return `"${val}"`;
       });
-      return JSON.parse(sanitized);
-    } catch (innerErr: any) {
-      console.error("[JSON Clean Parser] Sanitization failed as well:", innerErr);
+
+      // 2. Heuristic for truncated JSON (unterminated strings/braces)
+      let repaired = sanitized.trim();
+      const quoteCount = (repaired.match(/"/g) || []).length;
+      if (quoteCount % 2 !== 0) {
+        repaired += '"';
+      }
+      const openBraces = (repaired.match(/\{/g) || []).length;
+      const closeBraces = (repaired.match(/\}/g) || []).length;
+      if (openBraces > closeBraces) {
+        repaired += "}".repeat(openBraces - closeBraces);
+      }
+
+      // 3. Try parsing the repaired string
+      try {
+        return JSON.parse(repaired);
+      } catch (innerErr) {
+        console.warn("[JSON Clean Parser] Repaired JSON parsing failed. Attempting structural quote protection...", innerErr);
+        
+        // Heuristically escape double quotes inside values (e.g. unescaped HTML quotes)
+        const knownKeys = [
+          "selectedTopic", "reasoning", "primaryKeyword", "clusterKeywords", "outline",
+          "title", "slug", "excerpt", "bodyHTML", "readTime", "schemaMarkup", "imagePrompt",
+          "isApproved", "errors"
+        ];
+        
+        const KEY_QUOTE = "\uE000";
+        const VAL_QUOTE = "\uE001";
+        
+        let quoteRepaired = repaired;
+        // Protect keys
+        for (const key of knownKeys) {
+          const regex = new RegExp(`"${key}"\\s*:`, "g");
+          quoteRepaired = quoteRepaired.replace(regex, `${KEY_QUOTE}${key}${KEY_QUOTE}:`);
+        }
+        // Protect value starts
+        quoteRepaired = quoteRepaired.replace(/:\s*"/g, `:${VAL_QUOTE}`);
+        // Protect value ends
+        quoteRepaired = quoteRepaired.replace(/"\s*,/g, `${VAL_QUOTE},`);
+        quoteRepaired = quoteRepaired.replace(/"\s*\}/g, `${VAL_QUOTE}}`);
+        quoteRepaired = quoteRepaired.replace(/"\s*\]/g, `${VAL_QUOTE}]`);
+        // Protect array starts & item separators
+        quoteRepaired = quoteRepaired.replace(/\[\s*"/g, `[${VAL_QUOTE}`);
+        quoteRepaired = quoteRepaired.replace(/,\s*"/g, `,${VAL_QUOTE}`);
+        
+        // Escape remaining double quotes (which are literals inside the string values)
+        quoteRepaired = quoteRepaired.replace(/"/g, '\\"');
+        
+        // Restore structural quotes
+        quoteRepaired = quoteRepaired.split(KEY_QUOTE).join('"');
+        quoteRepaired = quoteRepaired.split(VAL_QUOTE).join('"');
+        
+        return JSON.parse(quoteRepaired);
+      }
+    } catch (finalErr: any) {
+      console.error("[JSON Clean Parser] All parsing and repair attempts failed:", finalErr);
       throw new Error(`Invalid JSON format: ${err.message || String(err)}`);
     }
   }
