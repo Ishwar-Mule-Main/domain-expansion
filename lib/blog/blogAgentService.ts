@@ -186,8 +186,16 @@ function cleanAndParseJSON(jsonStr: string): any {
         if (insideString) {
           if (escaped) {
             // Valid JSON escape check
-            if (char === '"' || char === '\\' || char === '/' || char === 'b' || char === 'f' || char === 'n' || char === 'r' || char === 't' || char === 'u') {
+            if (char === '"' || char === '\\' || char === '/' || char === 'b' || char === 'f' || char === 'n' || char === 'r' || char === 't') {
               repaired += '\\' + char;
+            } else if (char === 'u') {
+              // Verify u is followed by exactly 4 hex digits (e.g. \u0020)
+              const next4 = cleaned.substring(i + 1, i + 5);
+              if (/^[0-9a-fA-F]{4}$/.test(next4)) {
+                repaired += '\\u';
+              } else {
+                repaired += '\\\\u';
+              }
             } else {
               repaired += '\\\\' + char;
             }
