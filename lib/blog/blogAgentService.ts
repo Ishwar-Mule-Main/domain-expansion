@@ -283,13 +283,11 @@ function cleanAndParseJSON(jsonStr: string): any {
  * Generate a daily blog post using a four-agent pipeline:
  * 1. Research Agent (Mistral Nemo Free): Searches Q&A platforms, scans for business growth value, generates outline.
  * 2. Blog Writer Agent (Qwen 2.5 72B Free): Writes deep-dive 3000-word post using blogagentprompt.txt and outputs image prompt.
- * 3. Image Creator Agent (Playground v2.5): Calls Pollinations to generate stylized vector-like featured image.
+* 3. Image Creator Agent (Playground v2.5): Calls Pollinations to generate stylized vector-like featured image.
  * 4. Reviewer Agent (Prisma): Performs alignment checks and upserts the post to database & sitemap.
  */
 export async function generatePillarBlog(pillar: string, settings: any) {
   const openRouterApiKey = settings.openRouterApiKey;
-
-  // Resilient check: require OpenRouter API key
   if (!openRouterApiKey) {
     const err = "Failed: OpenRouter API Key is missing.";
     await prisma.blogAgentLog.create({
@@ -298,28 +296,48 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     throw new Error(err);
   }
 
+  try {
+    console.log(`[Blog Agent Workflow] Starting multi-agent pipeline for pillar: ${pillar}`);
+    const researchParsed = await runResearchStep(pillar, settings);
+    const writerParsed = await runWriterStep(pillar, researchParsed, settings);
+    const featuredImage = await runImageStep(writerParsed.imagePrompt, writerParsed.slug);
+    const post = await runReviewerStep(pillar, writerParsed, featuredImage, settings);
+    return post;
+  } catch (err: any) {
+    console.error(`[Blog Agent] Generation failed for pillar ${pillar}:`, err);
+    await prisma.blogAgentLog.create({
+      data: {
+        piller: pillar,
+        status: "FAILED",
+        errorMessage: err.message || String(err),
+      },
+    });
+    throw err;
+  }
+}
+
+export async function runResearchStep(pillar: string, settings: any): Promise<ResearchOutlineResult> {
+  const openRouterApiKey = settings.openRouterApiKey;
+  if (!openRouterApiKey) {
+    throw new Error("Failed: OpenRouter API Key is missing.");
+  }
+
   let pillarName = "";
-  let categoryLabel = "";
   switch (pillar) {
     case "marketing":
       pillarName = "Marketing Expansion (SEO, GEO, AIO, Paid Ads, Social Media growth, performance marketing, content strategy)";
-      categoryLabel = "SEO & Marketing";
       break;
     case "development":
       pillarName = "Development Expansion (Next.js, high-speed interfaces, APIs, SaaS architectures, TailwindCSS, full-stack, headless CMS, Postgres)";
-      categoryLabel = "Development";
       break;
     case "design":
       pillarName = "Design Expansion (Brand identity, premium UI/UX, Figma design systems, visual assets, custom website design)";
-      categoryLabel = "Design Systems";
       break;
     case "ai":
       pillarName = "AI Expansion (LLM integration, n8n/Make automation workflows, RAG, custom agents, intelligent automation)";
-      categoryLabel = "AI & Automation";
       break;
     default:
       pillarName = "Digital Strategy & Technology";
-      categoryLabel = "Agency News";
   }
 
   try {
@@ -407,18 +425,31 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     throw new Error("Research Agent failed to produce valid topic outline payload.");
   }
 
-  console.log(`[Research Agent] Outline completed. Topic: "${researchParsed.selectedTopic}"`);
+  console.log(`[Research Agent Step] Outline completed. Topic: "${researchParsed.selectedTopic}"`);
+  return researchParsed;
+  } catch (err: any) {
+    console.error(`[Research Agent Step] Outline generation failed:`, err);
+    throw err;
+  }
+}
 
-  // ==========================================
-  // AGENT 2: BLOG WRITER AGENT (Qwen 2.5 72B Free)
-  // ==========================================
-  console.log(`[Blog Writer Agent] Reading blogagentprompt.txt styling guidelines...`);
+export async function runWriterStep(
+  pillar: string,
+  researchParsed: ResearchOutlineResult,
+  settings: any
+): Promise<BlogGenerationResult> {
+  const openRouterApiKey = settings.openRouterApiKey;
+  if (!openRouterApiKey) {
+    throw new Error("Failed: OpenRouter API Key is missing.");
+  }
+
+  console.log(`[Blog Writer Agent Step] Reading blogagentprompt.txt styling guidelines...`);
   const promptFilePath = path.join(process.cwd(), "blogagentprompt.txt");
   let systemInstructions = "";
   try {
     systemInstructions = await fs.readFile(promptFilePath, "utf-8");
   } catch (err) {
-    console.warn("[Blog Writer Agent] blogagentprompt.txt not read, using standard rules.", err);
+    console.warn("[Blog Writer Agent Step] blogagentprompt.txt not read, using standard rules.", err);
     systemInstructions = "Write a comprehensive, professional blog post matching the design system and SEO/GEO/AIO requirements.";
   }
 
@@ -462,17 +493,17 @@ export async function generatePillarBlog(pillar: string, settings: any) {
 
   if (!useFallbackWriter) {
     try {
-      console.log(`[Blog Writer Agent] Writing blog using qwen/qwen-2.5-72b-instruct:free...`);
-      const qwenResponse = await fetchOpenRouterBlog(writerPrompt, openRouterApiKey, "qwen/qwen-2.5-72b-instruct:free");
+      console.log(`[Blog Writer Agent Step] Writing blog using ${settings.blogWriterModel || "qwen/qwen-2.5-72b-instruct:free"}...`);
+      const qwenResponse = await fetchOpenRouterBlog(writerPrompt, openRouterApiKey, settings.blogWriterModel || "qwen/qwen-2.5-72b-instruct:free");
       writerParsed = cleanAndParseJSON(qwenResponse);
     } catch (err) {
-      console.warn("[Blog Writer Agent] Qwen 72B failed or JSON invalid. Falling back to Gemini...", err);
+      console.warn("[Blog Writer Agent Step] Primary writer failed. Falling back to free router...", err);
       useFallbackWriter = true;
     }
   }
 
   if (useFallbackWriter) {
-    console.log(`[Blog Writer Agent] Running fallback writing agent via OpenRouter (openrouter/free)...`);
+    console.log(`[Blog Writer Agent Step] Running fallback writing agent via OpenRouter (openrouter/free)...`);
     const fallbackText = await fetchOpenRouterBlog(writerPrompt, openRouterApiKey, "openrouter/free", true);
     writerParsed = cleanAndParseJSON(fallbackText);
   }
@@ -481,11 +512,75 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     throw new Error("Blog Writer Agent failed to produce valid article content payload.");
   }
 
-  console.log(`[Blog Writer Agent] Article generation complete. Title: "${writerParsed.title}"`);
+  console.log(`[Blog Writer Agent Step] Article generation complete. Title: "${writerParsed.title}"`);
+  return writerParsed;
+}
 
-  // ==========================================
-  // FEEDBACK & REVISION LOOP (Agent 2 <-> Agent 4)
-  // ==========================================
+export async function runImageStep(imagePrompt: string, slug: string): Promise<string> {
+  console.log(`[Image Creator Agent Step] Generating featured cover image using playgroundai/playground-v2.5 model...`);
+  
+  let featuredImage = "";
+  const cleanPrompt = encodeURIComponent(imagePrompt.trim().substring(0, 180));
+  const randomSeed = Math.floor(Math.random() * 100000);
+  const playgroundUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?model=playground-v2.5&width=1024&height=576&nologo=true&seed=${randomSeed}`;
+
+  try {
+    featuredImage = await downloadAndProcessFallback(playgroundUrl, slug);
+  } catch (err) {
+    console.warn("[Image Creator Agent Step] Playground v2.5 generation failed. Trying Flux model fallback...", err);
+    try {
+      const fluxUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?model=flux&width=1024&height=576&nologo=true&seed=${randomSeed}`;
+      featuredImage = await downloadAndProcessFallback(fluxUrl, slug);
+    } catch (fluxErr) {
+      console.warn("[Image Creator Agent Step] Flux fallback failed as well, using direct image link fallback...", fluxErr);
+      featuredImage = playgroundUrl;
+    }
+  }
+
+  if (!featuredImage) {
+    featuredImage = playgroundUrl;
+  }
+  return featuredImage;
+}
+
+export async function runReviewerStep(
+  pillar: string,
+  writerParsed: BlogGenerationResult,
+  featuredImage: string,
+  settings: any
+): Promise<any> {
+  const openRouterApiKey = settings.openRouterApiKey;
+  if (!openRouterApiKey) {
+    throw new Error("Failed: OpenRouter API Key is missing.");
+  }
+
+  let categoryLabel = "";
+  switch (pillar) {
+    case "marketing":
+      categoryLabel = "SEO & Marketing";
+      break;
+    case "development":
+      categoryLabel = "Development";
+      break;
+    case "design":
+      categoryLabel = "Design Systems";
+      break;
+    case "ai":
+      categoryLabel = "AI & Automation";
+      break;
+    default:
+      categoryLabel = "Agency News";
+  }
+
+  console.log(`[Reviewer Agent Step] Reading blogagentprompt.txt styling guidelines...`);
+  const promptFilePath = path.join(process.cwd(), "blogagentprompt.txt");
+  let systemInstructions = "";
+  try {
+    systemInstructions = await fs.readFile(promptFilePath, "utf-8");
+  } catch (err) {
+    systemInstructions = "Write a comprehensive, professional blog post matching the design system and SEO/GEO/AIO requirements.";
+  }
+
   let reviewerParsed = {
     isApproved: true,
     errors: [] as string[],
@@ -499,9 +594,11 @@ export async function generatePillarBlog(pillar: string, settings: any) {
   let attempt = 0;
   let approved = false;
 
+  let currentWriterParsed = { ...writerParsed };
+
   while (attempt < maxAttempts) {
     attempt++;
-    console.log(`[Reviewer Agent] Reviewing draft (Attempt ${attempt}/${maxAttempts}) using ${settings.blogReviewerModel || "qwen/qwen3-coder:free"}...`);
+    console.log(`[Reviewer Agent Step] Reviewing draft (Attempt ${attempt}/${maxAttempts})...`);
 
     const reviewerPrompt = `
       You are an Automated Chief Editorial Bot and CMS Publisher for Domain Expansion. Your job is to review a provided blog draft against our strict rules and output a verified, publication-ready Markdown layout.
@@ -516,10 +613,10 @@ export async function generatePillarBlog(pillar: string, settings: any) {
       If there are violations, set "isApproved" to false and list all specific violations in the "errors" array so they can be logged.
 
       Input Blog Details to Review:
-      - Title: ${writerParsed.title}
-      - Excerpt: ${writerParsed.excerpt}
-      - BodyHTML: ${writerParsed.bodyHTML}
-      - SchemaMarkup: ${writerParsed.schemaMarkup}
+      - Title: ${currentWriterParsed.title}
+      - Excerpt: ${currentWriterParsed.excerpt}
+      - BodyHTML: ${currentWriterParsed.bodyHTML}
+      - SchemaMarkup: ${currentWriterParsed.schemaMarkup}
 
       Return your output strictly as a JSON object containing:
       {
@@ -542,31 +639,31 @@ export async function generatePillarBlog(pillar: string, settings: any) {
         );
         reviewerParsed = cleanAndParseJSON(reviewerResponse);
       } catch (err) {
-        console.warn("[Reviewer Agent] Qwen Coder failed or JSON invalid, using fallback parsing...", err);
+        console.warn("[Reviewer Agent Step] Qwen Coder failed. Falling back to free router...", err);
         useReviewerFallback = true;
       }
     }
 
     if (useReviewerFallback) {
       try {
-        console.log("[Reviewer Agent] Running fallback reviewer via OpenRouter (openrouter/free)...");
+        console.log("[Reviewer Agent Step] Running fallback reviewer via OpenRouter (openrouter/free)...");
         const fallbackText = await fetchOpenRouterBlog(reviewerPrompt, openRouterApiKey, "openrouter/free", true);
         reviewerParsed = cleanAndParseJSON(fallbackText);
       } catch (err) {
-        console.warn("[Reviewer Agent] OpenRouter fallback failed, utilizing direct writer output.", err);
+        console.warn("[Reviewer Agent Step] OpenRouter fallback failed, utilizing direct writer output.", err);
       }
     }
 
     if (reviewerParsed.isApproved) {
       approved = true;
-      console.log(`[Reviewer Agent] Draft approved on attempt ${attempt}!`);
+      console.log(`[Reviewer Agent Step] Draft approved on attempt ${attempt}!`);
       break;
     }
 
-    console.warn(`[Reviewer Agent] Draft REJECTED on attempt ${attempt}. Violations:\n${(reviewerParsed.errors || []).map(e => `- ${e}`).join("\n")}`);
+    console.warn(`[Reviewer Agent Step] Draft REJECTED on attempt ${attempt}. Violations:\n${(reviewerParsed.errors || []).map(e => `- ${e}`).join("\n")}`);
 
     if (attempt < maxAttempts) {
-      console.log(`[Blog Writer Agent] Reworking content to address reviewer feedback (Attempt ${attempt + 1}/${maxAttempts})...`);
+      console.log(`[Blog Writer Agent Step] Reworking content to address reviewer feedback (Attempt ${attempt + 1}/${maxAttempts})...`);
       const revisionPrompt = `
         ${systemInstructions}
 
@@ -578,10 +675,10 @@ export async function generatePillarBlog(pillar: string, settings: any) {
         ${(reviewerParsed.errors || ["Failed design/editorial criteria validation checks."]).map(e => `- ${e}`).join("\n")}
 
         Previous Rejected Draft:
-        - Title: ${writerParsed.title}
-        - Excerpt: ${writerParsed.excerpt}
-        - BodyHTML: ${writerParsed.bodyHTML}
-        - SchemaMarkup: ${writerParsed.schemaMarkup}
+        - Title: ${currentWriterParsed.title}
+        - Excerpt: ${currentWriterParsed.excerpt}
+        - BodyHTML: ${currentWriterParsed.bodyHTML}
+        - SchemaMarkup: ${currentWriterParsed.schemaMarkup}
 
         Return your output strictly as a JSON object containing:
         {
@@ -603,7 +700,7 @@ export async function generatePillarBlog(pillar: string, settings: any) {
           settings.blogWriterModel || "qwen/qwen-2.5-72b-instruct:free"
         );
       } catch (err) {
-        console.warn("[Blog Writer Agent] Rework failed via Qwen, trying fallback...", err);
+        console.warn("[Blog Writer Agent Step] Rework failed via Qwen, trying fallback...", err);
         try {
           revisedResponse = await fetchOpenRouterBlog(
             revisionPrompt,
@@ -612,11 +709,11 @@ export async function generatePillarBlog(pillar: string, settings: any) {
             true
           );
         } catch (fbErr) {
-          console.error("[Blog Writer Agent] Fallback rework failed too:", fbErr);
+          console.error("[Blog Writer Agent Step] Fallback rework failed too:", fbErr);
         }
       }
       if (revisedResponse) {
-        writerParsed = cleanAndParseJSON(revisedResponse);
+        currentWriterParsed = cleanAndParseJSON(revisedResponse);
       }
     }
   }
@@ -626,39 +723,10 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     throw new Error(errorMsg);
   }
 
-  const finalBodyHTML = reviewerParsed.bodyHTML || writerParsed.bodyHTML;
-  const finalTitle = reviewerParsed.title || writerParsed.title;
-  const finalExcerpt = reviewerParsed.excerpt || writerParsed.excerpt;
-  const finalSchema = reviewerParsed.schemaMarkup || writerParsed.schemaMarkup;
-
-  // ==========================================
-  // AGENT 3: FEATURED IMAGE CREATOR (Playground v2.5)
-  // ==========================================
-  console.log(`[Image Creator Agent] Generating featured cover image using playgroundai/playground-v2.5 model...`);
-  
-  let featuredImage = "";
-  const cleanPrompt = encodeURIComponent(writerParsed.imagePrompt.trim().substring(0, 180));
-  const randomSeed = Math.floor(Math.random() * 100000);
-  const playgroundUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?model=playground-v2.5&width=1024&height=576&nologo=true&seed=${randomSeed}`;
-
-  try {
-    featuredImage = await downloadAndProcessFallback(playgroundUrl, writerParsed.slug);
-  } catch (err) {
-    console.warn("[Image Creator Agent] Playground v2.5 generation failed. Trying Flux model fallback...", err);
-    try {
-      const fluxUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?model=flux&width=1024&height=576&nologo=true&seed=${randomSeed}`;
-      featuredImage = await downloadAndProcessFallback(fluxUrl, writerParsed.slug);
-    } catch (fluxErr) {
-      console.warn("[Image Creator Agent] Flux fallback failed as well, using direct image link fallback...", fluxErr);
-      featuredImage = playgroundUrl;
-    }
-  }
-
-  // Failover default
-  if (!featuredImage) {
-    console.warn("[Image Creator Agent] Both Playground and Gemini failed. Using direct image link fallback...");
-    featuredImage = playgroundUrl;
-  }
+  const finalBodyHTML = reviewerParsed.bodyHTML || currentWriterParsed.bodyHTML;
+  const finalTitle = reviewerParsed.title || currentWriterParsed.title;
+  const finalExcerpt = reviewerParsed.excerpt || currentWriterParsed.excerpt;
+  const finalSchema = reviewerParsed.schemaMarkup || currentWriterParsed.schemaMarkup;
 
   const formattedDate = new Date().toLocaleDateString("en-US", {
     month: "long",
@@ -667,26 +735,26 @@ export async function generatePillarBlog(pillar: string, settings: any) {
   });
 
   const post = await prisma.blogPost.upsert({
-    where: { slug: writerParsed.slug },
+    where: { slug: currentWriterParsed.slug },
     update: {
       title: finalTitle,
       excerpt: finalExcerpt,
       category: pillar,
       categoryLabel,
       date: formattedDate,
-      readTime: writerParsed.readTime,
+      readTime: currentWriterParsed.readTime,
       featuredImage,
       bodyHTML: finalBodyHTML,
       schemaMarkup: finalSchema,
     },
     create: {
-      slug: writerParsed.slug,
+      slug: currentWriterParsed.slug,
       title: finalTitle,
       excerpt: finalExcerpt,
       category: pillar,
       categoryLabel,
       date: formattedDate,
-      readTime: writerParsed.readTime,
+      readTime: currentWriterParsed.readTime,
       featuredImage,
       bodyHTML: finalBodyHTML,
       schemaMarkup: finalSchema,
@@ -709,19 +777,8 @@ export async function generatePillarBlog(pillar: string, settings: any) {
     },
   });
 
-  console.log(`[Reviewer Agent] Successfully published article: "${post.title}" at /blog/${post.slug}`);
+  console.log(`[Reviewer Agent Step] Successfully published article: "${post.title}" at /blog/${post.slug}`);
   return post;
-  } catch (err: any) {
-    console.error(`[Blog Agent] Generation failed for pillar ${pillar}:`, err);
-    await prisma.blogAgentLog.create({
-      data: {
-        piller: pillar,
-        status: "FAILED",
-        errorMessage: err.message || String(err),
-      },
-    });
-    throw err;
-  }
 }
 
 /**

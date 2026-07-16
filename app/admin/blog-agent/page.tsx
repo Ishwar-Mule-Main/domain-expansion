@@ -19,7 +19,10 @@ import {
   Trash2,
   BookOpen,
   Newspaper,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Terminal,
+  Check,
+  Eye
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
@@ -67,6 +70,15 @@ export default function BlogAgentDashboard() {
   const [blogAutopilot, setBlogAutopilot] = useState<boolean>(true);
   const [togglingAutopilot, setTogglingAutopilot] = useState<boolean>(false);
   const [regeneratingPostId, setRegeneratingPostId] = useState<string | null>(null);
+
+  // Step-by-step states
+  const [selectedConsolePillar, setSelectedConsolePillar] = useState<string | null>(null);
+  const [currentRunningStep, setCurrentRunningStep] = useState<number | null>(null);
+  const [stepResearchParsed, setStepResearchParsed] = useState<any>(null);
+  const [stepWriterParsed, setStepWriterParsed] = useState<any>(null);
+  const [stepFeaturedImage, setStepFeaturedImage] = useState<string | null>(null);
+  const [stepReviewerPost, setStepReviewerPost] = useState<any>(null);
+  const [stepError, setStepError] = useState<string | null>(null);
 
   // Model & API Settings states
   const [openRouterApiKey, setOpenRouterApiKey] = useState<string>("");
@@ -223,6 +235,123 @@ export default function BlogAgentDashboard() {
       alert(`Error triggering agent: ${err.message || String(err)}`);
     } finally {
       setRunningPillar(null);
+    }
+  };
+
+  const runStep1Research = async (pillar: string) => {
+    setCurrentRunningStep(1);
+    setStepError(null);
+    setStepResearchParsed(null);
+    setStepWriterParsed(null);
+    setStepFeaturedImage(null);
+    setStepReviewerPost(null);
+
+    try {
+      const res = await fetch("/api/admin/blog/run-agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pillar, step: 1 }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStepResearchParsed(data.researchParsed);
+      } else {
+        setStepError(data.error || "Failed running Step 1: Research Agent.");
+      }
+    } catch (err: any) {
+      setStepError(err.message || String(err));
+    } finally {
+      setCurrentRunningStep(null);
+    }
+  };
+
+  const runStep2Writer = async (pillar: string) => {
+    if (!stepResearchParsed) return;
+    setCurrentRunningStep(2);
+    setStepError(null);
+    setStepWriterParsed(null);
+    setStepFeaturedImage(null);
+    setStepReviewerPost(null);
+
+    try {
+      const res = await fetch("/api/admin/blog/run-agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pillar, step: 2, researchParsed: stepResearchParsed }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStepWriterParsed(data.writerParsed);
+      } else {
+        setStepError(data.error || "Failed running Step 2: Blog Writer Agent.");
+      }
+    } catch (err: any) {
+      setStepError(err.message || String(err));
+    } finally {
+      setCurrentRunningStep(null);
+    }
+  };
+
+  const runStep3Image = async (pillar: string) => {
+    if (!stepWriterParsed) return;
+    setCurrentRunningStep(3);
+    setStepError(null);
+    setStepFeaturedImage(null);
+    setStepReviewerPost(null);
+
+    try {
+      const res = await fetch("/api/admin/blog/run-agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          pillar, 
+          step: 3, 
+          imagePrompt: stepWriterParsed.imagePrompt, 
+          slug: stepWriterParsed.slug 
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStepFeaturedImage(data.featuredImage);
+      } else {
+        setStepError(data.error || "Failed running Step 3: Image Creator Agent.");
+      }
+    } catch (err: any) {
+      setStepError(err.message || String(err));
+    } finally {
+      setCurrentRunningStep(null);
+    }
+  };
+
+  const runStep4Reviewer = async (pillar: string) => {
+    if (!stepWriterParsed || !stepFeaturedImage) return;
+    setCurrentRunningStep(4);
+    setStepError(null);
+    setStepReviewerPost(null);
+
+    try {
+      const res = await fetch("/api/admin/blog/run-agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          pillar, 
+          step: 4, 
+          writerParsed: stepWriterParsed, 
+          featuredImage: stepFeaturedImage 
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStepReviewerPost(data.post);
+        alert(`Successfully generated and published: "${data.post.title}"!`);
+        await loadHistory();
+      } else {
+        setStepError(data.error || "Failed running Step 4: Reviewer Agent.");
+      }
+    } catch (err: any) {
+      setStepError(err.message || String(err));
+    } finally {
+      setCurrentRunningStep(null);
     }
   };
 
@@ -504,10 +633,11 @@ export default function BlogAgentDashboard() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6">
                 {pillars.map((pil) => {
                   const isRunning = runningPillar === pil.id;
                   const count = posts.filter(p => p.category === pil.id).length;
+                  const isConsoleOpen = selectedConsolePillar === pil.id;
                   return (
                     <div 
                       key={pil.id} 
@@ -524,23 +654,306 @@ export default function BlogAgentDashboard() {
                         <p className="text-xs text-[#ACACB8] leading-relaxed mb-6">{pil.desc}</p>
                       </div>
 
-                      <Button
-                        disabled={!!runningPillar}
-                        onClick={() => triggerAgentRun(pil.id)}
-                        className="w-full font-mono text-xs tracking-wider uppercase py-2 flex items-center justify-center gap-1.5 bg-[#FF6200]/10 hover:bg-[#FF6200]/20 text-[#FF8C42] border border-[#FF6200]/20 cursor-none"
-                      >
-                        {isRunning ? (
-                          <>
-                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                            Running Research...
-                          </>
-                        ) : (
-                          <>
-                            <Play className="h-3.5 w-3.5" />
-                            Run AI Generator
-                          </>
-                        )}
-                      </Button>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Button
+                          disabled={!!runningPillar || !!currentRunningStep}
+                          onClick={() => triggerAgentRun(pil.id)}
+                          className="w-full font-mono text-xs tracking-wider uppercase py-2 flex items-center justify-center gap-1.5 bg-[#FF6200]/10 hover:bg-[#FF6200]/20 text-[#FF8C42] border border-[#FF6200]/20 cursor-none"
+                        >
+                          {isRunning ? (
+                            <>
+                              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                              Running Autopilot...
+                            </>
+                          ) : (
+                            <>
+                              <Play className="h-3.5 w-3.5" />
+                              Run Autopilot (Full)
+                            </>
+                          )}
+                        </Button>
+
+                        <Button
+                          disabled={!!runningPillar || (!!currentRunningStep && !isConsoleOpen)}
+                          onClick={() => {
+                            if (isConsoleOpen) {
+                              setSelectedConsolePillar(null);
+                              setStepResearchParsed(null);
+                              setStepWriterParsed(null);
+                              setStepFeaturedImage(null);
+                              setStepReviewerPost(null);
+                              setStepError(null);
+                            } else {
+                              setSelectedConsolePillar(pil.id);
+                              setStepResearchParsed(null);
+                              setStepWriterParsed(null);
+                              setStepFeaturedImage(null);
+                              setStepReviewerPost(null);
+                              setStepError(null);
+                            }
+                          }}
+                          className={`w-full font-mono text-xs tracking-wider uppercase py-2 flex items-center justify-center gap-1.5 cursor-none transition-all ${
+                            isConsoleOpen 
+                              ? "bg-[#FF6200] hover:bg-[#FF8C42] text-white border border-[#FF6200]" 
+                              : "bg-[#888898]/10 hover:bg-[#888898]/20 text-[#ACACB8] border border-[#888898]/20"
+                          }`}
+                        >
+                          <Terminal className="h-3.5 w-3.5" />
+                          {isConsoleOpen ? "Close Console" : "Step-by-Step Console"}
+                        </Button>
+                      </div>
+
+                      {/* Expandable Step-by-Step console */}
+                      {isConsoleOpen && (
+                        <div className="mt-6 p-4 rounded-xl border border-[#2E2E2E] bg-black/50 text-left flex flex-col gap-4">
+                          <div className="flex justify-between items-center border-b border-[#2E2E2E]/60 pb-2">
+                            <span className="font-mono text-xs font-bold text-[#FF8C42] uppercase tracking-wider flex items-center gap-1.5">
+                              <Terminal className="h-4 w-4" /> Agent Console: {pil.label}
+                            </span>
+                            <button 
+                              onClick={() => {
+                                setSelectedConsolePillar(null);
+                                setStepResearchParsed(null);
+                                setStepWriterParsed(null);
+                                setStepFeaturedImage(null);
+                                setStepReviewerPost(null);
+                                setStepError(null);
+                              }}
+                              className="text-[10px] font-mono text-[#888898] hover:text-white uppercase"
+                            >
+                              Close Console
+                            </button>
+                          </div>
+
+                          {stepError && (
+                            <div className="p-3 rounded-lg border border-red-500/20 bg-red-500/10 text-xs text-red-400 font-mono flex items-start gap-2">
+                              <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                              <div>
+                                <span className="font-bold">Error:</span> {stepError}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* STEP 1: RESEARCH */}
+                          <div className="border border-[#2E2E2E]/60 rounded-lg p-3 bg-white/5">
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <div className={`h-5 w-5 rounded-full flex items-center justify-center font-mono text-[10px] font-bold ${
+                                  stepResearchParsed ? "bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30" : "bg-[#2E2E2E] text-[#ACACB8]"
+                                }`}>
+                                  {stepResearchParsed ? <Check className="h-3 w-3" /> : "1"}
+                                </div>
+                                <span className="text-xs font-bold text-white font-mono uppercase">Step 1: Research Agent</span>
+                              </div>
+                              <Badge variant={stepResearchParsed ? "success" : (currentRunningStep === 1 ? "orange" : "dark")} className="text-[9px]">
+                                {stepResearchParsed ? "Completed" : (currentRunningStep === 1 ? "Running" : "Pending")}
+                              </Badge>
+                            </div>
+
+                            {currentRunningStep === 1 && (
+                              <div className="mt-2 text-[10px] text-[#888898] font-mono flex items-center gap-2 pl-7 animate-pulse">
+                                <RefreshCw className="h-3 w-3 animate-spin text-[#FF6200]" />
+                                Analyzing discussions, scanning business value, generating outline...
+                              </div>
+                            )}
+
+                            {stepResearchParsed && (
+                              <div className="mt-3 pl-7 border-l-2 border-[#2E2E2E]/60 flex flex-col gap-2">
+                                <div className="text-[11px] text-white">
+                                  <span className="text-[#888898] font-mono uppercase block text-[9px] mb-0.5">Selected Topic:</span>
+                                  <span className="font-bold">{stepResearchParsed.selectedTopic}</span>
+                                </div>
+                                <div className="text-[11px] text-white">
+                                  <span className="text-[#888898] font-mono uppercase block text-[9px] mb-0.5">Primary Keyword:</span>
+                                  <span className="font-mono bg-white/5 py-0.5 px-1.5 rounded">{stepResearchParsed.primaryKeyword}</span>
+                                </div>
+                                <div className="text-[11px] text-white">
+                                  <span className="text-[#888898] font-mono uppercase block text-[9px] mb-0.5">Reasoning:</span>
+                                  <p className="text-[#ACACB8]">{stepResearchParsed.reasoning}</p>
+                                </div>
+                                
+                                <details className="mt-1">
+                                  <summary className="text-[10px] font-mono text-[#FF8C42] cursor-pointer hover:underline uppercase select-none">
+                                    View Generated Outline
+                                  </summary>
+                                  <pre className="mt-2 p-2 bg-black/40 border border-[#2E2E2E] rounded text-[10px] font-mono text-white max-h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                                    {stepResearchParsed.outline}
+                                  </pre>
+                                </details>
+                              </div>
+                            )}
+
+                            {!stepResearchParsed && currentRunningStep === null && (
+                              <div className="mt-3 pl-7">
+                                <Button
+                                  onClick={() => runStep1Research(pil.id)}
+                                  className="font-mono text-[10px] py-1 px-3 bg-[#FF6200] hover:bg-[#FF8C42] text-white cursor-none"
+                                >
+                                  Trigger Research Agent
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* STEP 2: WRITER */}
+                          <div className={`border border-[#2E2E2E]/60 rounded-lg p-3 bg-white/5 ${!stepResearchParsed ? "opacity-40" : ""}`}>
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <div className={`h-5 w-5 rounded-full flex items-center justify-center font-mono text-[10px] font-bold ${
+                                  stepWriterParsed ? "bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30" : "bg-[#2E2E2E] text-[#ACACB8]"
+                                }`}>
+                                  {stepWriterParsed ? <Check className="h-3 w-3" /> : "2"}
+                                </div>
+                                <span className="text-xs font-bold text-white font-mono uppercase">Step 2: Blog Writer Agent</span>
+                              </div>
+                              <Badge variant={stepWriterParsed ? "success" : (currentRunningStep === 2 ? "orange" : "dark")} className="text-[9px]">
+                                {stepWriterParsed ? "Completed" : (currentRunningStep === 2 ? "Running" : "Pending")}
+                              </Badge>
+                            </div>
+
+                            {currentRunningStep === 2 && (
+                              <div className="mt-2 text-[10px] text-[#888898] font-mono flex items-center gap-2 pl-7 animate-pulse">
+                                <RefreshCw className="h-3 w-3 animate-spin text-[#FF6200]" />
+                                Generating detailed 3,000-word draft with schema & hooks...
+                              </div>
+                            )}
+
+                            {stepWriterParsed && (
+                              <div className="mt-3 pl-7 border-l-2 border-[#2E2E2E]/60 flex flex-col gap-2">
+                                <div className="text-[11px] text-white">
+                                  <span className="text-[#888898] font-mono uppercase block text-[9px] mb-0.5">Article Title:</span>
+                                  <span className="font-bold">{stepWriterParsed.title}</span>
+                                </div>
+                                <div className="text-[11px] text-white">
+                                  <span className="text-[#888898] font-mono uppercase block text-[9px] mb-0.5">Slug & Excerpt:</span>
+                                  <span className="font-mono text-[10px] block text-[#FF8C42]">/blog/{stepWriterParsed.slug}</span>
+                                  <p className="text-[#ACACB8] mt-1">{stepWriterParsed.excerpt}</p>
+                                </div>
+                                
+                                <details className="mt-1">
+                                  <summary className="text-[10px] font-mono text-[#FF8C42] cursor-pointer hover:underline uppercase select-none">
+                                    View Draft Content & HTML Preview
+                                  </summary>
+                                  <div className="mt-2 p-3 bg-black/60 border border-[#2E2E2E] rounded text-white max-h-60 overflow-y-auto leading-relaxed">
+                                    <div 
+                                      className="prose prose-invert prose-xs text-xs" 
+                                      dangerouslySetInnerHTML={{ __html: stepWriterParsed.bodyHTML }} 
+                                    />
+                                  </div>
+                                </details>
+                              </div>
+                            )}
+
+                            {stepResearchParsed && !stepWriterParsed && currentRunningStep === null && (
+                              <div className="mt-3 pl-7">
+                                <Button
+                                  onClick={() => runStep2Writer(pil.id)}
+                                  className="font-mono text-[10px] py-1 px-3 bg-[#FF6200] hover:bg-[#FF8C42] text-white cursor-none"
+                                >
+                                  Trigger Blog Writer Agent
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* STEP 3: IMAGE CREATOR */}
+                          <div className={`border border-[#2E2E2E]/60 rounded-lg p-3 bg-white/5 ${!stepWriterParsed ? "opacity-40" : ""}`}>
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <div className={`h-5 w-5 rounded-full flex items-center justify-center font-mono text-[10px] font-bold ${
+                                  stepFeaturedImage ? "bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30" : "bg-[#2E2E2E] text-[#ACACB8]"
+                                }`}>
+                                  {stepFeaturedImage ? <Check className="h-3 w-3" /> : "3"}
+                                </div>
+                                <span className="text-xs font-bold text-white font-mono uppercase">Step 3: Image Creator Agent</span>
+                              </div>
+                              <Badge variant={stepFeaturedImage ? "success" : (currentRunningStep === 3 ? "orange" : "dark")} className="text-[9px]">
+                                {stepFeaturedImage ? "Completed" : (currentRunningStep === 3 ? "Running" : "Pending")}
+                              </Badge>
+                            </div>
+
+                            {currentRunningStep === 3 && (
+                              <div className="mt-2 text-[10px] text-[#888898] font-mono flex items-center gap-2 pl-7 animate-pulse">
+                                <RefreshCw className="h-3 w-3 animate-spin text-[#FF6200]" />
+                                Calling image model to generate cover graphic...
+                              </div>
+                            )}
+
+                            {stepFeaturedImage && (
+                              <div className="mt-3 pl-7 border-l-2 border-[#2E2E2E]/60 flex flex-col gap-2">
+                                <span className="text-[#888898] font-mono uppercase block text-[9px] mb-1">Generated Cover Artwork:</span>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img 
+                                  src={stepFeaturedImage} 
+                                  alt="Artwork Cover Preview" 
+                                  className="w-full max-w-sm h-36 object-cover rounded border border-[#2E2E2E]"
+                                />
+                              </div>
+                            )}
+
+                            {stepWriterParsed && !stepFeaturedImage && currentRunningStep === null && (
+                              <div className="mt-3 pl-7">
+                                <Button
+                                  onClick={() => runStep3Image(pil.id)}
+                                  className="font-mono text-[10px] py-1 px-3 bg-[#FF6200] hover:bg-[#FF8C42] text-white cursor-none"
+                                >
+                                  Trigger Image Creator Agent
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* STEP 4: REVIEWER & PUBLISHER */}
+                          <div className={`border border-[#2E2E2E]/60 rounded-lg p-3 bg-white/5 ${!stepFeaturedImage ? "opacity-40" : ""}`}>
+                            <div className="flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <div className={`h-5 w-5 rounded-full flex items-center justify-center font-mono text-[10px] font-bold ${
+                                  stepReviewerPost ? "bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30" : "bg-[#2E2E2E] text-[#ACACB8]"
+                                }`}>
+                                  {stepReviewerPost ? <Check className="h-3 w-3" /> : "4"}
+                                </div>
+                                <span className="text-xs font-bold text-white font-mono uppercase">Step 4: Reviewer & Publisher Agent</span>
+                              </div>
+                              <Badge variant={stepReviewerPost ? "success" : (currentRunningStep === 4 ? "orange" : "dark")} className="text-[9px]">
+                                {stepReviewerPost ? "Completed" : (currentRunningStep === 4 ? "Running" : "Pending")}
+                              </Badge>
+                            </div>
+
+                            {currentRunningStep === 4 && (
+                              <div className="mt-2 text-[10px] text-[#888898] font-mono flex items-center gap-2 pl-7 animate-pulse">
+                                <RefreshCw className="h-3 w-3 animate-spin text-[#FF6200]" />
+                                Running E-E-A-T reviews, writing to sitemaps & database...
+                              </div>
+                            )}
+
+                            {stepReviewerPost && (
+                              <div className="mt-3 pl-7 border-l-2 border-[#2E2E2E]/60 flex flex-col gap-2">
+                                <div className="text-[11px] text-[#22C55E] font-bold flex items-center gap-1.5 mb-2">
+                                  <CheckCircle2 className="h-4.5 w-4.5" /> Published successfully! The article is now live.
+                                </div>
+                                <Link 
+                                  href={`/blog/${stepReviewerPost.slug}`}
+                                  target="_blank"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#FF6200]/10 hover:bg-[#FF6200]/20 text-[#FF8C42] border border-[#FF6200]/20 text-[10px] font-mono uppercase transition-all w-max"
+                                >
+                                  View Live Blog Page <ExternalLink className="h-3.5 w-3.5" />
+                                </Link>
+                              </div>
+                            )}
+
+                            {stepFeaturedImage && !stepReviewerPost && currentRunningStep === null && (
+                              <div className="mt-3 pl-7">
+                                <Button
+                                  onClick={() => runStep4Reviewer(pil.id)}
+                                  className="font-mono text-[10px] py-1 px-3 bg-[#FF6200] hover:bg-[#FF8C42] text-white cursor-none"
+                                >
+                                  Trigger Reviewer Agent & Publish
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
