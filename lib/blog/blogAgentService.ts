@@ -851,35 +851,50 @@ export function formatBlogBodyHTML(html: string): string {
   if (!html) return "";
   let formatted = html.trim();
 
-  // If there are no HTML tags at all, or if it is purely plain text/markdown
+  // 1. Normalize line endings and clean up duplicate whitespace
+  formatted = formatted.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n");
+
+  // 2. Convert markdown bold and italics (handles bold inside HTML too)
+  formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  formatted = formatted.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+  // 3. If there are no HTML tags or it's primarily markdown/raw text
   const hasHtmlParagraphOrHeading = /<p>|<h[1-6]>|<ul>|<ol>|<div>/i.test(formatted);
   if (!hasHtmlParagraphOrHeading) {
-    console.log("[HTML Formatter] Plain text or Markdown detected. Formatting to design system HTML...");
+    console.log("[HTML Formatter] Formatting plain text/markdown blog content to rich design system HTML...");
     
-    // 1. Convert markdown headers
+    // Convert code blocks (```code```)
+    formatted = formatted.replace(/```(?:[a-z]+)?\n([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
+
+    // Convert blockquotes (> quote)
+    formatted = formatted.replace(/^>\s+(.+)$/gm, "<blockquote>$1</blockquote>");
+
+    // Convert headers
     formatted = formatted
       .replace(/^####\s+(.+)$/gm, "<h4>$1</h4>")
       .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
       .replace(/^##\s+(.+)$/gm, "<h2>$1</h2>")
       .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>");
 
-    // 2. Convert markdown bold/italics
-    formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-    formatted = formatted.replace(/\*(.*?)\*/g, "<em>$1</em>");
-
-    // 3. Convert markdown lists
+    // Convert bullet lists
     formatted = formatted.replace(/^\s*[-*+]\s+(.+)$/gm, "<li>$1</li>");
-    // Group adjacent <li> tags into <ul>
-    formatted = formatted.replace(/(<li>.*<\/li>)+/g, "<ul>$&</ul>");
+    formatted = formatted.replace(/(<li>.*<\/li>\n?)+/g, (match) => `<ul>\n${match}</ul>\n`);
 
-    // 4. Split by double-newlines into paragraphs
+    // Convert numbered lists
+    formatted = formatted.replace(/^\s*\d+\.\s+(.+)$/gm, "<li>$1</li>");
+    formatted = formatted.replace(/(<li>.*<\/li>\n?)+/g, (match) => {
+      if (match.trim().startsWith("<ul>") || match.trim().endsWith("</ul>")) return match;
+      return `<ol>\n${match}</ol>\n`;
+    });
+
+    // Split blocks by double newline and wrap paragraphs
     const blocks = formatted.split(/\n\s*\n/);
     formatted = blocks
       .map((block) => {
         const trimmed = block.trim();
         if (!trimmed) return "";
-        // If it starts with h1-6, ul, ol, li, pre, div, blockquote, table, don't wrap in <p>
-        if (/^<(h[1-6]|ul|ol|li|pre|div|blockquote|table)/i.test(trimmed)) {
+        // If it already starts with a block tag, don't wrap in <p>
+        if (/^<(h[1-6]|ul|ol|li|pre|div|blockquote|table|section|article)/i.test(trimmed)) {
           return trimmed;
         }
         return `<p>${trimmed}</p>`;
@@ -887,14 +902,14 @@ export function formatBlogBodyHTML(html: string): string {
       .filter(Boolean)
       .join("\n");
   } else {
-    // Already has HTML, but let's check for any stray markdown headers like "## Heading" inside and fix them
+    // Already has HTML structure, but let's check for any markdown headers or blockquotes written inside
     formatted = formatted
       .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
       .replace(/^##\s+(.+)$/gm, "<h2>$1</h2>")
-      .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>");
-      
-    // Sometimes the writer agent puts newlines inside text blocks that should be separate paragraphs
-    // but forgot to close and reopen <p> tags. We can replace double newlines inside <p> with </p><p>
+      .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>")
+      .replace(/^>\s+(.+)$/gm, "<blockquote>$1</blockquote>");
+
+    // Ensure double newlines inside existing paragraphs are formatted correctly
     formatted = formatted.replace(/<p>([\s\S]*?)<\/p>/gi, (match, content) => {
       const parts = content.split(/\n\s*\n/);
       if (parts.length > 1) {
@@ -904,9 +919,34 @@ export function formatBlogBodyHTML(html: string): string {
     });
   }
 
+  // 4. Highlight & Style Custom Alert/Tip blocks dynamically
+  // Convert tip/alert paragraphs to design system containers
+  formatted = formatted.replace(/<p>(<strong>)?(Pro-Tip|Tip):?<\/strong>?\s*(.*?)<\/p>/gi, (match, b, label, content) => {
+    return `<div class="alert alert-tip"><strong>Pro-Tip:</strong> ${content.trim()}</div>`;
+  });
+  
+  formatted = formatted.replace(/<p>(<strong>)?(Technical Rule|Warning|Important):?<\/strong>?\s*(.*?)<\/p>/gi, (match, b, label, content) => {
+    return `<div class="alert alert-important"><strong>${label}:</strong> ${content.trim()}</div>`;
+  });
+
+  // If there are raw text blocks matching alert indicators inside paragraph tags, update them:
+  formatted = formatted.replace(/<p>(\s*(?:Pro-Tip|Tip):\s*.*?<\/p>)/gi, (match) => {
+    const clean = match.replace(/<p>|(?:Pro-Tip|Tip):\s*|<\/p>/g, "").trim();
+    return `<div class="alert alert-tip"><strong>Pro-Tip:</strong> ${clean}</div>`;
+  });
+
+  formatted = formatted.replace(/<p>(\s*(?:Technical Rule|Warning|Important):\s*.*?<\/p>)/gi, (match) => {
+    const label = match.match(/Technical Rule|Warning|Important/i)?.[0] || "Warning";
+    const clean = match.replace(new RegExp(`<p>|(?:${label}):\\s*|<\\/p>`, "g"), "").trim();
+    return `<div class="alert alert-important"><strong>${label}:</strong> ${clean}</div>`;
+  });
+
   // 5. Apply design system specific styles to raw HTML components
   formatted = formatted.replace(/<p>\s*<\/p>/g, "");
   
+  // Clean list gaps
+  formatted = formatted.replace(/<\/ul>\s*<ul>/g, "").replace(/<\/ol>\s*<ol>/g, "");
+
   // Style tables for responsive design system
   formatted = formatted.replace(/<table>/g, '<table class="w-full border-collapse border border-[#E5E5E5] my-6">');
   formatted = formatted.replace(/<th>/g, '<th class="border border-[#E5E5E5] p-3 bg-[#F8F8F8] font-bold text-xs text-left">');
@@ -915,7 +955,7 @@ export function formatBlogBodyHTML(html: string): string {
   // Style blockquotes
   formatted = formatted.replace(/<blockquote>/g, '<blockquote class="border-left-brand border-l-4 border-[#FF6200] bg-[#F8F8F8] p-4 my-6 italic text-[#5A5A6A]">');
 
-  // Ensure alert tags have the design system class
+  // Ensure alert classes are correct
   formatted = formatted.replace(/<div class="alert">/g, '<div class="alert alert-important">');
 
   return formatted;
