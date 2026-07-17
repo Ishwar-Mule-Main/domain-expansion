@@ -22,7 +22,8 @@ import {
   Image as ImageIcon,
   Terminal,
   Check,
-  Eye
+  Eye,
+  AlignLeft
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
@@ -70,6 +71,7 @@ export default function BlogAgentDashboard() {
   const [blogAutopilot, setBlogAutopilot] = useState<boolean>(true);
   const [togglingAutopilot, setTogglingAutopilot] = useState<boolean>(false);
   const [regeneratingPostId, setRegeneratingPostId] = useState<string | null>(null);
+  const [realigningPostId, setRealigningPostId] = useState<string | null>(null);
 
   // Step-by-step states
   const [selectedConsolePillar, setSelectedConsolePillar] = useState<string | null>(null);
@@ -375,6 +377,29 @@ export default function BlogAgentDashboard() {
       alert(`Error re-creating image: ${err.message || String(err)}`);
     } finally {
       setRegeneratingPostId(null);
+    }
+  };
+
+  const realignBlogPostContent = async (id: string) => {
+    if (!confirm("Are you sure you want to format and realign this article's content to the best design system rules? This is non-destructive but will wrap/correct HTML tags.")) return;
+    setRealigningPostId(id);
+    try {
+      const res = await fetch("/api/admin/blog/realign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Blog content formatted and aligned successfully!");
+        await loadHistory();
+      } else {
+        alert(`Failed to realign content: ${data.error || "Unknown error"}`);
+      }
+    } catch (err: any) {
+      alert(`Error realigning content: ${err.message || String(err)}`);
+    } finally {
+      setRealigningPostId(null);
     }
   };
 
@@ -1063,6 +1088,20 @@ export default function BlogAgentDashboard() {
                                   <RefreshCw className="h-3.5 w-3.5 animate-spin" />
                                 ) : (
                                   <ImageIcon className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                              <button
+                                disabled={realigningPostId === post.id}
+                                onClick={() => realignBlogPostContent(post.id)}
+                                className={`p-1.5 rounded border border-[#2E2E2E] bg-black/20 text-blue-400 hover:text-blue-300 hover:border-blue-500/50 hover:bg-blue-950/10 transition-all ${
+                                  realigningPostId === post.id ? "animate-spin cursor-not-allowed" : "cursor-none"
+                                }`}
+                                title="Realign Blog Content"
+                              >
+                                {realigningPostId === post.id ? (
+                                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <AlignLeft className="h-3.5 w-3.5" />
                                 )}
                               </button>
                               <button
