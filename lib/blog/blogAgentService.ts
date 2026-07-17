@@ -645,7 +645,7 @@ export async function runReviewerStep(
       3. Verify that the AIO/GEO Snippet Block is present at the absolute top (prominent question heading and direct 30-50 words answer paragraph).
       4. Verify that a valid JSON-LD Schema string block is placed at the absolute bottom (or is provided).
 
-      If all checkpoints are ok, set "isApproved" to true and return the verified title, excerpt, bodyHTML (must be valid HTML with structured tags, headings, bullets, tables), and schemaMarkup.
+      If all checkpoints are ok, set "isApproved" to true and return the verified title, excerpt, bodyHTML (which MUST be structured HTML, with EVERY paragraph properly wrapped in <p>...</p> tags, headings properly formatted as <h2>...</h2> or <h3>...</h3>, and lists formatted as <ul>/<li> elements. DO NOT output a single long paragraph or raw text block without tags), and schemaMarkup.
       If there are violations, set "isApproved" to false and list all specific violations in the "errors" array so they can be logged.
 
       Input Blog Details to Review:
@@ -759,7 +759,7 @@ export async function runReviewerStep(
     throw new Error(errorMsg);
   }
 
-  const finalBodyHTML = reviewerParsed.bodyHTML || currentWriterParsed.bodyHTML;
+  const finalBodyHTML = formatBlogBodyHTML(reviewerParsed.bodyHTML || currentWriterParsed.bodyHTML);
   const finalTitle = reviewerParsed.title || currentWriterParsed.title;
   const finalExcerpt = reviewerParsed.excerpt || currentWriterParsed.excerpt;
   const finalSchema = reviewerParsed.schemaMarkup || currentWriterParsed.schemaMarkup;
@@ -842,3 +842,82 @@ export async function runDailyBlogAgent() {
 
   return results;
 }
+
+/**
+ * Ensures the generated blog body HTML is correctly formatted as per the design system.
+ * Prevents plain text blocks, missing paragraph tags, raw markdown headings, or unstyled tables.
+ */
+export function formatBlogBodyHTML(html: string): string {
+  if (!html) return "";
+  let formatted = html.trim();
+
+  // If there are no HTML tags at all, or if it is purely plain text/markdown
+  const hasHtmlParagraphOrHeading = /<p>|<h[1-6]>|<ul>|<ol>|<div>/i.test(formatted);
+  if (!hasHtmlParagraphOrHeading) {
+    console.log("[HTML Formatter] Plain text or Markdown detected. Formatting to design system HTML...");
+    
+    // 1. Convert markdown headers
+    formatted = formatted
+      .replace(/^####\s+(.+)$/gm, "<h4>$1</h4>")
+      .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
+      .replace(/^##\s+(.+)$/gm, "<h2>$1</h2>")
+      .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>");
+
+    // 2. Convert markdown bold/italics
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+    formatted = formatted.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+    // 3. Convert markdown lists
+    formatted = formatted.replace(/^\s*[-*+]\s+(.+)$/gm, "<li>$1</li>");
+    // Group adjacent <li> tags into <ul>
+    formatted = formatted.replace(/(<li>.*<\/li>)+/g, "<ul>$&</ul>");
+
+    // 4. Split by double-newlines into paragraphs
+    const blocks = formatted.split(/\n\s*\n/);
+    formatted = blocks
+      .map((block) => {
+        const trimmed = block.trim();
+        if (!trimmed) return "";
+        // If it starts with h1-6, ul, ol, li, pre, div, blockquote, table, don't wrap in <p>
+        if (/^<(h[1-6]|ul|ol|li|pre|div|blockquote|table)/i.test(trimmed)) {
+          return trimmed;
+        }
+        return `<p>${trimmed}</p>`;
+      })
+      .filter(Boolean)
+      .join("\n");
+  } else {
+    // Already has HTML, but let's check for any stray markdown headers like "## Heading" inside and fix them
+    formatted = formatted
+      .replace(/^###\s+(.+)$/gm, "<h3>$1</h3>")
+      .replace(/^##\s+(.+)$/gm, "<h2>$1</h2>")
+      .replace(/^#\s+(.+)$/gm, "<h1>$1</h1>");
+      
+    // Sometimes the writer agent puts newlines inside text blocks that should be separate paragraphs
+    // but forgot to close and reopen <p> tags. We can replace double newlines inside <p> with </p><p>
+    formatted = formatted.replace(/<p>([\s\S]*?)<\/p>/gi, (match, content) => {
+      const parts = content.split(/\n\s*\n/);
+      if (parts.length > 1) {
+        return parts.map((p: string) => `<p>${p.trim()}</p>`).join("\n");
+      }
+      return match;
+    });
+  }
+
+  // 5. Apply design system specific styles to raw HTML components
+  formatted = formatted.replace(/<p>\s*<\/p>/g, "");
+  
+  // Style tables for responsive design system
+  formatted = formatted.replace(/<table>/g, '<table class="w-full border-collapse border border-[#E5E5E5] my-6">');
+  formatted = formatted.replace(/<th>/g, '<th class="border border-[#E5E5E5] p-3 bg-[#F8F8F8] font-bold text-xs text-left">');
+  formatted = formatted.replace(/<td>/g, '<td class="border border-[#E5E5E5] p-3 text-xs">');
+
+  // Style blockquotes
+  formatted = formatted.replace(/<blockquote>/g, '<blockquote class="border-left-brand border-l-4 border-[#FF6200] bg-[#F8F8F8] p-4 my-6 italic text-[#5A5A6A]">');
+
+  // Ensure alert tags have the design system class
+  formatted = formatted.replace(/<div class="alert">/g, '<div class="alert alert-important">');
+
+  return formatted;
+}
+

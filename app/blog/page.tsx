@@ -128,8 +128,11 @@ export default function BlogArchivePage() {
               ✦ Highlighted Feature Article
             </span>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center rounded-2xl border border-[#E5E5E5] bg-[#F8F8F8] overflow-hidden p-6 sm:p-10">
-              {/* Image Gradient representation */}
-              <div className="lg:col-span-5 h-[280px] sm:h-[350px] rounded-xl bg-gradient-to-tr from-[#FF6200] to-[#6D28D9] p-8 flex flex-col justify-between text-white relative overflow-hidden group">
+              {/* Image representation */}
+              <Link 
+                href={`/blog/${featuredPost.slug}`}
+                className="lg:col-span-5 h-[280px] sm:h-[350px] rounded-xl bg-gradient-to-tr from-[#FF6200] to-[#6D28D9] relative overflow-hidden group block"
+              >
                 {featuredPost.featuredImage && (
                   <img
                     src={featuredPost.featuredImage}
@@ -137,22 +140,8 @@ export default function BlogArchivePage() {
                     className="absolute inset-0 w-full h-full object-cover z-0 group-hover:scale-105 transition-transform duration-500"
                   />
                 )}
-                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-all duration-300 z-10" />
-                <div className="relative z-20 flex justify-between items-center">
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-black/40 px-2 py-0.5 rounded border border-white/10">
-                    {featuredPost.categoryLabel}
-                  </span>
-                  <span className="text-[9px] font-mono">{featuredPost.readTime}</span>
-                </div>
-                <div className="relative z-20 text-left">
-                  <h3 className="font-display text-2xl font-bold leading-tight mb-2">
-                    {featuredPost.title}
-                  </h3>
-                  <p className="text-[11px] text-white/80 line-clamp-2">
-                    {featuredPost.excerpt}
-                  </p>
-                </div>
-              </div>
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/5 transition-all duration-300 z-10" />
+              </Link>
 
               {/* Summary Details */}
               <div className="lg:col-span-7 flex flex-col justify-between text-left h-full py-4">
