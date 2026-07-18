@@ -123,6 +123,7 @@ AI Blogging & Sitemap endpoints:
 - `GET /api/admin/blog/generate-daily`: Autonomous trigger endpoint run by Vercel scheduler crons to generate daily articles.
 - `POST /api/admin/blog/run-agent`: Manual trigger endpoint enabling administrators to execute an AI generation run for a specific service pillar.
 - `GET /api/admin/blog/history`: Returns logs list of agent runs and dynamically generated articles.
+- `POST /api/admin/blog/realign`: Reformats and realigns an existing blog post's bodyHTML to align perfectly with the design system.
 - `POST /api/admin/sitemap/register`: Sitemap Agent registration endpoint indexing dynamic website URLs.
 - `GET /api/blog`: Returns list of dynamized database blog posts.
 

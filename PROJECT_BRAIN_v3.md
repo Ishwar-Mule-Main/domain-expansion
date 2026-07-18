@@ -62,7 +62,7 @@ Follow `FTL_v3.md` phase order. Summary:
 - **Phase 4 — Portfolio & 21 case studies:** archive, project template, case study template with masking/pinning, content for all 21.
 - **Phase 5 — Blog/NewsRoom:** archive + post template + 10 launch posts.
 - **Phase 6 — TechGuild page** + waitlist API.
-- **Phase 7 — Admin dashboard.**
+- **Phase 7 — Admin dashboard:** Exposes dynamic leads visibility, automated email outreach management, waitlists, and interactive step-by-step blog console workflows.
 - **Phase 8 — SEO/AEO/GSO/GEO + performance + a11y** (SEO doc + JSON-LD).
 - **Phase 9 — Deploy & launch.**
 - **Phase 10 — TechGuild MVP** (post-launch).

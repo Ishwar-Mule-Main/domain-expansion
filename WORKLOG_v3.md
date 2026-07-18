@@ -7,11 +7,20 @@
 
 ## 📍 NEXT UP (current pointer)
 
-Verify cron execution on the live Vercel environment and gather user feedback on generated articles. Next, collaborate on case study updates or further system features.
+Implement and test automated email campaign queue workers or expand the TechGuild platform agency verification screens.
 
 ---
 
 ## SESSION LOG
+
+### 2026-07-17 — Session 24 (Step-by-Step Interactive Blog Console & Advanced Content Realigner)
+- **Step-by-Step Console Control:** Refactored the blog agent daily script in [blogAgentService.ts](file:///d:/demo%202/lib/blog/blogAgentService.ts) and `/api/admin/blog/run-agent` to support separate parameters for steps 1 (Research), 2 (Writer), 3 (Image Creator), and 4 (Reviewer). Added a sliding Step-by-Step Console drawer layout inside [app/admin/blog-agent/page.tsx](file:///d:/demo%202/app/admin/blog-agent/page.tsx) with state indicators and real-time generation previews.
+- **OpenRouter Image API Integration:** Integrated OpenRouter Image Generation endpoint (`POST https://openrouter.ai/api/v1/images`) inside the image agent, defaulting to `google/gemini-2.5-flash-image` (Nano Banana) with an automated keyless failover to Pollinations AI (Playground/Flux). Added dynamic dropdown select loading for the Image Creator model from available OpenRouter models list.
+- **Archive Page Polish:** Removed visual overlays (titles, meta badges, excerpts) from the featured cover image box on [app/blog/page.tsx](file:///d:/demo%202/app/blog/page.tsx) to prevent content duplication and clutter, and wrapped the visual in a direct Link to the blog post page.
+- **Aesthetic HTML Formatter & Realign Action:** 
+  - Authored a parsing formatter `formatBlogBodyHTML` inside [blogAgentService.ts](file:///d:/demo%202/lib/blog/blogAgentService.ts) to clean up raw text/markdown into structured HTML paragraphs, bold/italics, bullet lists, blockquotes, tables, and custom alert cards (`alert-tip`/`alert-important`) matching static premium articles.
+  - Implemented `/api/admin/blog/realign` and added a **"Realign Blog Content"** (`AlignLeft` icon) action button directly in the dynamic articles list table under the Generated Articles tab.
+- **Build Validation:** Checked compilation and ran local build type check validations successfully using `npm run build`.
 
 ### 2026-07-11 — Session 23 (Autonomous Blog AI Agent & Sitemap XML Indexer Agent)
 - Designed and built the autonomous **Daily Blog AI Agent**:

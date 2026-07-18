@@ -141,6 +141,14 @@ NEXTAUTH_SECRET="3bc3b6c2f37c357f897df890b0e5138e6dfd15024479bd72b153b6fa0f214cb
   - **Prisma Schema Update:** Added `blogResearchModel`, `blogWriterModel`, `blogImageModel`, and `blogReviewerModel` columns to `EmailSettings` table.
   - **Settings Admin Panel & API:** Built a Settings Tab in the blog-agent admin dashboard to configure the OpenRouter API Key and modify models for each of the four agents dynamically. Updated settings GET/POST API routes to persist model configurations.
 
+## Phase 12 — Step-by-Step Console, OpenRouter Image API & Design-System HTML Formatter (2026-07-17)
+- **Step-by-Step Console Control:** Refactored the blog agent daily script in `lib/blog/blogAgentService.ts` and `/api/admin/blog/run-agent` to support separate parameters for steps 1 (Research), 2 (Writer), 3 (Image Creator), and 4 (Reviewer). Added a sliding Step-by-Step Console drawer layout inside `app/admin/blog-agent/page.tsx` with state indicators and real-time generation previews.
+- **OpenRouter Image API Integration:** Integrated OpenRouter Image Generation endpoint (`POST https://openrouter.ai/api/v1/images`) inside the image agent, defaulting to `google/gemini-2.5-flash-image` (Nano Banana) with an automated keyless failover to Pollinations AI (Playground/Flux). Added dynamic dropdown select loading for the Image Creator model from available OpenRouter models list.
+- **Archive Page Polish:** Removed visual overlays (titles, meta badges, excerpts) from the featured cover image box on `app/blog/page.tsx` to prevent content duplication and clutter, and wrapped the visual in a direct Link to the blog post page.
+- **Aesthetic HTML Formatter & Realign Action:** 
+  - Authored a parsing formatter `formatBlogBodyHTML` inside `lib/blog/blogAgentService.ts` to clean up raw text/markdown into structured HTML paragraphs, bold/italics, bullet lists, blockquotes, tables, and custom alert cards (`alert-tip`/`alert-important`) matching static premium articles.
+  - Implemented `/api/admin/blog/realign` and added a **"Realign Blog Content"** (`AlignLeft` icon) action button directly in the dynamic articles list table under the Generated Articles tab.
+
 ---
 
 ## Commands Reference
