@@ -313,10 +313,10 @@ export default function ContactPage() {
               <div className="p-6 rounded-xl border border-[#2E2E2E] bg-[#141414] flex justify-between items-center group">
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] font-mono text-[#888898] uppercase">Inquiries & Briefs</span>
-                  <span className="font-display text-sm sm:text-base font-bold text-white">connect.domainexpansion@gmail.com</span>
+                  <span className="font-display text-sm sm:text-base font-bold text-white">contact@domainexpansion.in</span>
                 </div>
                 <button
-                  onClick={() => handleCopy("connect.domainexpansion@gmail.com", "email")}
+                  onClick={() => handleCopy("contact@domainexpansion.in", "email")}
                   className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1A1A1A] border border-[#2E2E2E] hover:border-brand-orange text-[#888898] hover:text-white transition-all"
                   aria-label="Copy Email"
                 >
@@ -347,13 +347,13 @@ export default function ContactPage() {
                   <span className="font-display text-sm sm:text-base font-bold text-white">@domainexpansion</span>
                 </div>
                 <Link
-                  href="https://linkedin.com"
+                  href="https://linkedin.com/company/domainexpansion"
                   target="_blank"
                   className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#1A1A1A] border border-[#2E2E2E] hover:border-brand-orange text-[#888898] hover:text-white transition-all"
-                  aria-label="LinkedIn Account"
+                  aria-label="Domain Expansion Linkedin"
                 >
                   <svg className="h-4.5 w-4.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
                   </svg>
                 </Link>
               </div>

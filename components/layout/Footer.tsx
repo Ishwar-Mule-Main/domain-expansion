@@ -140,13 +140,13 @@ export default function Footer() {
             <ul className="flex flex-col gap-3 text-xs">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-brand-orange shrink-0" />
-                <a href="mailto:connect.domainexpansion@gmail.com" className="hover:text-white transition-colors">
-                  connect.domainexpansion@gmail.com
+                <a href="mailto:contact@domainexpansion.in" className="hover:text-white transition-colors">
+                  contact@domainexpansion.in
                 </a>
               </li>
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 text-brand-orange shrink-0 mt-0.5" />
-                <span>Remote</span>
+                <span>Serving IN | USA | UK | UAE | Canada</span>
               </li>
             </ul>
           </div>

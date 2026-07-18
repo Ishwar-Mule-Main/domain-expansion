@@ -293,7 +293,7 @@ export default function Navbar() {
           {/* Bottom Actions */}
           <div className="flex flex-col gap-4 border-t border-[#2E2E2E]/40 pt-6">
             <p className="text-xs text-[#888898]">
-              Think Outside The Box — connect.domainexpansion@gmail.com
+              Think Outside The Box — contact@domainexpansion.in
             </p>
             <Link
               href="/contact"

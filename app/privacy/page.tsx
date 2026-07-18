@@ -151,7 +151,7 @@ export default function PrivacyPage() {
                 <li>**Nomination (DPDP)**: The right to nominate another individual to manage your data in case of incapacity.</li>
               </ul>
               <p className="text-xs sm:text-sm text-[#5A5A6A] leading-relaxed">
-                To trigger any of these rights, email us at <a href="mailto:connect.domainexpansion@gmail.com" className="text-brand-orange hover:underline">connect.domainexpansion@gmail.com</a> with subject "Data Rights Request".
+                To trigger any of these rights, email us at <a href="mailto:contact@domainexpansion.in" className="text-brand-orange hover:underline">contact@domainexpansion.in</a> with subject "Data Rights Request".
               </p>
             </section>
 
@@ -191,7 +191,7 @@ export default function PrivacyPage() {
               <div className="p-5 rounded-xl border border-[#E5E5E5] bg-[#F8F8F8] text-xs text-[#5A5A6A] leading-relaxed flex flex-col gap-1.5">
                 <span className="font-bold text-[#0D0D0D]">Data Protection Officer: Ishwar B. Mule</span>
                 <span>Address: Remote only</span>
-                <span>Email: <a href="mailto:connect.domainexpansion@gmail.com" className="text-brand-orange hover:underline font-semibold">connect.domainexpansion@gmail.com</a></span>
+                <span>Email: <a href="mailto:contact@domainexpansion.in" className="text-brand-orange hover:underline font-semibold">contact@domainexpansion.in</a></span>
               </div>
             </section>
 

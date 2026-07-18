@@ -47,7 +47,7 @@ export async function sendAdminLeadNotification(leadData: {
   budget?: string;
   message: string;
 }) {
-  const adminEmail = process.env.ADMIN_EMAIL || "connect.domainexpansion@gmail.com";
+  const adminEmail = process.env.ADMIN_EMAIL || "contact@domainexpansion.in";
   const subject = `🔥 New Lead Received: ${leadData.name} (${leadData.service})`;
   const html = `
     <div style="font-family: sans-serif; color: #111827; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px;">
