@@ -13,13 +13,15 @@ Implement and test automated email campaign queue workers or expand the TechGuil
 
 ## SESSION LOG
 
-### 2026-07-20 — Session 25 (GoDaddy Titan Email Integration for AI Outreach Suite)
+### 2026-07-20 — Session 25 (GoDaddy Titan Email Integration & Lead Routing)
 - **GoDaddy Titan Email Integration:**
   - Upgraded Nodemailer SMTP transport in [emailService.ts](file:///d:/demo%202/lib/email/emailService.ts) to connect dynamically via host and port, defaulting to GoDaddy Titan Email (`smtp.titan.email` on SSL port `465`).
   - Upgraded ImapFlow inbox response monitoring in [emailService.ts](file:///d:/demo%202/lib/email/emailService.ts) to connect to GoDaddy Titan Email IMAP (`imap.titan.email` on SSL port `993`).
 - **Database Schema Upgrades & Credentials Sync:**
   - Updated `EmailSettings` model in [schema.prisma](file:///d:/demo%202/prisma/schema.prisma) with `smtpHost`, `smtpPort`, `imapHost`, and `imapPort` columns, setting default email user to `ishwar@domainexpansion.in`.
   - Ran Prisma database schema push (`npx prisma db push`) to sync Neon PostgreSQL and updated active database email settings record with credentials (`ishwar@domainexpansion.in`).
+- **Website Lead Notification Routing:**
+  - Updated [email.ts](file:///d:/demo%202/lib/email.ts) and [.env](file:///d:/demo%202/.env) so all inbound website contact form lead notifications are routed to `ishwar@domainexpansion.in` with CC to `ishwar.mule007@gmail.com`.
 - **API & Admin Dashboard Polish:**
   - Updated `/api/admin/email/settings` route to GET/POST custom SMTP and IMAP host/port parameters.
   - Updated campaign settings dashboard tab in [page.tsx](file:///d:/demo%202/app/admin/email-campaigns/page.tsx) with Titan Email / GoDaddy / Custom SMTP host inputs.

@@ -152,6 +152,7 @@ NEXTAUTH_SECRET="3bc3b6c2f37c357f897df890b0e5138e6dfd15024479bd72b153b6fa0f214cb
 ## Phase 13 — GoDaddy Titan Email Integration & Custom SMTP Support (2026-07-20)
 - **Titan Email SMTP/IMAP Engine:** Upgraded `lib/email/emailService.ts` to support dynamic SMTP and IMAP host/port parameters, configuring Nodemailer and ImapFlow to connect to GoDaddy Titan Email (`smtp.titan.email:465` SSL / `imap.titan.email:993` SSL).
 - **Prisma Schema & Database Sync:** Added `smtpHost`, `smtpPort`, `imapHost`, and `imapPort` columns to `EmailSettings` model in `prisma/schema.prisma`. Pushed schema changes to Neon PostgreSQL with `npx prisma db push` and updated database credentials (`ishwar@domainexpansion.in`).
+- **Inbound Lead Routing:** Updated `lib/email.ts` and `.env` to ensure all website contact form submission notifications are sent to `ishwar@domainexpansion.in` with CC to `ishwar.mule007@gmail.com`.
 - **Settings API & Campaign Admin UI:** Updated `/api/admin/email/settings` endpoint and updated the email settings dashboard panel in `app/admin/email-campaigns/page.tsx` with Titan / GoDaddy / custom SMTP input fields.
 
 ---
