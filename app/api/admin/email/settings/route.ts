@@ -18,8 +18,12 @@ export async function GET() {
       // Initialize default settings record
       settings = await prisma.emailSettings.create({
         data: {
-          gmailUser: "connect.domainexpansion@gmail.com",
+          gmailUser: "ishwar@domainexpansion.in",
           gmailAppPassword: "",
+          smtpHost: "smtp.titan.email",
+          smtpPort: 465,
+          imapHost: "imap.titan.email",
+          imapPort: 993,
           geminiApiKey: "",
           openRouterApiKey: "",
           openRouterModel: "google/gemini-2.0-flash",
@@ -53,6 +57,10 @@ export async function POST(request: Request) {
     const {
       gmailUser,
       gmailAppPassword,
+      smtpHost,
+      smtpPort,
+      imapHost,
+      imapPort,
       geminiApiKey,
       openRouterApiKey,
       openRouterModel,
@@ -74,6 +82,10 @@ export async function POST(request: Request) {
         data: {
           gmailUser: gmailUser !== undefined ? String(gmailUser).trim() : settings.gmailUser,
           gmailAppPassword: gmailAppPassword !== undefined ? String(gmailAppPassword).trim() : settings.gmailAppPassword,
+          smtpHost: smtpHost !== undefined ? String(smtpHost).trim() : settings.smtpHost,
+          smtpPort: smtpPort !== undefined ? Number(smtpPort) : settings.smtpPort,
+          imapHost: imapHost !== undefined ? String(imapHost).trim() : settings.imapHost,
+          imapPort: imapPort !== undefined ? Number(imapPort) : settings.imapPort,
           geminiApiKey: geminiApiKey !== undefined ? String(geminiApiKey).trim() : settings.geminiApiKey,
           openRouterApiKey: openRouterApiKey !== undefined ? String(openRouterApiKey).trim() : settings.openRouterApiKey,
           openRouterModel: openRouterModel !== undefined ? String(openRouterModel).trim() : settings.openRouterModel,
@@ -90,8 +102,12 @@ export async function POST(request: Request) {
       // Create new record
       settings = await prisma.emailSettings.create({
         data: {
-          gmailUser: gmailUser ? String(gmailUser).trim() : "connect.domainexpansion@gmail.com",
+          gmailUser: gmailUser ? String(gmailUser).trim() : "ishwar@domainexpansion.in",
           gmailAppPassword: gmailAppPassword ? String(gmailAppPassword).trim() : "",
+          smtpHost: smtpHost ? String(smtpHost).trim() : "smtp.titan.email",
+          smtpPort: smtpPort ? Number(smtpPort) : 465,
+          imapHost: imapHost ? String(imapHost).trim() : "imap.titan.email",
+          imapPort: imapPort ? Number(imapPort) : 993,
           geminiApiKey: geminiApiKey ? String(geminiApiKey).trim() : "",
           openRouterApiKey: openRouterApiKey ? String(openRouterApiKey).trim() : "",
           openRouterModel: openRouterModel ? String(openRouterModel).trim() : "google/gemini-2.0-flash",

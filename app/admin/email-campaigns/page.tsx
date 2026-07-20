@@ -41,8 +41,12 @@ export default function EmailCampaignsPage() {
   const [activeTab, setActiveTab] = useState<"reports" | "prospects" | "settings" | "brain">("reports");
 
   // Settings state
-  const [gmailUser, setGmailUser] = useState("connect.domainexpansion@gmail.com");
+  const [gmailUser, setGmailUser] = useState("ishwar@domainexpansion.in");
   const [gmailAppPassword, setGmailAppPassword] = useState("");
+  const [smtpHost, setSmtpHost] = useState("smtp.titan.email");
+  const [smtpPort, setSmtpPort] = useState(465);
+  const [imapHost, setImapHost] = useState("imap.titan.email");
+  const [imapPort, setImapPort] = useState(993);
   const [geminiApiKey, setGeminiApiKey] = useState("");
   const [openRouterApiKey, setOpenRouterApiKey] = useState("");
   const [openRouterModel, setOpenRouterModel] = useState("google/gemini-2.0-flash");
@@ -235,9 +239,13 @@ export default function EmailCampaignsPage() {
       const res = await fetch("/api/admin/email/settings");
       const data = await res.json();
       if (data.success && data.settings) {
-        setGmailUser(data.settings.gmailUser);
-        setGmailAppPassword(data.settings.gmailAppPassword);
-        setGeminiApiKey(data.settings.geminiApiKey);
+        setGmailUser(data.settings.gmailUser || "ishwar@domainexpansion.in");
+        setGmailAppPassword(data.settings.gmailAppPassword || "");
+        setSmtpHost(data.settings.smtpHost || "smtp.titan.email");
+        setSmtpPort(data.settings.smtpPort || 465);
+        setImapHost(data.settings.imapHost || "imap.titan.email");
+        setImapPort(data.settings.imapPort || 993);
+        setGeminiApiKey(data.settings.geminiApiKey || "");
         setOpenRouterApiKey(data.settings.openRouterApiKey || "");
         setOpenRouterModel(data.settings.openRouterModel || "google/gemini-2.0-flash");
         setPreferredProvider(data.settings.preferredProvider || "GOOGLE");
@@ -262,6 +270,10 @@ export default function EmailCampaignsPage() {
         body: JSON.stringify({
           gmailUser,
           gmailAppPassword,
+          smtpHost,
+          smtpPort,
+          imapHost,
+          imapPort,
           geminiApiKey,
           openRouterApiKey,
           openRouterModel,
@@ -1024,37 +1036,60 @@ export default function EmailCampaignsPage() {
             <h3 className="font-display text-base font-bold text-white flex items-center gap-2">
               <Settings className="h-5 w-5 text-[#FF6200]" /> Campaign Settings & Credentials
             </h3>
-            <p className="text-xs text-[#888898] mt-1">Configure Gmail SMTP parameters, Gemini API models, and warm-up speeds.</p>
+            <p className="text-xs text-[#888898] mt-1">Configure GoDaddy Titan Email / SMTP parameters, Gemini API models, and warm-up speeds.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* SMTP Fields */}
             <div className="flex flex-col gap-4">
-              <h4 className="font-mono text-xs text-[#FF8C42] uppercase tracking-wider font-bold">SMTP Sender (Gmail App Passwords)</h4>
+              <h4 className="font-mono text-xs text-[#FF8C42] uppercase tracking-wider font-bold">SMTP Sender (Titan / GoDaddy / Gmail)</h4>
               
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-mono text-[#888898]">Gmail Username:</label>
+                <label className="text-[11px] font-mono text-[#888898]">Sender Email Address:</label>
                 <input
                   type="email"
                   value={gmailUser}
                   onChange={(e) => setGmailUser(e.target.value)}
                   className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
-                  placeholder="connect.domainexpansion@gmail.com"
+                  placeholder="ishwar@domainexpansion.in"
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-mono text-[#888898]">Gmail App Password (16 chars):</label>
+                <label className="text-[11px] font-mono text-[#888898]">Email Password / App Password:</label>
                 <input
                   type="password"
                   value={gmailAppPassword}
                   onChange={(e) => setGmailAppPassword(e.target.value)}
                   className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none font-mono"
-                  placeholder="xxxx xxxx xxxx xxxx"
+                  placeholder="••••••••••••"
                 />
                 <span className="text-[9px] text-[#5A5A6A] leading-relaxed">
-                  * Must be a 16-character App Password generated in Google Account settings (Security &gt; 2-Step Verification &gt; App passwords). Standard Gmail passwords are not supported by SMTP endpoints.
+                  * For GoDaddy Titan Email, enter your account password. For Gmail, use a 16-character App Password.
                 </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-mono text-[#888898]">SMTP Server Host:</label>
+                  <input
+                    type="text"
+                    value={smtpHost}
+                    onChange={(e) => setSmtpHost(e.target.value)}
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none font-mono"
+                    placeholder="smtp.titan.email"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-mono text-[#888898]">IMAP Server Host:</label>
+                  <input
+                    type="text"
+                    value={imapHost}
+                    onChange={(e) => setImapHost(e.target.value)}
+                    className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none font-mono"
+                    placeholder="imap.titan.email"
+                  />
+                </div>
               </div>
             </div>
 

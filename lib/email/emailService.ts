@@ -14,15 +14,20 @@ export interface MailOptions {
  * Send an email via SMTP using Nodemailer
  */
 export async function sendPitchEmail(options: MailOptions, settings: any) {
-  const { gmailUser, gmailAppPassword } = settings;
+  const { gmailUser, gmailAppPassword, smtpHost, smtpPort } = settings;
 
   if (!gmailUser || !gmailAppPassword) {
-    throw new Error("SMTP credentials missing. Please configure Gmail user and App Password.");
+    throw new Error("SMTP credentials missing. Please configure email address and password in Email Settings.");
   }
 
-  // Create transporter
+  const host = smtpHost || "smtp.titan.email";
+  const port = Number(smtpPort) || 465;
+
+  // Create transporter for GoDaddy Titan / SMTP
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host,
+    port,
+    secure: port === 465, // true for port 465, false for port 587
     auth: {
       user: gmailUser,
       pass: gmailAppPassword,
@@ -58,18 +63,21 @@ export async function sendPitchEmail(options: MailOptions, settings: any) {
 }
 
 /**
- * Connect to Gmail via IMAP and scan for replies from active prospects.
+ * Connect via IMAP and scan for replies from active prospects.
  */
 export async function syncGmailReplies(settings: any) {
-  const { gmailUser, gmailAppPassword } = settings;
+  const { gmailUser, gmailAppPassword, imapHost, imapPort } = settings;
 
   if (!gmailUser || !gmailAppPassword) {
-    throw new Error("IMAP credentials missing. Please configure Gmail user and App Password.");
+    throw new Error("IMAP credentials missing. Please configure email address and password in Email Settings.");
   }
 
+  const host = imapHost || "imap.titan.email";
+  const port = Number(imapPort) || 993;
+
   const client = new ImapFlow({
-    host: "imap.gmail.com",
-    port: 993,
+    host,
+    port,
     secure: true,
     auth: {
       user: gmailUser,

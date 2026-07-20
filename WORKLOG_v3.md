@@ -13,6 +13,18 @@ Implement and test automated email campaign queue workers or expand the TechGuil
 
 ## SESSION LOG
 
+### 2026-07-20 — Session 25 (GoDaddy Titan Email Integration for AI Outreach Suite)
+- **GoDaddy Titan Email Integration:**
+  - Upgraded Nodemailer SMTP transport in [emailService.ts](file:///d:/demo%202/lib/email/emailService.ts) to connect dynamically via host and port, defaulting to GoDaddy Titan Email (`smtp.titan.email` on SSL port `465`).
+  - Upgraded ImapFlow inbox response monitoring in [emailService.ts](file:///d:/demo%202/lib/email/emailService.ts) to connect to GoDaddy Titan Email IMAP (`imap.titan.email` on SSL port `993`).
+- **Database Schema Upgrades & Credentials Sync:**
+  - Updated `EmailSettings` model in [schema.prisma](file:///d:/demo%202/prisma/schema.prisma) with `smtpHost`, `smtpPort`, `imapHost`, and `imapPort` columns, setting default email user to `ishwar@domainexpansion.in`.
+  - Ran Prisma database schema push (`npx prisma db push`) to sync Neon PostgreSQL and updated active database email settings record with credentials (`ishwar@domainexpansion.in`).
+- **API & Admin Dashboard Polish:**
+  - Updated `/api/admin/email/settings` route to GET/POST custom SMTP and IMAP host/port parameters.
+  - Updated campaign settings dashboard tab in [page.tsx](file:///d:/demo%202/app/admin/email-campaigns/page.tsx) with Titan Email / GoDaddy / Custom SMTP host inputs.
+- **Compilation Verification:** Ran type check (`npx tsc --noEmit`) with 0 errors.
+
 ### 2026-07-17 — Session 24 (Step-by-Step Interactive Blog Console & Advanced Content Realigner)
 - **Step-by-Step Console Control:** Refactored the blog agent daily script in [blogAgentService.ts](file:///d:/demo%202/lib/blog/blogAgentService.ts) and `/api/admin/blog/run-agent` to support separate parameters for steps 1 (Research), 2 (Writer), 3 (Image Creator), and 4 (Reviewer). Added a sliding Step-by-Step Console drawer layout inside [app/admin/blog-agent/page.tsx](file:///d:/demo%202/app/admin/blog-agent/page.tsx) with state indicators and real-time generation previews.
 - **OpenRouter Image API Integration:** Integrated OpenRouter Image Generation endpoint (`POST https://openrouter.ai/api/v1/images`) inside the image agent, defaulting to `google/gemini-2.5-flash-image` (Nano Banana) with an automated keyless failover to Pollinations AI (Playground/Flux). Added dynamic dropdown select loading for the Image Creator model from available OpenRouter models list.

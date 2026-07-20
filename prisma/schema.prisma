@@ -134,8 +134,12 @@ model EmailLog {
 
 model EmailSettings {
   id                 String   @id @default(uuid())
-  gmailUser          String   @default("connect.domainexpansion@gmail.com")
+  gmailUser          String   @default("ishwar@domainexpansion.in")
   gmailAppPassword   String   @default("")
+  smtpHost           String   @default("smtp.titan.email")
+  smtpPort           Int      @default(465)
+  imapHost           String   @default("imap.titan.email")
+  imapPort           Int      @default(993)
   geminiApiKey       String   @default("")
   openRouterApiKey   String   @default("")
   openRouterModel    String   @default("google/gemini-2.0-flash")
