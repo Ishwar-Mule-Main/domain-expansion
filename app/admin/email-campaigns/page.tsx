@@ -43,9 +43,9 @@ export default function EmailCampaignsPage() {
   // Settings state
   const [gmailUser, setGmailUser] = useState("ishwar@domainexpansion.in");
   const [gmailAppPassword, setGmailAppPassword] = useState("");
-  const [smtpHost, setSmtpHost] = useState("smtp.titan.email");
+  const [smtpHost, setSmtpHost] = useState("smtpout.secureserver.net");
   const [smtpPort, setSmtpPort] = useState(465);
-  const [imapHost, setImapHost] = useState("imap.titan.email");
+  const [imapHost, setImapHost] = useState("imap.secureserver.net");
   const [imapPort, setImapPort] = useState(993);
   const [geminiApiKey, setGeminiApiKey] = useState("");
   const [openRouterApiKey, setOpenRouterApiKey] = useState("");
@@ -241,9 +241,9 @@ export default function EmailCampaignsPage() {
       if (data.success && data.settings) {
         setGmailUser(data.settings.gmailUser || "ishwar@domainexpansion.in");
         setGmailAppPassword(data.settings.gmailAppPassword || "");
-        setSmtpHost(data.settings.smtpHost || "smtp.titan.email");
+        setSmtpHost(data.settings.smtpHost || "smtpout.secureserver.net");
         setSmtpPort(data.settings.smtpPort || 465);
-        setImapHost(data.settings.imapHost || "imap.titan.email");
+        setImapHost(data.settings.imapHost || "imap.secureserver.net");
         setImapPort(data.settings.imapPort || 993);
         setGeminiApiKey(data.settings.geminiApiKey || "");
         setOpenRouterApiKey(data.settings.openRouterApiKey || "");
@@ -1065,7 +1065,7 @@ export default function EmailCampaignsPage() {
                   placeholder="••••••••••••"
                 />
                 <span className="text-[9px] text-[#5A5A6A] leading-relaxed">
-                  * For GoDaddy Titan Email, enter your account password. For Gmail, use a 16-character App Password.
+                  * For GoDaddy Professional Email, enter your account password. For Gmail, use a 16-character App Password.
                 </span>
               </div>
 
@@ -1077,7 +1077,7 @@ export default function EmailCampaignsPage() {
                     value={smtpHost}
                     onChange={(e) => setSmtpHost(e.target.value)}
                     className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none font-mono"
-                    placeholder="smtp.titan.email"
+                    placeholder="smtpout.secureserver.net"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -1087,7 +1087,7 @@ export default function EmailCampaignsPage() {
                     value={imapHost}
                     onChange={(e) => setImapHost(e.target.value)}
                     className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none font-mono"
-                    placeholder="imap.titan.email"
+                    placeholder="imap.secureserver.net"
                   />
                 </div>
               </div>

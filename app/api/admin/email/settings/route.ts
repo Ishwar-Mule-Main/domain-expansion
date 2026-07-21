@@ -20,9 +20,9 @@ export async function GET() {
         data: {
           gmailUser: "ishwar@domainexpansion.in",
           gmailAppPassword: "",
-          smtpHost: "smtp.titan.email",
+          smtpHost: "smtpout.secureserver.net",
           smtpPort: 465,
-          imapHost: "imap.titan.email",
+          imapHost: "imap.secureserver.net",
           imapPort: 993,
           geminiApiKey: "",
           openRouterApiKey: "",
@@ -104,9 +104,9 @@ export async function POST(request: Request) {
         data: {
           gmailUser: gmailUser ? String(gmailUser).trim() : "ishwar@domainexpansion.in",
           gmailAppPassword: gmailAppPassword ? String(gmailAppPassword).trim() : "",
-          smtpHost: smtpHost ? String(smtpHost).trim() : "smtp.titan.email",
+          smtpHost: smtpHost ? String(smtpHost).trim() : "smtpout.secureserver.net",
           smtpPort: smtpPort ? Number(smtpPort) : 465,
-          imapHost: imapHost ? String(imapHost).trim() : "imap.titan.email",
+          imapHost: imapHost ? String(imapHost).trim() : "imap.secureserver.net",
           imapPort: imapPort ? Number(imapPort) : 993,
           geminiApiKey: geminiApiKey ? String(geminiApiKey).trim() : "",
           openRouterApiKey: openRouterApiKey ? String(openRouterApiKey).trim() : "",

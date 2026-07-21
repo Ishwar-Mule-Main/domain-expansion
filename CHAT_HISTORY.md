@@ -149,11 +149,11 @@ NEXTAUTH_SECRET="3bc3b6c2f37c357f897df890b0e5138e6dfd15024479bd72b153b6fa0f214cb
   - Authored a parsing formatter `formatBlogBodyHTML` inside `lib/blog/blogAgentService.ts` to clean up raw text/markdown into structured HTML paragraphs, bold/italics, bullet lists, blockquotes, tables, and custom alert cards (`alert-tip`/`alert-important`) matching static premium articles.
   - Implemented `/api/admin/blog/realign` and added a **"Realign Blog Content"** (`AlignLeft` icon) action button directly in the dynamic articles list table under the Generated Articles tab.
 
-## Phase 13 — GoDaddy Titan Email Integration & Custom SMTP Support (2026-07-20)
-- **Titan Email SMTP/IMAP Engine:** Upgraded `lib/email/emailService.ts` to support dynamic SMTP and IMAP host/port parameters, configuring Nodemailer and ImapFlow to connect to GoDaddy Titan Email (`smtp.titan.email:465` SSL / `imap.titan.email:993` SSL).
-- **Prisma Schema & Database Sync:** Added `smtpHost`, `smtpPort`, `imapHost`, and `imapPort` columns to `EmailSettings` model in `prisma/schema.prisma`. Pushed schema changes to Neon PostgreSQL with `npx prisma db push` and updated database credentials (`ishwar@domainexpansion.in`).
+## Phase 13 — GoDaddy Professional Email Integration & Custom SMTP Support (2026-07-20)
+- **GoDaddy Professional Email SMTP/IMAP Engine:** Upgraded `lib/email/emailService.ts` to support dynamic SMTP and IMAP host/port parameters, configuring Nodemailer and ImapFlow to connect to GoDaddy SecureServer (`smtpout.secureserver.net:465` SSL / `imap.secureserver.net:993` SSL). Verified live SMTP and IMAP authentication.
+- **Prisma Schema & Database Sync:** Added `smtpHost`, `smtpPort`, `imapHost`, and `imapPort` columns to `EmailSettings` model in `prisma/schema.prisma`. Updated Neon PostgreSQL database settings record with credentials (`ishwar@domainexpansion.in`) and hosts (`smtpout.secureserver.net`).
 - **Inbound Lead Routing:** Updated `lib/email.ts` and `.env` to ensure all website contact form submission notifications are sent to `ishwar@domainexpansion.in` with CC to `ishwar.mule007@gmail.com`.
-- **Settings API & Campaign Admin UI:** Updated `/api/admin/email/settings` endpoint and updated the email settings dashboard panel in `app/admin/email-campaigns/page.tsx` with Titan / GoDaddy / custom SMTP input fields.
+- **Settings API & Campaign Admin UI:** Updated `/api/admin/email/settings` endpoint and updated the email settings dashboard panel in `app/admin/email-campaigns/page.tsx` with GoDaddy Professional Email / Custom SMTP input fields.
 
 ---
 

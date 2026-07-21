@@ -20,10 +20,10 @@ export async function sendPitchEmail(options: MailOptions, settings: any) {
     throw new Error("SMTP credentials missing. Please configure email address and password in Email Settings.");
   }
 
-  const host = smtpHost || "smtp.titan.email";
+  const host = smtpHost || "smtpout.secureserver.net";
   const port = Number(smtpPort) || 465;
 
-  // Create transporter for GoDaddy Titan / SMTP
+  // Create transporter for GoDaddy Professional / SMTP
   const transporter = nodemailer.createTransport({
     host,
     port,
@@ -72,7 +72,7 @@ export async function syncGmailReplies(settings: any) {
     throw new Error("IMAP credentials missing. Please configure email address and password in Email Settings.");
   }
 
-  const host = imapHost || "imap.titan.email";
+  const host = imapHost || "imap.secureserver.net";
   const port = Number(imapPort) || 993;
 
   const client = new ImapFlow({
