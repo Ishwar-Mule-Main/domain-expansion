@@ -18,11 +18,11 @@ export async function GET() {
       // Initialize default settings record
       settings = await prisma.emailSettings.create({
         data: {
-          gmailUser: "ishwar@domainexpansion.in",
+          gmailUser: "connect.domainexpansion@gmail.com",
           gmailAppPassword: "",
-          smtpHost: "smtpout.secureserver.net",
+          smtpHost: "smtp.gmail.com",
           smtpPort: 465,
-          imapHost: "imap.secureserver.net",
+          imapHost: "imap.gmail.com",
           imapPort: 993,
           geminiApiKey: "",
           openRouterApiKey: "",
@@ -102,11 +102,11 @@ export async function POST(request: Request) {
       // Create new record
       settings = await prisma.emailSettings.create({
         data: {
-          gmailUser: gmailUser ? String(gmailUser).trim() : "ishwar@domainexpansion.in",
+          gmailUser: gmailUser ? String(gmailUser).trim() : "connect.domainexpansion@gmail.com",
           gmailAppPassword: gmailAppPassword ? String(gmailAppPassword).trim() : "",
-          smtpHost: smtpHost ? String(smtpHost).trim() : "smtpout.secureserver.net",
+          smtpHost: smtpHost ? String(smtpHost).trim() : "smtp.gmail.com",
           smtpPort: smtpPort ? Number(smtpPort) : 465,
-          imapHost: imapHost ? String(imapHost).trim() : "imap.secureserver.net",
+          imapHost: imapHost ? String(imapHost).trim() : "imap.gmail.com",
           imapPort: imapPort ? Number(imapPort) : 993,
           geminiApiKey: geminiApiKey ? String(geminiApiKey).trim() : "",
           openRouterApiKey: openRouterApiKey ? String(openRouterApiKey).trim() : "",

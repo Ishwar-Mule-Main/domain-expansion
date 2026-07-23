@@ -134,11 +134,11 @@ model EmailLog {
 
 model EmailSettings {
   id                 String   @id @default(uuid())
-  gmailUser          String   @default("ishwar@domainexpansion.in")
+  gmailUser          String   @default("connect.domainexpansion@gmail.com")
   gmailAppPassword   String   @default("")
-  smtpHost           String   @default("smtpout.secureserver.net")
+  smtpHost           String   @default("smtp.gmail.com")
   smtpPort           Int      @default(465)
-  imapHost           String   @default("imap.secureserver.net")
+  imapHost           String   @default("imap.gmail.com")
   imapPort           Int      @default(993)
   geminiApiKey       String   @default("")
   openRouterApiKey   String   @default("")

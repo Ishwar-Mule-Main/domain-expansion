@@ -41,11 +41,11 @@ export default function EmailCampaignsPage() {
   const [activeTab, setActiveTab] = useState<"reports" | "prospects" | "settings" | "brain">("reports");
 
   // Settings state
-  const [gmailUser, setGmailUser] = useState("ishwar@domainexpansion.in");
+  const [gmailUser, setGmailUser] = useState("connect.domainexpansion@gmail.com");
   const [gmailAppPassword, setGmailAppPassword] = useState("");
-  const [smtpHost, setSmtpHost] = useState("smtpout.secureserver.net");
+  const [smtpHost, setSmtpHost] = useState("smtp.gmail.com");
   const [smtpPort, setSmtpPort] = useState(465);
-  const [imapHost, setImapHost] = useState("imap.secureserver.net");
+  const [imapHost, setImapHost] = useState("imap.gmail.com");
   const [imapPort, setImapPort] = useState(993);
   const [geminiApiKey, setGeminiApiKey] = useState("");
   const [openRouterApiKey, setOpenRouterApiKey] = useState("");
@@ -239,11 +239,11 @@ export default function EmailCampaignsPage() {
       const res = await fetch("/api/admin/email/settings");
       const data = await res.json();
       if (data.success && data.settings) {
-        setGmailUser(data.settings.gmailUser || "ishwar@domainexpansion.in");
+        setGmailUser(data.settings.gmailUser || "connect.domainexpansion@gmail.com");
         setGmailAppPassword(data.settings.gmailAppPassword || "");
-        setSmtpHost(data.settings.smtpHost || "smtpout.secureserver.net");
+        setSmtpHost(data.settings.smtpHost || "smtp.gmail.com");
         setSmtpPort(data.settings.smtpPort || 465);
-        setImapHost(data.settings.imapHost || "imap.secureserver.net");
+        setImapHost(data.settings.imapHost || "imap.gmail.com");
         setImapPort(data.settings.imapPort || 993);
         setGeminiApiKey(data.settings.geminiApiKey || "");
         setOpenRouterApiKey(data.settings.openRouterApiKey || "");
@@ -1051,7 +1051,7 @@ export default function EmailCampaignsPage() {
                   value={gmailUser}
                   onChange={(e) => setGmailUser(e.target.value)}
                   className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-3 py-2 text-xs text-white focus:outline-none"
-                  placeholder="ishwar@domainexpansion.in"
+                  placeholder="connect.domainexpansion@gmail.com"
                 />
               </div>
 
@@ -1065,7 +1065,7 @@ export default function EmailCampaignsPage() {
                   placeholder="••••••••••••"
                 />
                 <span className="text-[9px] text-[#5A5A6A] leading-relaxed">
-                  * For GoDaddy Professional Email, enter your account password. For Gmail, use a 16-character App Password.
+                  * Use your 16-character Gmail App Password (generated via Google Account &gt; Security &gt; App Passwords).
                 </span>
               </div>
 
@@ -1077,7 +1077,7 @@ export default function EmailCampaignsPage() {
                     value={smtpHost}
                     onChange={(e) => setSmtpHost(e.target.value)}
                     className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none font-mono"
-                    placeholder="smtpout.secureserver.net"
+                    placeholder="smtp.gmail.com"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -1087,7 +1087,7 @@ export default function EmailCampaignsPage() {
                     value={imapHost}
                     onChange={(e) => setImapHost(e.target.value)}
                     className="w-full bg-black/40 border border-[#2E2E2E] focus:border-[#FF6200] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none font-mono"
-                    placeholder="imap.secureserver.net"
+                    placeholder="imap.gmail.com"
                   />
                 </div>
               </div>

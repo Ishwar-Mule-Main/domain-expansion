@@ -47,7 +47,7 @@ export async function sendAdminLeadNotification(leadData: {
   budget?: string;
   message: string;
 }) {
-  const adminEmail = process.env.ADMIN_EMAIL || "ishwar@domainexpansion.in";
+  const adminEmail = process.env.ADMIN_EMAIL || "connect.domainexpansion@gmail.com";
   const adminCc = process.env.ADMIN_CC || "ishwar.mule007@gmail.com";
   const subject = `🔥 New Lead Received: ${leadData.name} (${leadData.service})`;
   const html = `

@@ -13,6 +13,12 @@ Implement and test automated email campaign queue workers or expand the TechGuil
 
 ## SESSION LOG
 
+### 2026-07-23 — Session 26 (Revert Primary Email & SMTP/IMAP settings to connect.domainexpansion@gmail.com)
+- **Reverted Email Configuration to Gmail:**
+  - Reverted primary email address in [.env](file:///d:/demo%202/.env) (`ADMIN_EMAIL`), [email.ts](file:///d:/demo%202/lib/email.ts), [schema.prisma](file:///d:/demo%202/prisma/schema.prisma), and `/api/admin/email/settings` to `connect.domainexpansion@gmail.com`.
+  - Reverted default SMTP and IMAP host settings across [emailService.ts](file:///d:/demo%202/lib/email/emailService.ts), [schema.prisma](file:///d:/demo%202/prisma/schema.prisma), `route.ts`, and [app/admin/email-campaigns/page.tsx](file:///d:/demo%202/app/admin/email-campaigns/page.tsx) to `smtp.gmail.com` (Port 465) and `imap.gmail.com` (Port 993).
+  - Executed script updating the active `EmailSettings` database record in Neon PostgreSQL to use `connect.domainexpansion@gmail.com`, `smtp.gmail.com`, and `imap.gmail.com`.
+
 ### 2026-07-20 — Session 25 (GoDaddy Professional Email Integration & Lead Routing)
 - **GoDaddy Professional Email Integration:**
   - Configured Nodemailer SMTP transport in [emailService.ts](file:///d:/demo%202/lib/email/emailService.ts) to connect via GoDaddy Professional Email (`smtpout.secureserver.net` on SSL port `465`). Verified live connection and authentication.

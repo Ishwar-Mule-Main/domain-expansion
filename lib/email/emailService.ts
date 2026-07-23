@@ -20,7 +20,7 @@ export async function sendPitchEmail(options: MailOptions, settings: any) {
     throw new Error("SMTP credentials missing. Please configure email address and password in Email Settings.");
   }
 
-  const host = smtpHost || "smtpout.secureserver.net";
+  const host = smtpHost || "smtp.gmail.com";
   const port = Number(smtpPort) || 465;
 
   // Create transporter for GoDaddy Professional / SMTP
@@ -72,7 +72,7 @@ export async function syncGmailReplies(settings: any) {
     throw new Error("IMAP credentials missing. Please configure email address and password in Email Settings.");
   }
 
-  const host = imapHost || "imap.secureserver.net";
+  const host = imapHost || "imap.gmail.com";
   const port = Number(imapPort) || 993;
 
   const client = new ImapFlow({
