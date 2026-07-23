@@ -257,9 +257,9 @@ export async function generatePitchEmail({
     - Industry: ${industry || "Not provided (infer from context or keep general)"}
     - Website: ${website || "Not provided"}
 
-    Generate a highly personalized cold email. 
+    Generate a highly personalized, high-converting cold email. 
     Return the response as a JSON object containing "subject" and "body". 
-    "body" should contain the email body in HTML format (using basic styling tags like <p>, <strong>, <br>, but no <html> or <body> wrapper). 
+    "body" must contain the email body formatted in clean, visually structured HTML (using <p style="margin: 0 0 16px 0;"> for paragraphs, <ul style="padding-left: 20px; margin: 12px 0 16px 0;"> for bullet lists, <strong style="color: #0f172a;"> for key metrics/emphasis, and clean line breaks). Do NOT include <html> or <body> wrapper tags, as the signature card will frame the body. 
     Ensure it addresses the prospect by name and aligns the pitch to their company and industry context.
   `;
 
